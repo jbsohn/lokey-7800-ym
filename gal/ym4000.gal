@@ -1,0 +1,21 @@
+GAL16V8
+YM4000
+
+NC   A15  A14  RW   NC   NC   NC   NC   NC   GND
+/OE  NC   NC   NC   NC   NC   NC   YMDIR YMSEL VCC
+
+YMSEL = !A15 & A14
+YMDIR = !A15 & A14 & !RW
+
+DESCRIPTION
+Target: ATF16V8 (compatible with GAL16V8 JEDEC)
+A15 is on Pin 2, A14 is on Pin 3, RW is on Pin 4.
+YMDIR (BDIR) is Pin 18, YMSEL (BC1 range) is Pin 19.
+
+This logic is designed for hardware where A0 is wired directly to YM BC1.
+YMSEL (Pin 19) acts as an internal range enable for the $4000-$7FFF block.
+YMDIR (Pin 18) acts as the write strobe (BDIR).
+
+Operations:
+$4000 Write: BDIR=1, BC1=0 (Write Data)
+$4001 Write: BDIR=1, BC1=1 (Latch Address)
