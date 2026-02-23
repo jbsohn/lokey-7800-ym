@@ -3,9 +3,9 @@
 ; -------------------------
 ; YM2149 write-only ports
 ; -------------------------
-ay_addr = $0460
-ay_data = $0461
-backgrnd = $0020
+ay_addr = $4000
+ay_data = $4001
+background = $0020
 heartbeat = $80
 tempo_count = $81
 speed_mult = 4
@@ -29,12 +29,12 @@ note_g_hi = >285
         ; -------------------------
         ; A78 HEADER (v4)
         ; -------------------------
-        ifconst build_with_header
-        if build_with_header
-        include "a78_ym2149_header.asm"
+        ifnconst build_with_header
+build_with_header SET 1
         endif
-        else
-        include "a78_ym2149_header.asm"
+
+        if build_with_header
+                include "a78_ym2149_header.asm"
         endif
 
 reset:
@@ -46,7 +46,7 @@ reset:
         lda #$00
         sta heartbeat
         ora #$06
-        sta backgrnd
+        sta background
 
         ; -------------------------
         ; YM2149 init
@@ -111,7 +111,7 @@ tick_vis:
         adc #$22
         sta heartbeat
         ora #$06
-        sta backgrnd
+        sta background
         rts
 
 ; -------------------------

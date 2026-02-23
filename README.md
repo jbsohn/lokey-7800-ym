@@ -7,18 +7,14 @@ This repository is a playground for experiments with the Atari 7800 using YM2149
 By default, sources build with the 128-byte A78 header (good for emulators):
 
 ```bash
-dasm ym2149_melody.asm -f3 -oym2149_melody.a78
-dasm ym2149_lullaby.asm -f3 -oym2149_lullaby.a78
-dasm ym2149_simple_tone.asm -f3 -oym2149_simple_tone.a78
+make a78
 ```
 
 To build raw ROM images (no A78 header, good for EPROM burning), set
 `build_with_header=0`:
 
 ```bash
-dasm ym2149_melody.asm -Dbuild_with_header=0 -f3 -oym2149_melody.bin
-dasm ym2149_lullaby.asm -Dbuild_with_header=0 -f3 -oym2149_lullaby.bin
-dasm ym2149_simple_tone.asm -Dbuild_with_header=0 -f3 -oym2149_simple_tone.bin
+make bin
 ```
 
 ## Signing for Real 7800 Hardware

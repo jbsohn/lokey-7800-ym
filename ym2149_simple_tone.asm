@@ -6,8 +6,10 @@
 ; - Set fixed pitch + fixed volume
 ; - Loop forever
 
-ay_addr = $0460
-ay_data = $0461
+ay_addr = $4000
+ay_data = $4001
+background = $0020
+heartbeat = $80
 
 ; A4 ~= 440 Hz for YM clock ~= 1.789772 MHz:
 ; period ~= 1,789,772 / (16 * 440) ~= 254
@@ -16,12 +18,12 @@ tone_a4_hi = >254
 
         org $8000
 
-        ifconst build_with_header
-        if build_with_header
-        include "a78_ym2149_header.asm"
+        ifnconst build_with_header
+build_with_header SET 1
         endif
-        else
-        include "a78_ym2149_header.asm"
+
+        if build_with_header
+                include "a78_ym2149_header.asm"
         endif
 
 reset:
@@ -54,7 +56,25 @@ reset:
         sta ay_data
 
 forever:
+        lda heartbeat
+        clc
+        adc #$22
+        sta heartbeat
+        ora #$06
+        sta background
+        jsr delay
         jmp forever
+
+delay:
+        ldy #$60
+delay_y:
+        ldx #$ff
+delay_x:
+        dex
+        bne delay_x
+        dey
+        bne delay_y
+        rts
 
         org $fff8
         .byte $ff
