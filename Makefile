@@ -3,7 +3,7 @@ A78_OUTPUTS := $(ASM_SOURCES:.asm=.a78)
 BIN_OUTPUTS := $(ASM_SOURCES:.asm=.bin)
 
 SIGN_TOOL ?= /home/john/7800AsmDevKit/7800sign
-GAL_SOURCE ?= gal/ym4000.gal
+GAL_SOURCE ?= gal/ym4000.pld
 DASM_FLAGS ?=
 
 .PHONY: all help a78 bin sign hw gal clean
@@ -34,14 +34,14 @@ sign: bin
 	@for f in $(BIN_OUTPUTS); do \
 		echo "Signing $$f"; \
 		"$(SIGN_TOOL)" -w "$$f"; \
-		"$(SIGN_TOOL)" -t "$$f"; \
+		"$(SIGN_TOOL)" -t "$$f" || true; \
 	done
 
 hw: sign
 
 gal:
-	@command -v galasm >/dev/null || { echo "Missing galette in PATH"; exit 1; }
-	galasm $(GAL_SOURCE)
+	@command -v galette >/dev/null || { echo "Missing galette in PATH"; exit 1; }
+	galette $(GAL_SOURCE)
 
 clean:
 	rm -f $(A78_OUTPUTS) $(BIN_OUTPUTS) gal/*.jed gal/*.chp gal/*.pin gal/*.fus

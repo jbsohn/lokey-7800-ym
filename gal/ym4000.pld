@@ -1,0 +1,13 @@
+GAL16V8
+YM4000
+
+Clock A15 A14 A0 NC RW NC NC NC GND
+/OE NC NC NC NC NC BC1 BDIR NC VCC
+
+BC1 = /A15 * A14 * /A0
+BDIR = /A15 * A14 * /RW
+
+DESCRIPTION
+YM4000 Atari 7800 GAL logic for YM2149 sound chip.
+Address Latch (BC1=1, BDIR=1) at $4000
+Data Write    (BC1=0, BDIR=1) at $4001
