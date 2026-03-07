@@ -1,0 +1,59 @@
+Name     YM2149 ;
+PartNo   00 ;
+Date     03/06/2026 ;
+Revision 03 ;
+Designer John ;
+Company  None ;
+Assembly None ;
+Location None ;
+Device   g16v8a ;
+
+/*
+ * Atari 7800 YM2149 Address Decoder
+ * GAL16V8
+ *
+ * Sigrok / physical pin mapping:
+ *   GAL Pin 2  = A15  = Sigrok D1
+ *   GAL Pin 3  = A14  = Sigrok D2
+ *   GAL Pin 4  = A0   = Sigrok D3
+ *   GAL Pin 5  = HALT = Sigrok D4  (HIGH = CPU running, LOW = Maria DMA)
+ *   GAL Pin 6  = RW   = Sigrok D5  (HIGH = Read, LOW = Write)
+ *   GAL Pin 17 = BC1  = Sigrok D6  (output to YM2149)
+ *   GAL Pin 18 = BDIR = Sigrok D7  (output to YM2149)
+ *
+ * YM2149 bus protocol:
+ *   BDIR=0, BC1=0  --> Inactive
+ *   BDIR=1, BC1=0  --> Write Data  (CPU writes to $4001)
+ *   BDIR=1, BC1=1  --> Latch Addr  (CPU writes to $4000)
+ *   BDIR=0, BC1=1  --> Read Data   (CPU reads from $4001)
+ *
+ * Address decode:
+ *   YM2149 lives at $4000-$4001 (A15=0, A14=1)
+ *   HALT removed - Maria DMA windows were intermittently blocking tone writes.
+ *   The BIOS itself writes to $4000 with HALT=0 and the YM accepts it fine.
+ */
+
+/* Inputs */
+PIN 2  = A15;
+PIN 3  = A14;
+PIN 4  = A0;
+PIN 5  = HALT;
+PIN 6  = RW;
+PIN 7  = PHI2;
+
+/* Outputs
+ * Drive YM2149 control pins.
+ */
+PIN 16 = PHI2OUT;
+PIN 17 = BC1;
+PIN 18 = BDIR;
+
+/* Logic Equations */
+/* Cleaned Clock Output */
+PHI2OUT = PHI2;
+
+/* BDIR: asserted while writing to $4xxx with CPU running and PHI2 high */
+BDIR = !A15 & A14 & !RW & PHI2OUT;
+
+/* BC1: asserted ONLY when latching address ($4000 write) and clock is high */
+BC1  = !A15 & A14 & !RW & !A0 & PHI2OUT;
