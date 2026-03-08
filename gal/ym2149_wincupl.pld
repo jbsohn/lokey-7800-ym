@@ -52,8 +52,9 @@ PIN 18 = BDIR;
 /* Cleaned Clock Output */
 PHI2OUT = PHI2;
 
-/* BDIR: asserted while writing to $4xxx with CPU running and PHI2 high */
-BDIR = !A15 & A14 & !RW & PHI2OUT;
+/* BDIR: asserted while writing to $4xxx with CPU running (HALT=1) */
+/* Asynchronous mode (no PHI2 gating) to ensure ~550ns pulse width */
+BDIR = !A15 & A14 & !RW & HALT;
 
-/* BC1: asserted ONLY when latching address ($4000 write) and clock is high */
-BC1  = !A15 & A14 & !RW & !A0 & PHI2OUT;
+/* BC1: asserted ONLY when latching address ($4000 write) */
+BC1  = !A15 & A14 & !RW & !A0 & HALT;

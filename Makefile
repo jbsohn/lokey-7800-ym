@@ -3,7 +3,8 @@ A78_OUTPUTS := $(ASM_SOURCES:.asm=.a78)
 BIN_OUTPUTS := $(ASM_SOURCES:.asm=.bin)
 
 SIGN_TOOL ?= /home/john/7800AsmDevKit/7800sign
-GAL_SOURCE ?= gal/ym4000.pld
+# using WinCupl in VM for now
+# GAL_SOURCE ?= gal/ym4000.pld
 DASM_FLAGS ?=
 
 .PHONY: all help a78 bin sign hw gal clean
@@ -39,9 +40,11 @@ sign: bin
 
 hw: sign
 
-gal:
-	@command -v galette >/dev/null || { echo "Missing galette in PATH"; exit 1; }
-	galette $(GAL_SOURCE)
+# using WinCupl in VM for now
+# gal:
+# 	@command -v galette >/dev/null || { echo "Missing galette in PATH"; exit 1; }
+# 	galette $(GAL_SOURCE)
 
 clean:
-	rm -f $(A78_OUTPUTS) $(BIN_OUTPUTS) gal/*.jed gal/*.chp gal/*.pin gal/*.fus
+	rm -f $(A78_OUTPUTS) $(BIN_OUTPUTS) gal/*.jed gal/*.chp gal/*.pin gal/*.fus gal/*.pdf gal/*.sr gal/*.sim gal/*.abs
+
