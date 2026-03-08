@@ -25,8 +25,8 @@ Atari 7800 cartridges must be cryptographically signed. After building a raw
 ```bash
 7800sign -w ym2149_heartbeat_main.bin
 7800sign -t ym2149_heartbeat_main.bin
-7800sign -w ym2149_melody.bin
-7800sign -t ym2149_melody.bin
+7800sign -w ym2149_melody_vbi.bin
+7800sign -t ym2149_melody_vbi.bin
 ```
 
 Important ROM footer requirement for `7800sign`:
