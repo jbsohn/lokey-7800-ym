@@ -33,17 +33,16 @@ note_a_lo = <254
 note_a_hi = >254
 
         ; -------------------------
-        ; Header Guard (FIXED)
+        ; Header Guard
         ; -------------------------
         ifnconst build_with_header
-build_with_header SET 0
+build_with_header SET 1
         endif
 
+        org $8000
+
         if build_with_header
-            ORG $8000
             include "a78_ym2149_header.asm"
-        else
-            ORG $8000
         endif
 
 reset:
@@ -129,19 +128,17 @@ vbi_done:
         rts
 
 write_ay:
-        ; The 'Brute Force' Double Write (To overcome wire capacitance)
+        ; Quad-Tap Address Latch
         sta ay_addr
-        sty ay_data
-        pha
-        lda dummy_read
-        pla
+        sta ay_addr
+        sta ay_addr
+        sta ay_addr
         
-        ; Second Pass
-        sta ay_addr
+        ; Quad-Tap Data Write
         sty ay_data
-        pha
-        lda dummy_read
-        pla
+        sty ay_data
+        sty ay_data
+        sty ay_data
         rts
 
 update_heartbeat:
