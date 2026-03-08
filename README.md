@@ -1,5 +1,7 @@
 # 7800 YM2149 Lab
 
+![Atari 7800 YM2149 Hardware Lab](docs/7800-ym-lab.jpg)
+
 This repository is a playground for experiments with the Atari 7800 using YM2149 on cartridge.
 
 ## Build
