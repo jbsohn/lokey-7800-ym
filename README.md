@@ -4,6 +4,10 @@
 
 This repository is a playground for experiments with the Atari 7800 using YM2149 on cartridge.
 
+## Why this project?
+
+The goal is to provide a stable, low-cost ($~2 USD) bridge between the Atari 7800 and the Atari ST. By leveraging the YM2149 PSG—or modern clones like the **KC89C72** (used in this project's lab) which are still in production—we can bring rich, standardized three-channel sound to the 7800 with 100% Atari ST asset compatibility. Original YM2149s remain widely available as used or New-Old-Stock (NOS) at similar price points.
+
 ## Build
 
 By default, sources build with the 128-byte A78 header (good for emulators):
@@ -87,7 +91,7 @@ To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided 
 | 30-37 | DA7-DA0 | 7800 Data Bus (D7-D0) |
 | 40 | VCC | +5V |
 
-3.  **Clocking**: Pin 22 (CLOCK) receives PHI2OUT from the GAL. This provides a clean, synchronized clock for the sound chip.
+3.  **Clocking**: Pin 22 (CLOCK) typically receives PHI2OUT from the GAL (1.79MHz) for 1:1 emulator parity. However, the logic is robust enough to support an external 2MHz crystal directly; this provides exact Atari ST sound compatibility for imported assets without needing software frequency adjustments.
 
 ## Baseline ROM: `ym2149_heartbeat_main.asm`
 
@@ -103,6 +107,8 @@ This is our "Gold Standard" baseline. It verified that:
 
 ## AI Assistance
 
-This project was developed with significant assistance from AI (Antigravity). For reflections on how AI is changing the landscape of hardware and software side-projects like this one, see the author's blog post:
+This project was developed with significant assistance from AI (Antigravity). For the author, AI has been a "force multiplier"—making it possible to tackle long-held "I've always wanted to do this" projects within the limited hours of evenings and weekends. 
+
+For reflections on how AI is changing the landscape of hardware and software side-projects, see the author's blog post:
 
 [What AI Is Doing to Software Development (and What It Can’t Do Yet)](https://johnsmusicandtech.com/posts/what-ai-is-doing-to-software-development/)
