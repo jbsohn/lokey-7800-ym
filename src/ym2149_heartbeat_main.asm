@@ -109,20 +109,17 @@ main_loop:
 
 ; -------------------------
 ; write_ay: Address latch then Data write
-; QUAD-WRITE version to defeat 230ns limit + Maria DMA
+; Interleaved Quad-Write for maximum reliability
 ; -------------------------
 write_ay:
-        ; 1. Latch Address ($4000)
-        sta ay_addr
-        sta ay_addr
-        sta ay_addr
-        sta ay_addr
-        
-        ; 2. Write Data ($4001)
-        sty ay_data
-        sty ay_data
-        sty ay_data
-        sty ay_data
+        sta ay_addr         ; Latch Addr 1
+        sty ay_data         ; Write Data 1
+        sta ay_addr         ; Latch Addr 2
+        sty ay_data         ; Write Data 2
+        sta ay_addr         ; Latch Addr 3
+        sty ay_data         ; Write Data 3
+        sta ay_addr         ; Latch Addr 4
+        sty ay_data         ; Write Data 4
         rts
 
 ; -------------------------

@@ -1,6 +1,19 @@
 # 7800 YM2149 Lab
 
+## **WARNING**
+
+> **WORK IN PROGRESS / ALPHA STATE**\
+> This laboratory is an active research project. The hardware has unstable feedback; it is sort of working but needs to be perfected. The codebase, wiring diagrams, and tools are subject to frequent breaking changes as we optimize for a "Gold Standard" release. Proceed with curiosity and caution!
+
 ![Atari 7800 YM2149 Hardware Lab](docs/7800-ym-lab.jpg)
+
+### Hardware Tests in Action
+Check out the current state of tests running on the dev board:
+
+[![Hardware Test 1](https://img.youtube.com/vi/xwr_qn-GMdQ/hqdefault.jpg)](https://www.youtube.com/shorts/xwr_qn-GMdQ)
+
+
+[![Hardware Test 2](https://img.youtube.com/vi/qCsVi0Iiq5I/hqdefault.jpg)](https://www.youtube.com/shorts/qCsVi0Iiq5I)
 
 This repository is a playground for experiments with the Atari 7800 using YM2149 on cartridge.
 
@@ -22,6 +35,21 @@ To build raw ROM images (no A78 header, good for EPROM burning), set
 ```bash
 make bin
 ```
+
+## Emulator Support
+
+Before testing on real hardware, you can verify your builds using a specialized branch of the **a7800** emulator that supports this physical YM2149 mapping:
+
+- **Repository**: [https://github.com/jbsohn/a7800](https://github.com/jbsohn/a7800)
+- **Branch**: `ym2149`
+
+### Compatibility Notes:
+- **Modern Hardware**: This branch includes specific updates for **macOS on Apple Silicon (M1/M2/M3)**.
+- **C# / .NET Tooling**: All diagnostic and processing tools require the **.NET SDK** (verified on Linux and macOS).
+- **Supported Platforms**: Built and tested for **macOS** and **Linux**.
+- **Windows**: Currently **untested**. If you are on Windows, your mileage may vary as the build environment has not been verified for that platform yet.
+
+This is the recommended way to iterate on your code and musical assets before committing to a hardware burn.
 
 ## Signing for Real 7800 Hardware
 
@@ -59,11 +87,22 @@ org $fffa
 
 For real hardware, start with **ym2149_heartbeat_main.bin**. It is our "Gold Standard" baseline that has been verified 100% stable on the Atari 7800.
 
+## Memory Mapping & POKEY Compatibility
+
+The YM2149 sound card in this lab is mapped to the **$4000–$7FFF** range (16 KB). 
+### Write-Only Mirroring (Theoretical)
+
+The current GAL logic is gated by the `!RW` (Read/Write) line. This means the YM2149 should effectively be a "write-only" device at $4000. In theory, this allows other devices (like ROM or RAM) to reside at the same memory addresses for **read** operations without bus contention. 
+
+> **NOTE:** This "Stealth Mirroring" is the intended design but remains untested on live hardware. It represents one of our "hopes" for maximum bus efficiency!
+
+This mapping is intentional: it follows the historical precedent set by classic Atari 7800 games like **Ballblazer** and **Commando**, which mapped the **POKEY** sound chip to $4000. By mirroring this 16k "Sound Area," we ensure high compatibility with existing hardware designs and make it easier for 7800 developers to swap or supplement POKEY with the YM2149.
+
 ## Hardware Wiring
 
 To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided GAL logic:
 
-### 1. GAL16V8 Pinout ([ym2149_wincupl.pld](file:///home/john/Projects/7800-ym2149-lab/gal/ym2149_wincupl.pld))
+### 1. GAL16V8 Pinout ([rom_ym.pld](/gal/rom_ym.pld))
 | Pin | Signal | Source |
 | :--- | :--- | :--- |
 | 2 | A15 | 7800 Address Bus |
@@ -96,19 +135,43 @@ To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided 
 ## Baseline ROM: `ym2149_heartbeat_main.asm`
 
 This is our "Gold Standard" baseline. It verified that:
-1.  **Pitch**: Matches the emulator perfectly.
+1.  **Pitch**: Matches the emulator.
 2.  **Stability**: No notes are dropped (Uses Quad-Tap writes).
 3.  **Cleanliness**: No stuttering (HALT pulses protect the bus).
 
 **Tempo**: 1.0 seconds per note (Ideal for hardware verification).
 
-> **IMPORTANT**
-> The GAL logic uses **HALT-Protected Asynchronous** pulses. This expands the write pulse width to ~550ns (meeting the 300ns requirement) while ensuring the Maria graphics chip cannot corrupt registers.
+## Experimental Player: ym_player.asm
+
+While `heartbeat` is our diagnostic baseline, `ym_player.asm` is our **Experimental Melodic Player**. This is the current frontier of the project, where we take raw YM data and attempt to drive the chip with melodic complexity. 
+
+1.  **Work-in-Progress Stability**: We are currently tuning the "Quad-Tap" (or 8-Tap) write protocols to ensure 100% reliability during heavy Maria DMA activity.
+2.  **Sound Processing**: Implements "Anti-Thump" volume zeroing and software volume caps to better match the mixed audio characteristics of the 7800.
+3.  **16-bit Looping**: Capable of handle long melodic loops (e.g., 515 frames for Loader 1).
+
+## Credits & Samples
+
+The `samples/` directory contains a curated selection of melodic assets sourced from the excellent **StSound** project by **Arnaud Carré (Leonard/OXG)**. These are provided for your own experimentation.
+
+- **Source**: [https://github.com/arnaud-carre/StSound](https://github.com/arnaud-carre/StSound)
+
+We are grateful to the Atari ST community for maintaining such high-quality musical assets. It's heartening to see that there are still plenty of dedicated Atari ST fans out there keeping the 16-bit flame alive!
+
+## Future Plans & Extensibility
+
+- **YM2 as Canonical Source**: We have established **YM2** as the preferred "raw" source format for incoming Atari ST data. Its lack of metadata overhead and predictable register-interleaving makes it the perfect baseline for future compression research.
+- **Advanced Compression**: Future research will explore **RLE (Run-Length Encoding)** and custom **Bitpacking** (similar to VGM or YM-Pro formats) to squeeze minutes of high-fidelity music into standard 32KB/48KB 7800 banksets.
+- **I/O Port Logging**: The YM2149 I/O ports provide 16 additional lines of communication. We plan to implement a high-speed "Diagnostic Logging" system to stream real-time debug data back from the 7800 to a host machine.
+- **Enhanced Interfacing**: Using the spare ports for external controllers or status LEDs to assist in hardware bring-up.
 
 ## AI Assistance
 
 This project was developed with significant assistance from AI (Antigravity). For the author, AI has been a "force multiplier"—making it possible to tackle long-held "I've always wanted to do this" projects within the limited hours of evenings and weekends. 
 
-For reflections on how AI is changing the landscape of hardware and software side-projects, see the author's blog post:
+For reflections on the legacy of the Atari ST and how AI is changing the landscape of hardware and software side-projects, see the author's blog posts:
 
-[What AI Is Doing to Software Development (and What It Can’t Do Yet)](https://johnsmusicandtech.com/posts/what-ai-is-doing-to-software-development/)
+## License & No Warranty
+
+This project is licensed under the **GNU General Public License v2.0 (GPL-2.0)**. See the `LICENSE` file for details.
+
+**Use at your own risk.** The author is not responsible for any damage to your hardware, loss of data, or any other issues that may arise from using this code, following the wiring diagrams, or running the provided tools. There is no warranty, Expressed or Implied.

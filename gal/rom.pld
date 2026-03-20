@@ -1,0 +1,22 @@
+Name     ROM_ONLY;
+PartNo   00;
+Date     03/17/2026;
+Revision 01;
+Designer John Sohn;
+Company  None;
+Assembly None;
+Location None;
+Device   g16v8a;
+
+/*
+ * Atari 7800 Simple 32KB ROM Decoder
+ * For initial hardware testing. Replaces LS04/LS02 logic.
+ */
+
+/* Inputs from Cartridge Port */
+PIN 2  = A15;
+
+/* Outputs to ROM */
+PIN 19 = ROM_CE;
+
+!ROM_CE = A15;
