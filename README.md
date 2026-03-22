@@ -163,14 +163,6 @@ This is our "Gold Standard" baseline. It verified that:
 
 **Tempo**: 1.0 seconds per note (Ideal for hardware verification).
 
-## Experimental Player: ym_player.asm
-
-While `heartbeat` is our diagnostic baseline, `ym_player.asm` is our **Experimental Melodic Player**. This is the current frontier of the project, where we take raw YM data and attempt to drive the chip with melodic complexity. 
-
-1.  **Work-in-Progress Stability**: We are currently tuning the "Quad-Tap" (or 8-Tap) write protocols to ensure 100% reliability during heavy Maria DMA activity.
-2.  **Sound Processing**: Implements "Anti-Thump" volume zeroing and software volume caps to better match the mixed audio characteristics of the 7800.
-3.  **16-bit Looping**: Capable of handle long melodic loops (e.g., 515 frames for Loader 1).
-
 ## Credits & Samples
 
 The `samples/` directory contains a curated selection of melodic assets sourced from the excellent **StSound** project by **Arnaud Carré (Leonard/OXG)**. These are provided for your own experimentation.
