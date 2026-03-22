@@ -98,11 +98,17 @@ The current GAL logic is gated by the `!RW` (Read/Write) line. This means the YM
 
 This mapping is intentional: it follows the historical precedent set by classic Atari 7800 games like **Ballblazer** and **Commando**, which mapped the **POKEY** sound chip to $4000. By mirroring this 16k "Sound Area," we ensure high compatibility with existing hardware designs and make it easier for 7800 developers to swap or supplement POKEY with the YM2149.
 
+## GAL Logic
+
+This project provides two `GAL16V8` programming files for address decoding:
+1. **[rom.pld](gal/rom.pld)**: A simple 32KB ROM decoder. It removes the need for basic LS04/LS02 logic chips and is intended for initial hardware testing before adding the sound chip.
+2. **[rom_ym.pld](gal/rom_ym.pld)**: The full decoder. It includes the 32KB ROM decoding plus the logic required to map the YM2149 sound chip to the $4000-$7FFF address space, along with its clock and bus controls.
+
 ## Hardware Wiring
 
-To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided GAL logic:
+To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided `rom_ym.pld` logic:
 
-### 1. GAL16V8 Pinout ([rom_ym.pld](/gal/rom_ym.pld))
+### 1. GAL16V8 Pinout (`rom_ym.pld`)
 | Pin | Signal | Source |
 | :--- | :--- | :--- |
 | 2 | A15 | 7800 Address Bus |
@@ -127,10 +133,26 @@ To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided 
 | 27 | BDIR | GAL Pin 18 |
 | 28 | BC2 | +5V |
 | 29 | BC1 | GAL Pin 17 |
-| 30-37 | DA7-DA0 | 7800 Data Bus (D7-D0) |
+| 30 | DA7 | 7800 Data Bus D7 |
+| 31 | DA6 | 7800 Data Bus D6 |
+| 32 | DA5 | 7800 Data Bus D5 |
+| 33 | DA4 | 7800 Data Bus D4 |
+| 34 | DA3 | 7800 Data Bus D3 |
+| 35 | DA2 | 7800 Data Bus D2 |
+| 36 | DA1 | 7800 Data Bus D1 |
+| 37 | DA0 | 7800 Data Bus D0 |
 | 40 | VCC | +5V |
 
 3.  **Clocking**: Pin 22 (CLOCK) typically receives PHI2OUT from the GAL (1.79MHz) for 1:1 emulator parity. However, the logic is robust enough to support an external 2MHz crystal directly; this provides exact Atari ST sound compatibility for imported assets without needing software frequency adjustments.
+
+## Included Tools
+
+### `tools/ValidateCartSignals.cs`
+A diagnostic C# script used to validate the raw physical signals coming off the Atari 7800 cartridge edge connector before they reach the ROM or YM2149. 
+
+- **Requirements**: `sigrok-cli` and `dotnet-script` installed globally.
+- **Usage**: Run `./tools/ValidateCartSignals.cs` from the project root. It captures 100,000 samples at 24MHz using a logic analyzer (defaults to `fx2lafw`).
+- **Output**: Analyzes the CSV stream in real-time and reports the total number of low-to-high transitions for the `PHI2` Clock, `R/W`, `HALT`, and `A15` pins. This proves your physical solder joints and edge-connector logic are completely clean.
 
 ## Baseline ROM: `ym2149_heartbeat_main.asm`
 

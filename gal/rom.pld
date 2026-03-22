@@ -1,4 +1,4 @@
-Name     ROM_ONLY;
+Name     ROM;
 PartNo   00;
 Date     03/17/2026;
 Revision 01;
@@ -11,6 +11,10 @@ Device   g16v8a;
 /*
  * Atari 7800 Simple 32KB ROM Decoder
  * For initial hardware testing. Replaces LS04/LS02 logic.
+ *
+ * Physical pin mapping:
+ *   GAL Pin 2  = A15
+ *   GAL Pin 19 = ROM_CE (output to ROM)
  */
 
 /* Inputs from Cartridge Port */
@@ -19,4 +23,5 @@ PIN 2  = A15;
 /* Outputs to ROM */
 PIN 19 = ROM_CE;
 
+/* ROM Chip Enable: asserted (active low) when accessing upper 32KB ($8000-$FFFF) */
 !ROM_CE = A15;
