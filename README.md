@@ -184,6 +184,8 @@ This project was developed with significant assistance from AI (Antigravity). Fo
 
 For reflections on the legacy of the Atari ST and how AI is changing the landscape of hardware and software side-projects, see the author's blog posts:
 
+[John's Music & Tech](https://johnsmusicandtech.com/)
+
 ## License & No Warranty
 
 This project is licensed under the **GNU General Public License v2.0 (GPL-2.0)**. See the `LICENSE` file for details.
