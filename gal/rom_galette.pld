@@ -1,0 +1,11 @@
+GAL16V8
+ROM
+
+NC A15 NC NC NC NC NC NC NC GND
+NC NC NC NC NC NC NC NC ROMCE VCC
+
+/ROMCE = A15
+
+DESCRIPTION
+
+Atari 7800 Simple 32KB ROM Decoder in galette format.

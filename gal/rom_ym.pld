@@ -19,6 +19,7 @@ Device   g16v8a;
  *   GAL Pin 5  = HALT (HIGH = CPU running, LOW = Maria DMA)
  *   GAL Pin 6  = RW   (HIGH = Read, LOW = Write)
  *   GAL Pin 7  = PHI2 (System Clock)
+ *   GAL Pin 15 = YM_LE (output to 74HCT373 Latch Enable)
  *   GAL Pin 16 = PHI2OUT (Cleaned Clock Output)
  *   GAL Pin 17 = BC1  (output to YM2149)
  *   GAL Pin 18 = BDIR (output to YM2149)
@@ -41,6 +42,7 @@ PIN 7  = PHI2;
 
 /* Outputs
  */
+PIN 15 = YM_LE;
 PIN 16 = PHI2OUT;
 PIN 17 = BC1;
 PIN 18 = BDIR;
@@ -52,6 +54,9 @@ PHI2OUT = PHI2;
 
 /* BDIR: asserted while writing to $4xxx with CPU running (HALT=1) */
 BDIR = !A15 & A14 & !RW & HALT;
+
+/* YM_LE: High during PHI2 on a YM write, falls with PHI2 to latch data */
+YM_LE = !A15 & A14 & !RW & HALT & PHI2;
 
 /* BC1: asserted ONLY when latching address ($4000 write) */
 BC1  = !A15 & A14 & !RW & !A0 & HALT;

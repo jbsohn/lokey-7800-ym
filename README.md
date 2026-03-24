@@ -117,12 +117,38 @@ To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided 
 | 5 | HALT | 7800 Maria Halt Signal |
 | 6 | R/W | 7800 CPU R/W Line |
 | 7 | PHI2 | 7800 CPU Clock (Pin 28 on Cart) |
+| 15 | **YM_LE** | Latch Enable output to 74HCT373 Pin 11 |
 | 16 | **PHI2OUT** | Buffered Clock to YM Pin 22 |
 | 17 | **BC1** | Connect to YM Pin 29 |
 | 18 | **BDIR** | Connect to YM Pin 27 |
+| 19 | **!ROM_CE** | Connect to 27C256 ROM Pin 20 (~CE) |
 | 20 | VCC | +5V |
 
-### 2. YM2149 / AY-3-8910 Connections
+### 2. 74HCT373 Octal Latch Connections
+| Latch Pin | Signal | Connection | 27C256 ROM Pin |
+| :--- | :--- | :--- | :--- |
+| 1 | ~OE | Ground (Always Enable) or GAL Output | - |
+| 2 | Q0 | YM Pin 37 (DA0) | - |
+| 3 | D0 | 7800 Data Bus D0 | Pin 11 (O0) |
+| 4 | D1 | 7800 Data Bus D1 | Pin 12 (O1) |
+| 5 | Q1 | YM Pin 36 (DA1) | - |
+| 6 | Q2 | YM Pin 35 (DA2) | - |
+| 7 | D2 | 7800 Data Bus D2 | Pin 13 (O2) |
+| 8 | D3 | 7800 Data Bus D3 | Pin 15 (O3) |
+| 9 | Q3 | YM Pin 34 (DA3) | - |
+| 10 | GND | Ground | - |
+| 11 | LE | Latch Enable (from GAL Pin 15 **YM_LE**) | - |
+| 12 | Q4 | YM Pin 33 (DA4) | - |
+| 13 | D4 | 7800 Data Bus D4 | Pin 16 (O4) |
+| 14 | D5 | 7800 Data Bus D5 | Pin 17 (O5) |
+| 15 | Q5 | YM Pin 32 (DA5) | - |
+| 16 | Q6 | YM Pin 31 (DA6) | - |
+| 17 | D6 | 7800 Data Bus D6 | Pin 18 (O6) |
+| 18 | D7 | 7800 Data Bus D7 | Pin 19 (O7) |
+| 19 | Q7 | YM Pin 30 (DA7) | - |
+| 20 | VCC | +5V | - |
+
+### 3. YM2149 / AY-3-8910 Connections
 | YM Pin | Signal | Connection |
 | :--- | :--- | :--- |
 | 1 | GND | Ground |
@@ -133,17 +159,17 @@ To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided 
 | 27 | BDIR | GAL Pin 18 |
 | 28 | BC2 | +5V |
 | 29 | BC1 | GAL Pin 17 |
-| 30 | DA7 | 7800 Data Bus D7 |
-| 31 | DA6 | 7800 Data Bus D6 |
-| 32 | DA5 | 7800 Data Bus D5 |
-| 33 | DA4 | 7800 Data Bus D4 |
-| 34 | DA3 | 7800 Data Bus D3 |
-| 35 | DA2 | 7800 Data Bus D2 |
-| 36 | DA1 | 7800 Data Bus D1 |
-| 37 | DA0 | 7800 Data Bus D0 |
+| 30 | DA7 | 74HCT373 Q7 (Pin 19) |
+| 31 | DA6 | 74HCT373 Q6 (Pin 16) |
+| 32 | DA5 | 74HCT373 Q5 (Pin 15) |
+| 33 | DA4 | 74HCT373 Q4 (Pin 12) |
+| 34 | DA3 | 74HCT373 Q3 (Pin 9) |
+| 35 | DA2 | 74HCT373 Q2 (Pin 6) |
+| 36 | DA1 | 74HCT373 Q1 (Pin 5) |
+| 37 | DA0 | 74HCT373 Q0 (Pin 2) |
 | 40 | VCC | +5V |
 
-3.  **Clocking**: Pin 22 (CLOCK) typically receives PHI2OUT from the GAL (1.79MHz) for 1:1 emulator parity. However, the logic is robust enough to support an external 2MHz crystal directly; this provides exact Atari ST sound compatibility for imported assets without needing software frequency adjustments.
+4.  **Clocking**: Pin 22 (CLOCK) typically receives PHI2OUT from the GAL (1.79MHz) for 1:1 emulator parity. However, the logic is robust enough to support an external 2MHz crystal directly; this provides exact Atari ST sound compatibility for imported assets without needing software frequency adjustments.
 
 ## Included Tools
 
