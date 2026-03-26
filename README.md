@@ -1,4 +1,4 @@
-# 7800 YM2149 Lab
+# Lokey 7800 YM
 
 ## **WARNING**
 
