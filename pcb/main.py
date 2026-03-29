@@ -39,8 +39,6 @@ ym = lib_audio['YM2149'].copy(ref='U4', tag='YM')
 ym.footprint = 'Package_DIP:DIP-40_W15.24mm'
 
 # Atari 7800 Gold Standard Cartridge Connector
-# Symbol uses canonical 1-32 numbering with descriptive names.
-# Footprint 'A7800' handles the 36-pin spacing and notches.
 cart = lib_a78['7800edgeconn'].copy(ref='J1', tag='YM')
 cart.footprint = 'Connector_PCBEdge:A7800'
 
@@ -53,6 +51,17 @@ def add_cap(ref):
 
 c1 = add_cap('C1'); c2 = add_cap('C2'); c3 = add_cap('C3'); c4 = add_cap('C4')
 
+# Audio Mixing (Simple Resistive Mixer)
+# Channels A, B, C mixed via 1K resistors
+ra = lib_dev['R'].copy(ref='R1', tag='YM', value='1K')
+rb = lib_dev['R'].copy(ref='R2', tag='YM', value='1K')
+rc = lib_dev['R'].copy(ref='R3', tag='YM', value='1K')
+ra.footprint = rb.footprint = rc.footprint = 'Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal'
+
+# Audio DC Blocking Capacitor (10uF Electrolytic)
+caudio = lib_dev['C_Polarized'].copy(ref='C5', tag='YM', value='10uF')
+caudio.footprint = 'Capacitor_THT:CP_Radial_D5.0mm_P2.00mm'
+
 # Power and Ground Nets
 vcc = Net('VCC', tag='YM')
 vcc += cart['13'], rom['28'], gal['20'], latch['20'], ym['40'], ym['25'], ym['28'], ym['23']
@@ -64,7 +73,18 @@ gnd += cart['14'], cart['30'], rom['14'], rom['22'], gal['10'], latch['10'], lat
 for c in [c1, c2, c3, c4]:
     gnd += c['2']
 
-# Address Bus Connections (Mappings follow canonical 32-pin layout)
+# Audio Connections
+audio_mixed = Net('AUDIO_MIXED', tag='YM')
+audio_mixed += ra['2'], rb['2'], rc['2'], caudio['1'] # Mix resistors to cap positive
+ra['1'] += ym['3']  # Channel A
+rb['1'] += ym['4']  # Channel B
+rc['1'] += ym['38'] # Channel C
+
+# Mixed audio to cartridge audio pin
+audio_out = Net('AUDIO_OUT', tag='YM')
+audio_out += cart['18'], caudio['2']
+
+# Address Bus Connections
 rom['10'] += cart['26'] # A0
 rom['9']  += cart['25'] # A1
 rom['8']  += cart['24'] # A2
