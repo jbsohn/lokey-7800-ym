@@ -107,6 +107,19 @@ The current design includes:
 - **Professional Constraints**: Baked-in design rules (0.25mm traces, 0.8mm vias) sourced from the [Otaku-flash](https://github.com/karrika/Otaku-flash) project.
 - **Socket-Ready**: All ICs use standard DIP through-hole footprints.
 
+### Environment Setup
+
+The PCB project requires local environment variables to point to your KiCad library locations. 
+
+1. **Setup `.env`**: Copy the example template and adjust the paths to match your system (macOS defaults are provided):
+   ```bash
+   cp pcb/env.example pcb/.env
+   ```
+2. **Install Dependencies**: The build system will automatically create a virtual environment and install `skidl` and `python-dotenv` on the first run of `make pcb`. You can also trigger this manually:
+   ```bash
+   make -C pcb install
+   ```
+
 ### Build Instructions
 
 To generate the latest PCB assets (Netlist and visual SVG), ensure you have the dependencies installed in the `pcb/venv` and run:

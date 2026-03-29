@@ -21,9 +21,9 @@ lib_dev = SchLib('Device', tool=KICAD8)
 lib_audio = SchLib('Audio', tool=KICAD8)
 lib_74xx = SchLib('74xx', tool=KICAD8)
 
-# Load the local A7800 library
+# Load the local 7800-ym library
 project_dir = os.path.dirname(os.path.abspath(__file__))
-lib_a78 = SchLib(os.path.join(project_dir, 'A7800.kicad_sym'), tool=KICAD8)
+lib_a78 = SchLib(os.path.join(project_dir, '7800-ym.kicad_sym'), tool=KICAD8)
 
 # Component Instantiation
 rom = lib_mem['27C256'].copy(ref='U1', tag='YM')
