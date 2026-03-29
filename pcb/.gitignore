@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# SKiDL / Build Outputs
+*_sklib.py
+*.net
+*.svg
+*.log
+*.erc
+*.json
+
+# KiCad 8 Temporary & Backup Files
+*-backups/
+*.bak
+*.bck
+*.kicad_pcb-bak
+*.kicad_sch-bak
+*.kicad_pro-bak
+_autosave-*
+fp-info-cache
+*.lck

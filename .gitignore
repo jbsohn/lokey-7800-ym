@@ -11,3 +11,4 @@
 *.sr
 *.sim
 .testing/
+.DS_Store
