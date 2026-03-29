@@ -7,6 +7,12 @@
 
 ![Atari 7800 YM2149 Hardware Lab](docs/7800-ym-lab.jpg)
 
+### Generated Schematic (Preview)
+
+> **NOTE:** This SVG is a generated block diagram intended for visual reference. It is **not guaranteed to be the latest version** of the hardware logic. Always refer to `pcb/main.py` for the authoritative design.
+
+![Atari 7800 YM2149 Generated Schematic](docs/main.svg)
+
 This repository is a playground for experiments with the Atari 7800 using YM2149 on cartridge.
 
 ## Why this project?
@@ -97,12 +103,6 @@ This mapping is intentional: it follows the historical precedent set by classic 
 Unlike traditional hardware projects, this laboratory uses a **Code-to-PCB** workflow. The "Source of Truth" for the schematic is not a visual diagram, but the Python source code found in `pcb/main.py`.
 
 We leverage **SKiDL**, a Python library that allows us to define electronic connections programmatically. This ensures that our hardware logic is version-controllable, modular, and precisely mapped to the Atari 7800's technical specifications.
-
-### Generated Schematic (Preview)
-
-> **NOTE:** This SVG is a generated block diagram intended for visual reference. It is **not guaranteed to be the latest version** of the hardware logic. Always refer to `pcb/main.py` for the authoritative design.
-
-![Atari 7800 YM2149 Generated Schematic](docs/main.svg)
 
 ### Hardware Status: "Gold Standard"
 
