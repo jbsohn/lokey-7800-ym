@@ -18,11 +18,17 @@ all: $(NETLIST)
 $(NETLIST): $(SRC) $(VENV)
 	@echo "Generating PCB Netlist and SVG..."
 	$(PYTHON) $(SRC)
-	@echo "Applying white background to SVG for documentation..."
-	@# Uses sed to insert style and a white rectangle immediately after the opening <svg> tag
-	@# Handles macOS sed quirks by avoiding multi-line append where possible
+	@echo "Applying GitHub-friendly optimizations to SVG..."
+	@# 1. Apply white background for Dark Mode compatibility
 	@sed -i '' 's/<svg /<svg style="background-color:white" /' $(SVG)
 	@sed -i '' 's/<svg[^>]*>/&<rect width="100%" height="100%" fill="white"\/>/' $(SVG)
+	@# 2. Add viewBox and set width to 100% for responsive rendering in Markdown
+	@# Extracts current width/height to build the viewBox
+	@W=$$(grep -o 'width="[^"]*"' $(SVG) | head -1 | cut -d'"' -f2); \
+	 H=$$(grep -o 'height="[^"]*"' $(SVG) | head -1 | cut -d'"' -f2); \
+	 sed -i '' "s/<svg /<svg viewBox=\"0 0 $$W $$H\" /" $(SVG); \
+	 sed -i '' 's/width="[^"]*"/width="100%"/' $(SVG); \
+	 sed -i '' 's/height="[^"]*"/height="auto"/' $(SVG)
 
 # Automatic environment setup
 $(VENV): $(REQ)
