@@ -7,14 +7,6 @@
 
 ![Atari 7800 YM2149 Hardware Lab](docs/7800-ym-lab.jpg)
 
-### Hardware Tests in Action
-Check out the current state of tests running on the dev board:
-
-[![Hardware Test 1](https://img.youtube.com/vi/xwr_qn-GMdQ/hqdefault.jpg)](https://www.youtube.com/shorts/xwr_qn-GMdQ)
-
-
-[![Hardware Test 2](https://img.youtube.com/vi/qCsVi0Iiq5I/hqdefault.jpg)](https://www.youtube.com/shorts/qCsVi0Iiq5I)
-
 This repository is a playground for experiments with the Atari 7800 using YM2149 on cartridge.
 
 ## Why this project?
@@ -167,8 +159,6 @@ To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided 
 | 35 | DA2 | 74HCT373 Q2 (Pin 6) |
 | 36 | DA1 | 74HCT373 Q1 (Pin 5) |
 | 37 | DA0 | 74HCT373 Q0 (Pin 2) |
-| 40 | VCC | +5V |
-
 4.  **Clocking**: Pin 22 (CLOCK) typically receives PHI2OUT from the GAL (1.79MHz) for 1:1 emulator parity. However, the logic is robust enough to support an external 2MHz crystal directly; this provides exact Atari ST sound compatibility for imported assets without needing software frequency adjustments.
 
 ## Included Tools
@@ -189,20 +179,74 @@ This is our "Gold Standard" baseline. It verified that:
 
 **Tempo**: 1.0 seconds per note (Ideal for hardware verification).
 
-## Credits & Samples
+### Hardware Tests in Action
+Check out the current state of tests running on the dev board:
 
-The `samples/` directory contains a curated selection of melodic assets sourced from the excellent **StSound** project by **Arnaud Carré (Leonard/OXG)**. These are provided for your own experimentation.
+[![Hardware Test 1](https://img.youtube.com/vi/xwr_qn-GMdQ/hqdefault.jpg)](https://www.youtube.com/shorts/xwr_qn-GMdQ)
 
-- **Source**: [https://github.com/arnaud-carre/StSound](https://github.com/arnaud-carre/StSound)
 
-We are grateful to the Atari ST community for maintaining such high-quality musical assets. It's heartening to see that there are still plenty of dedicated Atari ST fans out there keeping the 16-bit flame alive!
+[![Hardware Test 2](https://img.youtube.com/vi/qCsVi0Iiq5I/hqdefault.jpg)](https://www.youtube.com/shorts/qCsVi0Iiq5I)
+
+## Acknowledgements & Credits
+
+- **Dan Boris (AtariHQ)**: For the indispensable [7800 Cartridge Technical Specifications](https://atarihq.com/danb/7800cart/a7800cart.shtml) and reference diagrams that made this hardware mapping possible.
+- **Arnaud Carré (Leonard/OXG)**: For the excellent [StSound](https://github.com/arnaud-carre/StSound) project. The `samples/` directory contains melodic assets sourced from this project for hardware testing.
+- **The Atari Community**: We are grateful to the dedicated fans keeping the 16-bit and 8-bit flames alive through archival and homebrew development.
 
 ## Future Plans & Extensibility
 
+- **Hardware Roadmap**: Our MVP (Minimum Viable Project) focus is a stable **32KB ROM (27C256)** that plays music reliably on real hardware. Future revisions will expand compatibility to support all **28-pin ROMs**, eventually moving to **32-pin ROMs** and more complex bank-switching versions.
 - **YM2 as Canonical Source**: We have established **YM2** as the preferred "raw" source format for incoming Atari ST data. Its lack of metadata overhead and predictable register-interleaving makes it the perfect baseline for future compression research.
 - **Advanced Compression**: Future research will explore **RLE (Run-Length Encoding)** and custom **Bitpacking** (similar to VGM or YM-Pro formats) to squeeze minutes of high-fidelity music into standard 32KB/48KB 7800 banksets.
 - **I/O Port Logging**: The YM2149 I/O ports provide 16 additional lines of communication. We plan to implement a high-speed "Diagnostic Logging" system to stream real-time debug data back from the 7800 to a host machine.
 - **Enhanced Interfacing**: Using the spare ports for external controllers or status LEDs to assist in hardware bring-up.
+
+## Hardware Pinout Reference
+From [AtariHQ](https://atarihq.com/danb/7800cart/a7800cart.shtml):
+
+### 7800 Cartridge Edge (32-Pin)
+![Atari 7800 Cartridge Edge Pinout Diagram](docs/7800-cart-pinout.jpg)
+
+*Image credit: [Dan Boris / AtariHQ](https://atarihq.com/danb/7800cart/a7800cart.shtml) (Used for educational/reference purposes)*
+
+| Pin (1–16) | Signal Description | Pin (32–17) | Signal Description |
+| :--- | :--- | :--- | :--- |
+| **1** | Read/Write (from 6502, low=Write) | **32** | Phase 2 Clock (from 6502) |
+| **2** | Halt (to 6502) | **31** | IRQ (to 6502) |
+| **3** | D3 (to/from 6502) | **30** | Ground |
+| **4** | D4 (to/from 6502) | **29** | D2 (from 6502) |
+| **5** | D5 (to/from 6502) | **28** | D1 (from 6502) |
+| **6** | D6 (to/from 6502) | **27** | D0 (from 6502) |
+| **7** | D7 (to/from 6502) | **26** | A0 (from 6502) |
+| **8** | A12 (from 6502) | **25** | A1 (from 6502) |
+| **9** | A10 (from 6502) | **24** | A2 (from 6502) |
+| **10** | A11 (from 6502) | **23** | A3 (from 6502) |
+| **11** | A9 (from 6502) | **22** | A4 (from 6502) |
+| **12** | A8 (from 6502) | **21** | A5 (from 6502) |
+| **13** | +5 VDC | **20** | A6 (from 6502) |
+| **14** | Ground | **19** | A7 (from 6502) |
+| **15** | A13 (from 6502) | **18** | External Audio Input |
+| **16** | A14 (from 6502) | **17** | A15 (from 6502) |
+
+**Backward Compatibility:** Pins 3–14 and 19–30 are identical to the Atari 2600 standard. This allows the 7800 to be physically backward compatible with 2600 cartridges. The remaining pins are specific to the 7800 and enable its expanded memory and sound capabilities.
+
+### 27C256 EPROM (32KB ROM)
+| Pin (Left) | Signal | Pin (Right) | Signal |
+| :--- | :--- | :--- | :--- |
+| **1** | VPP (12.5V or VCC) | **28** | VCC (+5V) |
+| **2** | A12 (7800 Cart Pin 8) | **27** | A14 (7800 Cart Pin 16) |
+| **3** | A7 (7800 Cart Pin 19) | **26** | A13 (7800 Cart Pin 15) |
+| **4** | A6 (7800 Cart Pin 20) | **25** | A8 (7800 Cart Pin 12) |
+| **5** | A5 (7800 Cart Pin 21) | **24** | A9 (7800 Cart Pin 11) |
+| **6** | A4 (7800 Cart Pin 22) | **23** | A11 (7800 Cart Pin 10) |
+| **7** | A3 (7800 Cart Pin 23) | **22** | !OE (Output Enable - Ground) |
+| **8** | A2 (7800 Cart Pin 24) | **21** | A10 (7800 Cart Pin 9) |
+| **9** | A1 (7800 Cart Pin 25) | **20** | !CE (Chip Enable - GAL Pin 19) |
+| **10** | A0 (7800 Cart Pin 26) | **19** | Q7 (Data D7 - Latch Pin 18) |
+| **11** | Q0 (Data D0 - Latch Pin 3) | **18** | Q6 (Data D6 - Latch Pin 17) |
+| **12** | Q1 (Data D1 - Latch Pin 4) | **17** | Q5 (Data D5 - Latch Pin 14) |
+| **13** | Q2 (Data D2 - Latch Pin 7) | **16** | Q4 (Data D4 - Latch Pin 13) |
+| **14** | GND (Ground) | **15** | Q3 (Data D3 - Latch Pin 8) |
 
 ## AI Assistance
 
