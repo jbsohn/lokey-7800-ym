@@ -115,13 +115,16 @@ The current design includes:
 
 ### Environment Setup
 
-The PCB project requires local environment variables to point to your KiCad library locations. 
+The PCB project requires local environment variables to point to your KiCad library locations.
 
 1. **Setup `.env`**: Copy the example template and adjust the paths to match your system (macOS defaults are provided):
+
    ```bash
    cp pcb/env.example pcb/.env
    ```
+
 2. **Install Dependencies**: The build system will automatically create a virtual environment and install `skidl` and `python-dotenv` on the first run of `make pcb`. You can also trigger this manually:
+
    ```bash
    make -C pcb install
    ```
