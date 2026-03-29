@@ -18,6 +18,11 @@ all: $(NETLIST)
 $(NETLIST): $(SRC) $(VENV)
 	@echo "Generating PCB Netlist and SVG..."
 	$(PYTHON) $(SRC)
+	@echo "Applying white background to SVG for documentation..."
+	@# Uses sed to insert style and a white rectangle immediately after the opening <svg> tag
+	@# Handles macOS sed quirks by avoiding multi-line append where possible
+	@sed -i '' 's/<svg /<svg style="background-color:white" /' $(SVG)
+	@sed -i '' 's/<svg[^>]*>/&<rect width="100%" height="100%" fill="white"\/>/' $(SVG)
 
 # Automatic environment setup
 $(VENV): $(REQ)
@@ -32,5 +37,5 @@ install: $(VENV)
 
 clean:
 	@echo "Cleaning PCB outputs..."
-	rm -rf $(NETLIST) $(SVG) skidl.log skidl.erc
+	rm -f $(NETLIST) $(SVG) skidl.log skidl.erc
 	@echo "Note: Virtual environment '$(VENV)' was NOT removed. Use 'rm -rf $(VENV)' to delete it."
