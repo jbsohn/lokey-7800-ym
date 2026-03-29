@@ -35,7 +35,8 @@ Before testing on real hardware, you can verify your builds using a specialized 
 - **Repository**: [https://github.com/jbsohn/a7800](https://github.com/jbsohn/a7800)
 - **Branch**: `ym2149`
 
-### Compatibility Notes:
+### Compatibility Notes
+
 - **Modern Hardware**: This branch includes specific updates for **macOS on Apple Silicon (M1/M2/M3)**.
 - **C# / .NET Tooling**: All diagnostic and processing tools require the **.NET SDK** (verified on Linux and macOS).
 - **Supported Platforms**: Built and tested for **macOS** and **Linux**.
@@ -81,18 +82,55 @@ For real hardware, start with **ym2149_heartbeat_main.bin**. It is our "Gold Sta
 
 ## Memory Mapping & POKEY Compatibility
 
-The YM2149 sound card in this lab is mapped to the **$4000–$7FFF** range (16 KB). 
+The YM2149 sound card in this lab is mapped to the **$4000–$7FFF** range (16 KB).
+
 ### Write-Only Mirroring (Theoretical)
 
-The current GAL logic is gated by the `!RW` (Read/Write) line. This means the YM2149 should effectively be a "write-only" device at $4000. In theory, this allows other devices (like ROM or RAM) to reside at the same memory addresses for **read** operations without bus contention. 
+The current GAL logic is gated by the `!RW` (Read/Write) line. This means the YM2149 should effectively be a "write-only" device at $4000. In theory, this allows other devices (like ROM or RAM) to reside at the same memory addresses for **read** operations without bus contention.
 
 > **NOTE:** This "Stealth Mirroring" is the intended design but remains untested on live hardware. It represents one of our "hopes" for maximum bus efficiency!
 
 This mapping is intentional: it follows the historical precedent set by classic Atari 7800 games like **Ballblazer** and **Commando**, which mapped the **POKEY** sound chip to $4000. By mirroring this 16k "Sound Area," we ensure high compatibility with existing hardware designs and make it easier for 7800 developers to swap or supplement POKEY with the YM2149.
 
+## PCB Design Workflow (SKiDL)
+
+Unlike traditional hardware projects, this laboratory uses a **Code-to-PCB** workflow. The "Source of Truth" for the schematic is not a visual diagram, but the Python source code found in `pcb/main.py`.
+
+We leverage **SKiDL**, a Python library that allows us to define electronic connections programmatically. This ensures that our hardware logic is version-controllable, modular, and precisely mapped to the Atari 7800's technical specifications.
+
+### Hardware Status: "Gold Standard"
+
+The current design includes:
+
+- **Full YM2149 / AY-3-8910 Support**: Integrated via a 74HCT373 latch.
+- **A78 Maxi Connector**: A precise 32-pin physical layout that accounts for the 7800's alignment notches.
+- **Professional Constraints**: Baked-in design rules (0.25mm traces, 0.8mm vias) sourced from the [Otaku-flash](https://github.com/karrika/Otaku-flash) project.
+- **Socket-Ready**: All ICs use standard DIP through-hole footprints.
+
+### Build Instructions
+
+To generate the latest PCB assets (Netlist and visual SVG), ensure you have the dependencies installed in the `pcb/venv` and run:
+
+```bash
+make pcb
+```
+
+This will produce:
+
+- `pcb/main.net`: The authoritative netlist for import into KiCad.
+- `pcb/main.svg`: A visual block-diagram review of the connections.
+
+### Importing into KiCad
+
+1. Open KiCad and select **Open Project**.
+2. Open `pcb/7800-ym.kicad_pro`.
+3. Open the **PCB Editor**.
+4. Go to **File -> Import -> Netlist...** and select `pcb/main.net`.
+
 ## GAL Logic
 
 This project provides two `GAL16V8` programming files for address decoding:
+
 1. **[rom.pld](gal/rom.pld)**: A simple 32KB ROM decoder. It removes the need for basic LS04/LS02 logic chips and is intended for initial hardware testing before adding the sound chip.
 2. **[rom_ym.pld](gal/rom_ym.pld)**: The full decoder. It includes the 32KB ROM decoding plus the logic required to map the YM2149 sound chip to the $4000-$7FFF address space, along with its clock and bus controls.
 
@@ -101,6 +139,7 @@ This project provides two `GAL16V8` programming files for address decoding:
 To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided `rom_ym.pld` logic:
 
 ### 1. GAL16V8 Pinout (`rom_ym.pld`)
+
 | Pin | Signal | Source |
 | :--- | :--- | :--- |
 | 2 | A15 | 7800 Address Bus |
@@ -117,6 +156,7 @@ To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided 
 | 20 | VCC | +5V |
 
 ### 2. 74HCT373 Octal Latch Connections
+
 | Latch Pin | Signal | Connection | 27C256 ROM Pin |
 | :--- | :--- | :--- | :--- |
 | 1 | ~OE | Ground (Always Enable) or GAL Output | - |
@@ -141,6 +181,7 @@ To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided 
 | 20 | VCC | +5V | - |
 
 ### 3. YM2149 / AY-3-8910 Connections
+
 | YM Pin | Signal | Connection |
 | :--- | :--- | :--- |
 | 1 | GND | Ground |
@@ -159,12 +200,14 @@ To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided 
 | 35 | DA2 | 74HCT373 Q2 (Pin 6) |
 | 36 | DA1 | 74HCT373 Q1 (Pin 5) |
 | 37 | DA0 | 74HCT373 Q0 (Pin 2) |
-4.  **Clocking**: Pin 22 (CLOCK) typically receives PHI2OUT from the GAL (1.79MHz) for 1:1 emulator parity. However, the logic is robust enough to support an external 2MHz crystal directly; this provides exact Atari ST sound compatibility for imported assets without needing software frequency adjustments.
+
+1. **Clocking**: Pin 22 (CLOCK) typically receives PHI2OUT from the GAL (1.79MHz) for 1:1 emulator parity. However, the logic is robust enough to support an external 2MHz crystal directly; this provides exact Atari ST sound compatibility for imported assets without needing software frequency adjustments.
 
 ## Included Tools
 
 ### `tools/ValidateCartSignals.cs`
-A diagnostic C# script used to validate the raw physical signals coming off the Atari 7800 cartridge edge connector before they reach the ROM or YM2149. 
+
+A diagnostic C# script used to validate the raw physical signals coming off the Atari 7800 cartridge edge connector before they reach the ROM or YM2149.
 
 - **Requirements**: `sigrok-cli` and `dotnet-script` installed globally.
 - **Usage**: Run `./tools/ValidateCartSignals.cs` from the project root. It captures 100,000 samples at 24MHz using a logic analyzer (defaults to `fx2lafw`).
@@ -173,22 +216,24 @@ A diagnostic C# script used to validate the raw physical signals coming off the 
 ## Baseline ROM: `ym2149_heartbeat_main.asm`
 
 This is our "Gold Standard" baseline. It verified that:
-1.  **Pitch**: Matches the emulator.
-2.  **Stability**: No notes are dropped (Uses Quad-Tap writes).
-3.  **Cleanliness**: No stuttering (HALT pulses protect the bus).
+
+1. **Pitch**: Matches the emulator.
+2. **Stability**: No notes are dropped (Uses Quad-Tap writes).
+3. **Cleanliness**: No stuttering (HALT pulses protect the bus).
 
 **Tempo**: 1.0 seconds per note (Ideal for hardware verification).
 
 ### Hardware Tests in Action
+
 Check out the current state of tests running on the dev board:
 
 [![Hardware Test 1](https://img.youtube.com/vi/xwr_qn-GMdQ/hqdefault.jpg)](https://www.youtube.com/shorts/xwr_qn-GMdQ)
-
 
 [![Hardware Test 2](https://img.youtube.com/vi/qCsVi0Iiq5I/hqdefault.jpg)](https://www.youtube.com/shorts/qCsVi0Iiq5I)
 
 ## Acknowledgements & Credits
 
+- **Karri Kaksonen (karrika)**: For the excellent [Otaku-flash](https://github.com/karrika/Otaku-flash) project. We have integrated the "Gold Standard" Atari 7800 cartridge footprints, symbols, and professional design rules from this MIT-licensed repository.
 - **Dan Boris (AtariHQ)**: For the indispensable [7800 Cartridge Technical Specifications](https://atarihq.com/danb/7800cart/a7800cart.shtml) and reference diagrams that made this hardware mapping possible.
 - **Arnaud Carré (Leonard/OXG)**: For the excellent [StSound](https://github.com/arnaud-carre/StSound) project. The `samples/` directory contains melodic assets sourced from this project for hardware testing.
 - **The Atari Community**: We are grateful to the dedicated fans keeping the 16-bit and 8-bit flames alive through archival and homebrew development.
@@ -202,9 +247,11 @@ Check out the current state of tests running on the dev board:
 - **Enhanced Interfacing**: Using the spare ports for external controllers or status LEDs to assist in hardware bring-up.
 
 ## Hardware Pinout Reference
+
 From [AtariHQ](https://atarihq.com/danb/7800cart/a7800cart.shtml):
 
 ### 7800 Cartridge Edge (32-Pin)
+
 ![Atari 7800 Cartridge Edge Pinout Diagram](docs/7800-cart-pinout.jpg)
 
 *Image credit: [Dan Boris / AtariHQ](https://atarihq.com/danb/7800cart/a7800cart.shtml) (Used for educational/reference purposes)*
@@ -231,6 +278,7 @@ From [AtariHQ](https://atarihq.com/danb/7800cart/a7800cart.shtml):
 **Backward Compatibility:** Pins 3–14 and 19–30 are identical to the Atari 2600 standard. This allows the 7800 to be physically backward compatible with 2600 cartridges. The remaining pins are specific to the 7800 and enable its expanded memory and sound capabilities.
 
 ### 27C256 EPROM (32KB ROM)
+
 | Pin (Left) | Signal | Pin (Right) | Signal |
 | :--- | :--- | :--- | :--- |
 | **1** | VPP (12.5V or VCC) | **28** | VCC (+5V) |
@@ -250,7 +298,7 @@ From [AtariHQ](https://atarihq.com/danb/7800cart/a7800cart.shtml):
 
 ## AI Assistance
 
-This project was developed with significant assistance from AI (Antigravity). For the author, AI has been a "force multiplier"—making it possible to tackle long-held "I've always wanted to do this" projects within the limited hours of evenings and weekends. 
+This project was developed with assistance from AI. For the author, AI has been a "force multiplier"—making it possible to tackle long-held "I've always wanted to do this" projects within the limited hours of evenings and weekends.
 
 For reflections on the legacy of the Atari ST and how AI is changing the landscape of hardware and software side-projects, see the author's blog posts:
 
