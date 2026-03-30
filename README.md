@@ -102,12 +102,12 @@ We leverage **SKiDL**, a Python library that allows us to define electronic conn
 
 > **NOTE:** This SVG is a generated block diagram intended for visual reference. It is **not guaranteed to be the latest version** of the hardware logic. Always refer to `pcb/main.py` for the authoritative design.
 
-![Atari 7800 YM2149 Generated Schematic]
-<div style="background-color: white; padding: 20px; display: inline-block;">
-  <a href="docs/main.svg" target="_blank">
-    <img src="docs/main.svg" alt="Atari 7800 YM2149 Schematic" width="600">
-  </a>
+[🔍 Click here to open the full-size vector schematic (docs/main.svg)](docs/main.svg)
+
+<div align="center" style="background-color: white; padding: 25px; margin-top: 10px; border-radius: 8px;">
+  <img src="docs/main.svg" alt="Atari 7800 YM2149 Generated Schematic" width="800">
 </div>
+
 ### Hardware Status
 
 The current design includes:
