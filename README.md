@@ -102,11 +102,10 @@ We leverage **SKiDL**, a Python library that allows us to define electronic conn
 
 > **NOTE:** This SVG is a generated block diagram intended for visual reference. It is **not guaranteed to be the latest version** of the hardware logic. Always refer to `pcb/main.py` for the authoritative design.
 
-[🔍 Click here to open the full-size vector schematic (docs/main.svg)](docs/main.svg)
+### 🛠 YM2149 Sound Lab Schematic
 
-<div align="center" style="background-color: white; padding: 25px; margin-top: 10px; border-radius: 8px;">
-  <img src="docs/main.svg" alt="Atari 7800 YM2149 Generated Schematic" width="800">
-</div>
+![Atari 7800 YM2149 Schematic](docs/main.png)
+[🔍 View Source (main.svg)](docs/main.svg)
 
 ### Hardware Status
 
