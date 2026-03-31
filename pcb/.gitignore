@@ -25,6 +25,7 @@ _autosave-*
 fp-info-cache
 *.lck
 *.prl
+report.txt
 
 # VS Code History
 .history/

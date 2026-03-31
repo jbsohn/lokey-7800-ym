@@ -76,30 +76,32 @@ for c in [c1, c2, c3, c4]:
 # Audio Connections
 audio_mixed = Net('AUDIO_MIXED', tag='YM')
 audio_mixed += ra['2'], rb['2'], rc['2'], caudio['1'] # Mix resistors to cap positive
-ra['1'] += ym['3']  # Channel A
-rb['1'] += ym['4']  # Channel B
-rc['1'] += ym['38'] # Channel C
+
+Net('AUDIO_A', tag='YM').connect(ra['1'], ym['3'])
+Net('AUDIO_B', tag='YM').connect(rb['1'], ym['4'])
+Net('AUDIO_C', tag='YM').connect(rc['1'], ym['38'])
 
 # Mixed audio to cartridge audio pin
 audio_out = Net('AUDIO_OUT', tag='YM')
 audio_out += cart['18'], caudio['2']
 
 # Address Bus Connections
-rom['10'] += cart['26'] # A0
-rom['9']  += cart['25'] # A1
-rom['8']  += cart['24'] # A2
-rom['7']  += cart['23'] # A3
-rom['6']  += cart['22'] # A4
-rom['5']  += cart['21'] # A5
-rom['4']  += cart['20'] # A6
-rom['3']  += cart['19'] # A7
-rom['25'] += cart['12'] # A8
-rom['24'] += cart['11'] # A9
-rom['21'] += cart['9']  # A10
-rom['23'] += cart['10'] # A11
-rom['2']  += cart['8']  # A12
-rom['26'] += cart['15'] # A13
-rom['27'] += cart['16'] # A14
+Net('A0',  tag='YM').connect(rom['10'], cart['26'], gal['4'])
+Net('A1',  tag='YM').connect(rom['9'],  cart['25'])
+Net('A2',  tag='YM').connect(rom['8'],  cart['24'])
+Net('A3',  tag='YM').connect(rom['7'],  cart['23'])
+Net('A4',  tag='YM').connect(rom['6'],  cart['22'])
+Net('A5',  tag='YM').connect(rom['5'],  cart['21'])
+Net('A6',  tag='YM').connect(rom['4'],  cart['20'])
+Net('A7',  tag='YM').connect(rom['3'],  cart['19'])
+Net('A8',  tag='YM').connect(rom['25'], cart['12'])
+Net('A9',  tag='YM').connect(rom['24'], cart['11'])
+Net('A10', tag='YM').connect(rom['21'], cart['9'])
+Net('A11', tag='YM').connect(rom['23'], cart['10'])
+Net('A12', tag='YM').connect(rom['2'],  cart['8'])
+Net('A13', tag='YM').connect(rom['26'], cart['15'])
+Net('A14', tag='YM').connect(rom['27'], cart['16'], gal['3'])
+Net('A15', tag='YM').connect(cart['17'], gal['2'])
 
 # Data Bus Connections
 d0 = Net('D0', tag='YM'); d0 += cart['27'], rom['11'], latch['3']
@@ -121,20 +123,24 @@ Net('DA5', tag='YM').connect(ym['32'], latch['15'])
 Net('DA6', tag='YM').connect(ym['31'], latch['16'])
 Net('DA7', tag='YM').connect(ym['30'], latch['19'])
 
-# GAL Selection Logic & Controls
-gal['2'] += cart['17'] # A15
-gal['3'] += cart['16'] # A14
-gal['4'] += cart['26'] # A0
-gal['5'] += cart['2']  # HALT
-gal['6'] += cart['1']  # RW
-gal['7'] += cart['32'] # Phase_2_CLK
+# Other Cartridge Controls
+Net('HALT', tag='YM').connect(cart['2'],  gal['5'])
+Net('RW',   tag='YM').connect(cart['1'],  gal['6'])
+Net('PHI2', tag='YM').connect(cart['32'], gal['7'])
 
 # Control nets
-Net('ROM_CE', tag='YM').connect(rom['20'], gal['19'])
-Net('YM_LE', tag='YM').connect(latch['11'], gal['15'])
-Net('PHI2OUT', tag='YM').connect(ym['22'], gal['16'])
-Net('BC1', tag='YM').connect(ym['29'], gal['17'])
-Net('BDIR', tag='YM').connect(ym['27'], gal['18'])
+Net('ROM_CE',  tag='YM').connect(rom['20'],   gal['19'])
+Net('YM_LE',   tag='YM').connect(latch['11'],  gal['15'])
+Net('PHI2OUT', tag='YM').connect(ym['22'],    gal['16'])
+Net('BC1',     tag='YM').connect(ym['29'],    gal['17'])
+Net('BDIR',    tag='YM').connect(ym['27'],    gal['18'])
+
+# Connect all unconnected pins to unique NC nets to avoid KiCAD warnings about "no pin in symbol"
+# which happens when a pin is not in any net in the imported netlist.
+for part in default_circuit.parts:
+    for pin in part.pins:
+        if not pin.is_connected():
+            pin += Net(f"NC_{part.ref}_{pin.num}")
 
 generate_netlist()
 generate_svg()
