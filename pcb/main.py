@@ -7,23 +7,23 @@ load_dotenv()
 from skidl import *
 from skidl.pin import pin_types
 
-# Set default tool to KICAD8
-set_default_tool(KICAD8)
+# Set default tool to KICAD9
+set_default_tool(KICAD9)
 
 # Tag the default circuit
 default_circuit.tag = 'YM'
 
-# Load libraries - SKiDL will search in KICAD8_SYMBOL_DIR
-lib_mem = SchLib('Memory_EPROM', tool=KICAD8)
-lib_logic = SchLib('Logic_Programmable', tool=KICAD8)
-lib_gen = SchLib('Connector_Generic', tool=KICAD8)
-lib_dev = SchLib('Device', tool=KICAD8)
-lib_audio = SchLib('Audio', tool=KICAD8)
-lib_74xx = SchLib('74xx', tool=KICAD8)
+# Load libraries - SKiDL will search in KICAD9_SYMBOL_DIR
+lib_mem = SchLib('Memory_EPROM', tool=KICAD9)
+lib_logic = SchLib('Logic_Programmable', tool=KICAD9)
+lib_gen = SchLib('Connector_Generic', tool=KICAD9)
+lib_dev = SchLib('Device', tool=KICAD9)
+lib_audio = SchLib('Audio', tool=KICAD9)
+lib_74xx = SchLib('74xx', tool=KICAD9)
 
 # Load the local 7800-ym library
 project_dir = os.path.dirname(os.path.abspath(__file__))
-lib_a78 = SchLib(os.path.join(project_dir, '7800-ym.kicad_sym'), tool=KICAD8)
+lib_a78 = SchLib(os.path.join(project_dir, '7800-ym.kicad_sym'), tool=KICAD9)
 
 # Component Instantiation
 rom = lib_mem['27C256'].copy(ref='U1', tag='YM')
