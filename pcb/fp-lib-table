@@ -1,3 +1,0 @@
-(fp_lib_table
-  (lib (name "Connector_PCBEdge")(type "KiCad")(uri "${KIPRJMOD}/Connector_PCBEdge.pretty")(options "")(descr ""))
-)
