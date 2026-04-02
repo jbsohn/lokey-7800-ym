@@ -5,17 +5,17 @@ import { Latch74HCT373 } from "./74HCT373";
 import { YM2149 } from "./YM2149";
 
 export default () => (
-  <board width="75mm" height="55mm">
+  <board width="48mm" height="67.5mm" routingDisabled>
     {/* Explicit Nets */}
     <net name="VCC" />
     <net name="GND" />
 
     {/* --- Components --- */}
 
-    {/* Atari 7800 Edge Connector */}
+    {/* Atari 7800 Edge Connector - Aligned flush to bottom center */}
     <Atari7800EdgeConnector
       name="J1"
-      pcbX={0} pcbY={22}
+      pcbX={-0.02} pcbY={-30.24}
       schX={-4} schY={0}
       connections={{
         VCC: "net.VCC",
@@ -51,10 +51,10 @@ export default () => (
       }}
     />
 
-    {/* Decoding & Latches */}
+    {/* Decoding & Latches - Left Column */}
     <GAL16V8
       name="U2"
-      pcbX={-20} pcbY={-12}
+      pcbX={-18.5} pcbY={16}
       schX={2} schY={4}
       connections={{
         VCC: "net.VCC",
@@ -75,7 +75,7 @@ export default () => (
 
     <Latch74HCT373
       name="U3"
-      pcbX={20} pcbY={-12}
+      pcbX={-18.5} pcbY={-10}
       schX={2} schY={-4}
       connections={{
         VCC: "net.VCC",
@@ -101,10 +101,10 @@ export default () => (
       }}
     />
 
-    {/* Memory & Sound */}
+    {/* Memory - Middle Column */}
     <ROM_27C256
       name="U1"
-      pcbX={-20} pcbY={8}
+      pcbX={-4} pcbY={4}
       schX={8} schY={4}
       connections={{
         VCC: "net.VCC",
@@ -138,9 +138,10 @@ export default () => (
       }}
     />
 
+    {/* Sound - Right Column */}
     <YM2149
       name="U4"
-      pcbX={20} pcbY={4}
+      pcbX={14.5} pcbY={4}
       schX={8} schY={-4}
       connections={{
         VCC: "net.VCC",
@@ -162,21 +163,23 @@ export default () => (
       }}
     />
 
-    {/* Passives - PCB Tucked tightly to IC bodies */}
-    <capacitor name="C1" capacitance="0.1uF" footprint="axial" pcbX={-32} pcbY={18} schX={4} schY={6} connections={{ pin1: "net.VCC", pin2: "net.GND" }} />
-    <capacitor name="C2" capacitance="0.1uF" footprint="axial" pcbX={-32} pcbY={-5} schX={3} schY={6} connections={{ pin1: "net.VCC", pin2: "net.GND" }} />
-    <capacitor name="C3" capacitance="0.1uF" footprint="axial" pcbX={32} pcbY={25} schX={4} schY={-6} connections={{ pin1: "net.VCC", pin2: "net.GND" }} />
-    <capacitor name="C4" capacitance="0.1uF" footprint="axial" pcbX={32} pcbY={-5} schX={3} schY={-6} connections={{ pin1: "net.VCC", pin2: "net.GND" }} />
+    {/* --- Passives (Through-hole Axial on Bottom) --- */}
+    
+    {/* Decoupling Capacitors - Positioned under ICs on the back side */}
+    <capacitor name="C1" capacitance="0.1uF" footprint="axial" layer="bottom" pcbX={-18.5} pcbY={24} pcbRotation={90} schX={4} schY={6} connections={{ pin1: "net.VCC", pin2: "net.GND" }} />
+    <capacitor name="C2" capacitance="0.1uF" footprint="axial" layer="bottom" pcbX={-18.5} pcbY={4} pcbRotation={90} schX={3} schY={6} connections={{ pin1: "net.VCC", pin2: "net.GND" }} />
+    <capacitor name="C3" capacitance="0.1uF" footprint="axial" layer="bottom" pcbX={-4} pcbY={26} pcbRotation={90} schX={4} schY={-6} connections={{ pin1: "net.VCC", pin2: "net.GND" }} />
+    <capacitor name="C4" capacitance="0.1uF" footprint="axial" layer="bottom" pcbX={14.5} pcbY={32} pcbRotation={90} schX={3} schY={-6} connections={{ pin1: "net.VCC", pin2: "net.GND" }} />
 
-    {/* Audio Section */}
-    <resistor name="R1" resistance="1k" footprint="axial" pcbX={32} pcbY={14} schX={13} schY={-3} connections={{ pin2: "net.AUDIO_MIXED" }} />
-    <resistor name="R2" resistance="1k" footprint="axial" pcbX={32} pcbY={11} schX={13} schY={-4} connections={{ pin2: "net.AUDIO_MIXED" }} />
-    <resistor name="R3" resistance="1k" footprint="axial" pcbX={32} pcbY={8} schX={13} schY={-5} connections={{ pin2: "net.AUDIO_MIXED" }} />
-    <capacitor name="C5" capacitance="10uF" footprint="axial" polarized pcbX={25} pcbY={25} schX={16} schY={-4} connections={{ pin1: "net.AUDIO_MIXED" }} />
+    {/* Audio Section - Center Gap */}
+    <resistor name="R1" resistance="1k" footprint="axial" layer="bottom" pcbX={0} pcbY={-12} pcbRotation={0} schX={13} schY={-3} connections={{ pin1: ".U4 > .ANALOG_A", pin2: "net.AUDIO_MIXED" }} />
+    <resistor name="R2" resistance="1k" footprint="axial" layer="bottom" pcbX={0} pcbY={-15} pcbRotation={0} schX={13} schY={-4} connections={{ pin1: ".U4 > .ANALOG_B", pin2: "net.AUDIO_MIXED" }} />
+    <resistor name="R3" resistance="1k" footprint="axial" layer="bottom" pcbX={0} pcbY={-18} pcbRotation={0} schX={13} schY={-5} connections={{ pin1: ".U4 > .ANALOG_C", pin2: "net.AUDIO_MIXED" }} />
+    <capacitor name="C5" capacitance="10uF" footprint="axial" polarized layer="bottom" pcbX={10} pcbY={-15} pcbRotation={90} schX={16} schY={-4} connections={{ pin1: "net.AUDIO_MIXED", pin2: ".J1 > .Exaudio" }} />
 
-    {/* Board Labels */}
-    <silkscreentext text="7800 YM" pcbX={0} pcbY={-22} fontSize={3} />
-    <silkscreentext text="v1.0" pcbX={0} pcbY={-26} fontSize={1.5} />
+    {/* Board Labels (Top Side) */}
+    <silkscreentext text="7800 YM" pcbX={-10} pcbY={-22} fontSize={3} />
+    <silkscreentext text="v1.0" pcbX={-10} pcbY={-26} fontSize={1.5} />
 
     {/* Manual Audio Traces */}
     <trace from=".U4 > .ANALOG_A" to=".R1 > .pin1" />
