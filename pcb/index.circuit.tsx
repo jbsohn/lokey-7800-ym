@@ -5,7 +5,23 @@ import { Latch74HCT373 } from "./74HCT373";
 import { YM2149 } from "./YM2149";
 
 export default () => (
-  <board width="48mm" height="67.5mm" routingDisabled>
+  <board
+    outline={[
+      { x: -24, y: 33.75 },    // Top-left
+      { x: 24, y: 33.75 },     // Top-right
+      { x: 24, y: -33.75 },    // Bottom-right
+      { x: 18.05, y: -33.75 }, // Right edge of right notch
+      { x: 18.05, y: -27 },    // Top-right of right notch
+      { x: 14.97, y: -27 },    // Top-left of right notch
+      { x: 14.97, y: -33.75 }, // Left edge of right notch
+      { x: -14.97, y: -33.75 },// Right edge of left notch
+      { x: -14.97, y: -27 },   // Top-right of left notch
+      { x: -18.05, y: -27 },   // Top-left of left notch
+      { x: -18.05, y: -33.75 },// Left edge of left notch
+      { x: -24, y: -33.75 },   // Bottom-left
+    ]}
+    routingDisabled
+  >
     {/* Explicit Nets */}
     <net name="VCC" />
     <net name="GND" />
