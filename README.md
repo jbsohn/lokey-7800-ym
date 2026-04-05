@@ -28,6 +28,12 @@ To build raw ROM images (no A78 header, good for EPROM burning), set
 make bin
 ```
 
+To clean all generated files (ROMs, temporary binaries, and GAL output):
+
+```bash
+make clean
+```
+
 ## Emulator Support
 
 Before testing on real hardware, you can verify your builds using a specialized branch of the **a7800** emulator that supports this physical YM2149 mapping:
@@ -52,8 +58,12 @@ Atari 7800 cartridges must be cryptographically signed. After building a raw
 ```bash
 7800sign -w ym2149_heartbeat_main.bin
 7800sign -t ym2149_heartbeat_main.bin
-7800sign -w ym2149_melody_vbi.bin
-7800sign -t ym2149_melody_vbi.bin
+```
+
+Alternatively, you can sign all generated `.bin` files automatically using the provided Makefile target:
+
+```bash
+make hw
 ```
 
 Important ROM footer requirement for `7800sign`:
@@ -92,18 +102,18 @@ The current GAL logic is gated by the `!RW` (Read/Write) line. This means the YM
 
 This mapping is intentional: it follows the historical precedent set by classic Atari 7800 games like **Ballblazer** and **Commando**, which mapped the **POKEY** sound chip to $4000. By mirroring this 16k "Sound Area," we ensure high compatibility with existing hardware designs and make it easier for 7800 developers to swap or supplement POKEY with the YM2149.
 
-## PCB Design Workflow (SKiDL)
+## PCB Design Workflow (tscircuit)
 
-Unlike traditional hardware projects, this laboratory uses a **Code-to-PCB** workflow. The "Source of Truth" for the schematic is not a visual diagram, but the Python source code found in `pcb/main.py`.
+Unlike traditional hardware projects, this laboratory uses a **Code-to-PCB** workflow. The "Source of Truth" for the schematic is not a visual diagram, but the React-based circuit code found in `pcb/index.circuit.tsx`.
 
-We leverage **SKiDL**, a Python library that allows us to define electronic connections programmatically. This ensures that our hardware logic is version-controllable, modular, and precisely mapped to the Atari 7800's technical specifications.
+We leverage **tscircuit**, a TypeScript framework that allows us to define electronic components and layouts using React. This ensures that our hardware logic is version-controllable, modular, and precisely mapped to the Atari 7800's technical specifications.
 
 ### Generated Schematic
 
-> **NOTE:** This SVG is a generated block diagram intended for visual reference. It is **not guaranteed to be the latest version** of the hardware logic. Always refer to `pcb/main.py` for the authoritative design.
+> **NOTE:** This PDF is a generated preview intended for visual reference. It is **not guaranteed to be the latest version** of the hardware logic. Always refer to `pcb/index.circuit.tsx` for the authoritative design.
 
-![Atari 7800 YM2149 Schematic](docs/main.png)
-[🔍 View Source (main.svg)](docs/main.svg)
+[Atari 7800 YM2149 Cartridge Schematic](pcb/schematic.pdf)
+
 
 ### Hardware Status
 
@@ -116,39 +126,31 @@ The current design includes:
 
 ### Environment Setup
 
-The PCB project requires local environment variables to point to your KiCad library locations.
+The PCB project requires **Node.js** and the **tscircuit CLI**.
 
-1. **Setup `.env`**: Copy the example template and adjust the paths to match your system (macOS defaults are provided):
+1. **Install Dependencies**: Navigate to the `pcb` directory and install the required npm packages:
 
    ```bash
-   cp pcb/env.example pcb/.env
+   cd pcb
+   npm install
    ```
 
-2. **Install Dependencies**: The build system will automatically create a virtual environment and install `skidl` and `python-dotenv` on the first run of `make pcb`. You can also trigger this manually:
+2. **Install CLI Tools**: Ensure you have the `tsci` tool installed globally to run the interactive viewer:
 
    ```bash
-   make -C pcb install
+   npm install -g tscircuit
    ```
 
 ### Build Instructions
 
-To generate the latest PCB assets (Netlist and visual SVG), ensure you have the dependencies installed in the `pcb/venv` and run:
+To live-preview the latest PCB design and footprints, run the development server:
 
 ```bash
-make pcb
+cd pcb
+npm run dev
 ```
 
-This will produce:
-
-- `pcb/main.net`: The authoritative netlist for import into KiCad.
-- `pcb/main.svg`: A visual block-diagram review of the connections.
-
-### Importing into KiCad
-
-1. Open KiCad and select **Open Project**.
-2. Open `pcb/7800-ym.kicad_pro`.
-3. Open the **PCB Editor**.
-4. Go to **File -> Import -> Netlist...** and select `pcb/main.net`.
+This will launch the `tscircuit` viewer in your browser, allowing you to inspect the schematic, PCB layout, and 3D preview in real-time.
 
 ## GAL Logic
 
@@ -156,6 +158,12 @@ This project provides two `GAL16V8` programming files for address decoding:
 
 1. **[rom.pld](gal/rom.pld)**: A simple 32KB ROM decoder. It removes the need for basic LS04/LS02 logic chips and is intended for initial hardware testing before adding the sound chip.
 2. **[rom_ym.pld](gal/rom_ym.pld)**: The full decoder. It includes the 32KB ROM decoding plus the logic required to map the YM2149 sound chip to the $4000-$7FFF address space, along with its clock and bus controls.
+
+To compile the GAL logic into a JEDEC file for programming, run:
+
+```bash
+make gal
+```
 
 ## Hardware Wiring
 
