@@ -5,7 +5,6 @@ export const ROM_27C256 = (props: ChipProps) => (
     {...props}
     footprint="dip28_w600mil"
     pinLabels={{
-      1: "VPP",
       2: "A12",
       3: "A7",
       4: "A6",

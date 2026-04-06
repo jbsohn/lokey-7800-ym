@@ -5,14 +5,13 @@ export const YM2149 = (props: ChipProps) => (
     {...props}
     footprint="dip40_w600mil"
     pinLabels={{
-      1: "VSS",
-      2: "TEST2",
+      1: "GND",
       3: "ANALOG_A",
       4: "ANALOG_B",
       22: "CLK",
-      23: "VCC",
-      24: "ANALOG_C_REF",
-      25: "VCC_ANALOG",
+      23: "RESET",
+      24: "A9",
+      25: "A8",
       27: "BDIR",
       28: "BC2",
       29: "BC1",

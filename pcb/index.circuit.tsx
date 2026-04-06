@@ -29,7 +29,7 @@ export default () => (
 
     {/* Dedicated Power Traces for stability (16 mil) */}
     <trace from=".J1 > .VCC" to=".U4 > .VCC" thickness="0.4mm" />
-    <trace from=".J1 > .GND" to=".U4 > .VSS" thickness="0.4mm" />
+    <trace from=".J1 > .GND" to=".U4 > .GND" thickness="0.4mm" />
     <trace from=".U4 > .VCC" to=".U1 > .VCC" thickness="0.4mm" />
     <trace from=".U1 > .VCC" to=".U2 > .VCC" thickness="0.4mm" />
     <trace from=".U2 > .VCC" to=".U3 > .VCC" thickness="0.4mm" />
@@ -86,7 +86,6 @@ export default () => (
         schX={8} schY={4}
         connections={{
           VCC: "net.VCC",
-          VPP: "net.VCC",
           GND: "net.GND",
           OE: "net.GND",
           CE: "net.ROM_CE",
@@ -207,10 +206,8 @@ export default () => (
           schX={8} schY={-4}
           connections={{
             VCC: "net.VCC",
-            VCC_ANALOG: "net.VCC",
             BC2: "net.VCC",
-            VSS: "net.GND",
-            ANALOG_C_REF: "net.GND",
+            GND: "net.GND",
             DA0: "net.DA0",
             DA1: "net.DA1",
             DA2: "net.DA2",
@@ -222,6 +219,9 @@ export default () => (
             CLK: "net.PHI2OUT",
             BDIR: "net.BDIR",
             BC1: "net.BC1",
+            RESET: "net.VCC",
+            A8: "net.VCC",
+            A9: "net.GND",
             ANALOG_A: "net.ANALOG_A",
             ANALOG_B: "net.ANALOG_B",
             ANALOG_C: "net.ANALOG_C",
