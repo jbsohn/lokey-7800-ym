@@ -128,16 +128,7 @@ vbi_done:
         rts
 
 write_ay:
-        ; Quad-Tap Address Latch
         sta ay_addr
-        sta ay_addr
-        sta ay_addr
-        sta ay_addr
-        
-        ; Quad-Tap Data Write
-        sty ay_data
-        sty ay_data
-        sty ay_data
         sty ay_data
         rts
 
