@@ -17,7 +17,7 @@ var psi = new ProcessStartInfo
 {
     FileName = "sigrok-cli",
     // Adjust driver if you are using something other than a generic Cypress FX2 logic analyzer
-    Arguments = "--driver fx2lafw --config samplerate=24M --samples 100000 --channels D0,D1,D2,D3 -O csv",
+    Arguments = "--driver fx2lafw --config samplerate=1M --samples 5000000 --channels D0,D1,D2,D3 -O csv",
     UseShellExecute = false,
     RedirectStandardOutput = true,
     RedirectStandardError = true,

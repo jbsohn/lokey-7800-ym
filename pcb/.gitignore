@@ -1,31 +1,29 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-venv/
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment variables
 .env
+.env.local
+.env.*.local
 
-# SKiDL / Build Outputs
-*_sklib.py
-*_skin.svg
-*.net
-*.svg
-*.log
-*.erc
-*.json
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# KiCad 8 Temporary & Backup Files
-*-backups/
-*.bak
-*.bck
-*.kicad_pcb-bak
-*.kicad_sch-bak
-*.kicad_pro-bak
-_autosave-*
-fp-info-cache
-*.lck
-*.prl
-report.txt
+# OS files
+.DS_Store
+Thumbs.db
 
-# VS Code History
-.history/
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# tscircuit cache
+.tscircuit/

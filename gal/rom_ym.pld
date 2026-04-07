@@ -49,17 +49,16 @@ PIN 18 = BDIR;
 PIN 19 = ROM_CE;
 
 /* Logic Equations */
-/* Cleaned Clock Output */
 PHI2OUT = PHI2;
 
-/* BDIR: asserted while writing to $4xxx with CPU running (HALT=1) */
-BDIR = !A15 & A14 & !RW & HALT;
+/* BDIR: High for any YM write ($4000-$4001) */
+BDIR = !A15 & A14 & !RW & HALT & PHI2;
 
-/* YM_LE: High during PHI2 on a YM write, falls with PHI2 to latch data */
+/* BC1: High ONLY for Address Latch ($4000) */
+BC1  = !A15 & A14 & !RW & !A0 & HALT & PHI2;
+
+/* YM_LE: Same timing as BDIR to capture data into the external latch */
 YM_LE = !A15 & A14 & !RW & HALT & PHI2;
-
-/* BC1: asserted ONLY when latching address ($4000 write) */
-BC1  = !A15 & A14 & !RW & !A0 & HALT;
 
 /* ROM Chip Enable: asserted (active low) when accessing upper 32KB ($8000-$FFFF) */
 !ROM_CE = A15;
