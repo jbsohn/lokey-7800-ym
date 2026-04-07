@@ -107,12 +107,9 @@ main_loop:
         
         jmp main_loop
 
-; -------------------------
-; write_ay: Address latch then Data write
-; -------------------------
 write_ay:
-        sta ay_addr         ; Latch Addr (BDIR=1, BC1=1)
-        sty ay_data         ; Write Data (BDIR=1, BC1=0)
+        sta ay_addr
+        sty ay_data
         rts
 
 ; -------------------------
