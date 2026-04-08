@@ -48,9 +48,14 @@ sign: bin
 hw: sign
 
 # GAL Logic (galette)
-gal: 
+GAL_SOURCES := gal/rom.pld gal/rom_ym.pld
+GAL_JEDECS := $(GAL_SOURCES:.pld=.jed)
+
+gal: $(GAL_JEDECS)
 	@command -v galette >/dev/null || { echo "Missing galette in PATH"; exit 1; }
-	galette $(GAL_SOURCE)
+
+%.jed: %.pld
+	galette $<
 
 
 # YM Tooling (C# Toolbox)

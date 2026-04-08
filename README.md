@@ -155,18 +155,26 @@ npm run dev
 
 This will launch the `tscircuit` viewer in your browser, allowing you to inspect the schematic, PCB layout, and 3D preview in real-time.
 
-## GAL Logic
+## GAL Logic (galette)
 
-This project provides two `GAL16V8` programming files for address decoding:
+This project uses **galette**, an open-source GAL assembler, for its active development workflow. This allows for a completely open-source toolchain on Linux and macOS without requiring legacy Windows-only tools like WinCUPL.
 
-1. **[rom.pld](gal/rom.pld)**: A simple 32KB ROM decoder. It removes the need for basic LS04/LS02 logic chips and is intended for initial hardware testing before adding the sound chip.
-2. **[rom_ym.pld](gal/rom_ym.pld)**: The full decoder. It includes the 32KB ROM decoding plus the logic required to map the YM2149 sound chip to the $4000-$7FFF address space, along with its clock and bus controls.
+### Logic Files
+
+1. **[gal/rom.pld](gal/rom.pld)**: A simple 32KB ROM decoder in `galette` format.
+2. **[gal/rom_ym.pld](gal/rom_ym.pld)**: The full YM2149 address decoder in `galette` format.
 
 To compile the GAL logic into a JEDEC file for programming, run:
 
 ```bash
 make gal
 ```
+
+### WinCUPL Archive (Golden Reference)
+
+The original WinCUPL-formatted source files are preserved in the **[gal/wincupl/](gal/wincupl/)** directory. 
+
+During development, these served as the "Source of Truth" to verify that the `galette` port produced 100% bit-for-bit identical logic. They remain in the repository for archival purposes and for users who prefer to use the official Microchip/Atmel WinCUPL environment.
 
 ## Hardware Wiring
 
