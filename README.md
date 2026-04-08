@@ -1,20 +1,24 @@
 # Lokey 7800 YM
 
-## **[SUCCESS] STABLE ALPHA / "IT ACTUALLY WORKS!"**
+## What is this project?
 
-> This laboratory has successfully graduated from "Unstable Alpha" to **Stable Alpha**. We have officially achieved emulator-perfect sound on a breadboard. (Beta status is reserved for the first printed PCB!) 
-
-### Breadboard "Lab"
-![Atari 7800 YM2149 Breadboard Lab](docs/7800-ym-lab.jpg)
-
-### Cartridge Prototype
-![Atari 7800 YM2149 Cartridge Prototype](docs/prototype.jpg)
+The goal is to provide a stable, low-cost (~$2 USD) bridge between the Atari 7800 and the Atari ST. By leveraging the YM2149 PSG—or modern clones like the **KC89C72** (used in this project) which are still in production—we can bring rich, standardized three-channel sound to the 7800 with 100% Atari ST asset compatibility. Original YM2149 chips remain widely available as used or New-Old-Stock (NOS) parts at similar price points.
 
 This repository is a playground for experiments with the Atari 7800 using a YM2149 on a cartridge.
 
-## Why this project?
+## Status: **[SUCCESS] STABLE ALPHA / "IT ACTUALLY WORKS!"**
 
-The goal is to provide a stable, low-cost (~$2 USD) bridge between the Atari 7800 and the Atari ST. By leveraging the YM2149 PSG—or modern clones like the **KC89C72** (used in this project's lab) which are still in production—we can bring rich, standardized three-channel sound to the 7800 with 100% Atari ST asset compatibility. Original YM2149 chips remain widely available as used or New-Old-Stock (NOS) parts at similar price points.
+> This project has successfully graduated from its early breadboard phase to **Stable Alpha**. We have officially achieved emulator-perfect sound on real hardware. (Beta status is reserved for the first professional PCB run!)
+
+### Current Working Prototype (Cartridge)
+
+![Atari 7800 YM2149 Cartridge Prototype](docs/prototype.jpg)
+
+### Early Proof of Concept (Breadboard)
+
+*Note: This version served as the initial validation and is no longer maintained.*
+
+![Atari 7800 YM2149 Early Proof of Concept](docs/7800-ym-prototype.jpg)
 
 ## Build
 
@@ -95,7 +99,7 @@ For real hardware, start with **ym2149_heartbeat_main.bin**. It is our **Stable 
 
 ## Memory Mapping & POKEY Compatibility
 
-The YM2149 sound card in this lab is mapped to the **$4000–$7FFF** range (16 KB).
+The YM2149 sound card is mapped to the **$4000–$7FFF** range (16 KB).
 
 ### Write-Only Mirroring (Theoretical)
 
@@ -107,7 +111,7 @@ This mapping is intentional: it follows the historical precedent set by classic 
 
 ## PCB Design Workflow (tscircuit)
 
-Unlike traditional hardware projects, this laboratory uses a **Code-to-PCB** workflow. The "Source of Truth" for the schematic is not a visual diagram, but the React-based circuit code found in `pcb/index.circuit.tsx`.
+Unlike traditional hardware projects, this project uses a **Code-to-PCB** workflow. The "Source of Truth" for the schematic is not a visual diagram, but the React-based circuit code found in `pcb/index.circuit.tsx`.
 
 We leverage **tscircuit**, a TypeScript framework that allows us to define electronic components and layouts using React. This ensures that our hardware logic is version-controllable, modular, and precisely mapped to the Atari 7800's technical specifications.
 
@@ -116,7 +120,6 @@ We leverage **tscircuit**, a TypeScript framework that allows us to define elect
 > **NOTE:** This PDF is a generated preview intended for visual reference. It is **not guaranteed to be the latest version** of the hardware logic. Always refer to `pcb/index.circuit.tsx` for the authoritative design.
 
 [Atari 7800 YM2149 Cartridge Schematic](pcb/schematic.pdf)
-
 
 ### Hardware Status
 
@@ -155,14 +158,14 @@ npm run dev
 
 This will launch the `tscircuit` viewer in your browser, allowing you to inspect the schematic, PCB layout, and 3D preview in real-time.
 
-## GAL Logic (galette)
+## GAL Logic ([galette](https://github.com/simon-frankau/galette))
 
-This project uses **galette**, an open-source GAL assembler, for its active development workflow. This allows for a completely open-source toolchain on Linux and macOS without requiring legacy Windows-only tools like WinCUPL.
+This project uses **[galette](https://github.com/simon-frankau/galette)**, an open-source GAL assembler, for its active development workflow. This allows for a completely open-source toolchain on Linux and macOS without requiring legacy Windows-only tools like WinCUPL.
 
 ### Logic Files
 
-1. **[gal/rom.pld](gal/rom.pld)**: A simple 32KB ROM decoder in `galette` format.
-2. **[gal/rom_ym.pld](gal/rom_ym.pld)**: The full YM2149 address decoder in `galette` format.
+1. **[gal/rom.pld](gal/rom.pld)**: A simple 32KB ROM decoder in **[galette](https://github.com/simon-frankau/galette)** format.
+2. **[gal/rom_ym.pld](gal/rom_ym.pld)**: The full YM2149 address decoder in **[galette](https://github.com/simon-frankau/galette)** format.
 
 To compile the GAL logic into a JEDEC file for programming, run:
 
@@ -172,9 +175,9 @@ make gal
 
 ### WinCUPL Archive (Golden Reference)
 
-The original WinCUPL-formatted source files are preserved in the **[gal/wincupl/](gal/wincupl/)** directory. 
+The original WinCUPL-formatted source files are preserved in the **[gal/wincupl/](gal/wincupl/)** directory.
 
-During development, these served as the "Source of Truth" to verify that the `galette` port produced 100% bit-for-bit identical logic. They remain in the repository for archival purposes and for users who prefer to use the official Microchip/Atmel WinCUPL environment.
+During development, these served as the "Source of Truth" to verify that the **[galette](https://github.com/simon-frankau/galette)** port produced 100% bit-for-bit identical logic. They remain in the repository for archival purposes and for users who prefer to use the official Microchip/Atmel WinCUPL environment.
 
 ## Hardware Wiring
 
@@ -257,7 +260,7 @@ A diagnostic C# script used to validate the raw physical signals coming off the 
 
 ### `tools/ValidateGalSignals.cs` & `tools/ValidateLatchEnable.cs`
 
-Advanced diagnostics for stabilized timing. These tools use 2MHz sampling to detect "shattered" pulses and mid-cycle address bus noise. 
+Advanced diagnostics for stabilized timing. These tools use 2MHz sampling to detect "shattered" pulses and mid-cycle address bus noise.
 
 - **Validation**: Ensures `YM_LE`, `BDIR`, and `BC1` only fall when `PHI2` falls.
 - **BC1 Monitor**: Confirms the GAL is correctly identifying `A0=0` for register selection.
@@ -283,6 +286,7 @@ Check out the current state of tests running on the dev board:
 ## Acknowledgements & Credits
 
 - **Karri Kaksonen (karrika)**: For the excellent [Otaku-flash](https://github.com/karrika/Otaku-flash) project. We have integrated the **Stable Alpha** Atari 7800 cartridge footprints, symbols, and professional design rules from this MIT-licensed repository.
+- **Simon Frankau ([galette](https://github.com/simon-frankau/galette))**: For the open-source **galette** GAL assembler. It provides a modern, cross-platform toolchain that saved us from the Windows VM nightmare of WinCUPL. Thanks for keeping our development environment in the 21st century!
 - **Dan Boris (AtariHQ)**: For the indispensable [7800 Cartridge Technical Specifications](https://atarihq.com/danb/7800cart/a7800cart.shtml) and reference diagrams that made this hardware mapping possible.
 - **Arnaud Carré (Leonard/OXG)**: For the excellent [StSound](https://github.com/arnaud-carre/StSound) project. The `samples/` directory contains melodic assets sourced from this project for hardware testing.
 - **The Atari Community**: We are grateful to the dedicated fans keeping the 16-bit and 8-bit flames alive through archival and homebrew development.
@@ -290,7 +294,7 @@ Check out the current state of tests running on the dev board:
 ## Future Plans & Extensibility
 
 - **Hardware Roadmap**: Our MVP (Minimum Viable Project) focus is a stable **32KB ROM (27C256)** that plays music reliably on real hardware. Future revisions will expand compatibility to support all **28-pin ROMs**, eventually moving to **32-pin ROMs** and more complex bank-switching versions.
-- **YM2 as Canonical Source**: We have established **YM2** as the preferred "raw" source format for incoming Atari ST data. Its lack of metadata overhead and predictable register-interleaving makes it the perfect baseline for future compression research.
+- **YM2 as Canonical Source**: We have established **YM2** as the preferred "raw" source format for incoming Atari ST data. Its logic overhead and predictable register-interleaving makes it the perfect baseline for future compression research.
 - **Advanced Compression**: Future research will explore **RLE (Run-Length Encoding)** and custom **Bitpacking** (similar to VGM or YM-Pro formats) to squeeze minutes of high-fidelity music into standard 32KB/48KB 7800 banksets.
 - **I/O Port Logging**: The YM2149 I/O ports provide 16 additional lines of communication. We plan to implement a high-speed "Diagnostic Logging" system to stream real-time debug data back from the 7800 to a host machine.
 - **Enhanced Interfacing**: Using the spare ports for external controllers or status LEDs to assist in hardware bring-up.

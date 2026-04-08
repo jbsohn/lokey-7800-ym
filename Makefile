@@ -1,4 +1,4 @@
-# Atari 7800 YM2149 Lab Makefile
+# Atari 7800 YM2149 Project Makefile
 
 # Find all 6502 assembly sources
 ASM_SOURCES := $(wildcard src/ym2149_*.asm)
@@ -17,7 +17,7 @@ GAL_SOURCE := gal/rom_ym.pld
 all: a78
 
 help:
-	@echo "Laboratory Targets:"
+	@echo "Build Targets:"
 	@echo "  make a78           - Build .a78 ROMs for all ASM sources"
 	@echo "  make bin           - Build headerless .bin ROMs"
 	@echo "  make hw            - Build and sign .bin ROMs for real hardware"
