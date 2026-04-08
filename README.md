@@ -349,6 +349,34 @@ From [AtariHQ](https://atarihq.com/danb/7800cart/a7800cart.shtml):
 | **13** | Q2 (Data D2 - Latch Pin 7) | **16** | Q4 (Data D4 - Latch Pin 13) |
 | **14** | GND (Ground) | **15** | Q3 (Data D3 - Latch Pin 8) |
 
+### AY-3-8910 / YM2149 PSG (40-Pin)
+
+| Pin (Left) | Signal | Pin (Right) | Signal |
+| :--- | :--- | :--- | :--- |
+| **1** | VSS (Ground) | **40** | VCC (+5V) |
+| **2** | N.C. | **39** | TEST 1 |
+| **3** | Analog Channel B | **38** | Analog Channel C |
+| **4** | Analog Channel A | **37** | DA0 (Data/Address Bit 0) |
+| **5** | N.C. | **36** | DA1 (Data/Address Bit 1) |
+| **6** | IOB7 | **35** | DA2 (Data/Address Bit 2) |
+| **7** | IOB6 | **34** | DA3 (Data/Address Bit 3) |
+| **8** | IOB5 | **33** | DA4 (Data/Address Bit 4) |
+| **9** | IOB4 | **32** | DA5 (Data/Address Bit 5) |
+| **10** | IOB3 | **31** | DA6 (Data/Address Bit 6) |
+| **11** | IOB2 | **30** | DA7 (Data/Address Bit 7) |
+| **12** | IOB1 | **29** | BC1 (Bus Control 1) |
+| **13** | IOB0 | **28** | BC2 (Bus Control 2) |
+| **14** | IOA7 | **27** | BDIR (Bus Direction) |
+| **15** | IOA6 | **26** | SEL (YM2149 Clock Div Select) |
+| **16** | IOA5 | **25** | A8 (Address 8 - Tie High) |
+| **17** | IOA4 | **24** | !A9 (Address 9 - Tie Low) |
+| **18** | IOA3 | **23** | !RESET (Reset - Tie High) |
+| **19** | IOA2 | **22** | CLOCK (Master Clock Input) |
+| **20** | IOA1 | **21** | IOA0 |
+
+**Note:** On the YM2149, Pin 26 (**SEL**) acts as an internal clock divider. When tied **Low**, the master clock is divided by 2. When tied **High**, the clock is used as-is. On the original AY-3-8910, this pin is part of the bus control logic.
+
+
 ## AI Assistance
 
 This project was developed with assistance from AI. For the author, AI has been a "force multiplier"—making it possible to tackle long-held "I've always wanted to do this" projects within the limited hours of evenings and weekends.
