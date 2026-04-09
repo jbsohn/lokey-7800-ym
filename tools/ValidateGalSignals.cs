@@ -28,16 +28,17 @@ int countYMLE = 0, countPHI2OUT = 0, countBC1 = 0, countBDIR = 0;
 int lastYMLE = -1, lastPHI2OUT = -1, lastBC1 = -1, lastBDIR = -1;
 int samplesProcessed = 0;
 
-try 
+try
 {
     using var process = new Process { StartInfo = psi };
-    process.OutputDataReceived += (s, e) => {
+    process.OutputDataReceived += (s, e) =>
+    {
         if (string.IsNullOrWhiteSpace(e.Data)) return;
         var line = e.Data.Trim();
         if (line.StartsWith("D") || line.StartsWith("l")) return; // Skip headers
 
         var parts = line.Split(',');
-        if (parts.Length >= 4 && 
+        if (parts.Length >= 4 &&
             int.TryParse(parts[0], out int d0) &&
             int.TryParse(parts[1], out int d1) &&
             int.TryParse(parts[2], out int d2) &&

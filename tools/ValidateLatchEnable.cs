@@ -30,16 +30,17 @@ int countPHI2 = 0, countLE = 0, countBDIR = 0, countBC1 = 0;
 int lastLE = -1, lastBDIR = -1, lastBC1 = -1, lastPHI2 = -1;
 int samplesProcessed = 0;
 
-try 
+try
 {
     using var process = new Process { StartInfo = psi };
-    process.OutputDataReceived += (s, e) => {
+    process.OutputDataReceived += (s, e) =>
+    {
         if (string.IsNullOrWhiteSpace(e.Data)) return;
         var line = e.Data.Trim();
-        if (line.StartsWith("D") || line.StartsWith("l")) return; 
+        if (line.StartsWith("D") || line.StartsWith("l")) return;
 
         var parts = line.Split(',');
-        if (parts.Length >= 4 && 
+        if (parts.Length >= 4 &&
             int.TryParse(parts[0], out int d0) &&  // PHI2
             int.TryParse(parts[1], out int d1) &&  // YM_LE
             int.TryParse(parts[2], out int d2) &&  // BDIR
@@ -50,31 +51,38 @@ try
             if (lastLE == 0 && d1 == 1) countLE++;
             if (lastBDIR == 0 && d2 == 1) countBDIR++;
             if (lastBC1 == 0 && d3 == 1) countBC1++;
-            
+
             // Timing Check: LE should only fall when PHI2 falls
-            if (lastLE == 1 && d1 == 0) {
-               if (d0 == 1) {
-                   Console.WriteLine($"[WARN] YM_LE (Latch Enable) fell while PHI2 was still high! (Sample {samplesProcessed})");
-               }
+            if (lastLE == 1 && d1 == 0)
+            {
+                if (d0 == 1)
+                {
+                    Console.WriteLine($"[WARN] YM_LE (Latch Enable) fell while PHI2 was still high! (Sample {samplesProcessed})");
+                }
             }
 
             // Timing Check: BDIR should only fall when PHI2 falls
-            if (lastBDIR == 1 && d2 == 0) {
-               if (d0 == 1) {
-                   Console.WriteLine($"[WARN] BDIR (Bus Direction) fell while PHI2 was still high! (Sample {samplesProcessed})");
-               }
+            if (lastBDIR == 1 && d2 == 0)
+            {
+                if (d0 == 1)
+                {
+                    Console.WriteLine($"[WARN] BDIR (Bus Direction) fell while PHI2 was still high! (Sample {samplesProcessed})");
+                }
             }
 
             // Timing Check: BC1 should only fall when PHI2 falls
-            if (lastBC1 == 1 && d3 == 0) {
-               if (d0 == 1) {
-                   Console.WriteLine($"[WARN] BC1 (Bus Control 1) fell while PHI2 was still high! (Sample {samplesProcessed})");
-               }
+            if (lastBC1 == 1 && d3 == 0)
+            {
+                if (d0 == 1)
+                {
+                    Console.WriteLine($"[WARN] BC1 (Bus Control 1) fell while PHI2 was still high! (Sample {samplesProcessed})");
+                }
             }
 
             // Timing Check: BDIR/BC1 should be stable throughout LE high
-            if (d1 == 1 && (lastBDIR != d2 || lastBC1 != d3)) {
-               // Console.WriteLine($"[INFO] BDIR/BC1 stable during LE pulse.");
+            if (d1 == 1 && (lastBDIR != d2 || lastBC1 != d3))
+            {
+                // Console.WriteLine($"[INFO] BDIR/BC1 stable during LE pulse.");
             }
 
             lastPHI2 = d0; lastLE = d1; lastBDIR = d2; lastBC1 = d3;
@@ -94,10 +102,13 @@ try
     Console.WriteLine($"BDIR Transitions: {countBDIR:N0}");
     Console.WriteLine($"BC1 Transitions : {countBC1:N0}");
 
-    if (countLE == 0) {
+    if (countLE == 0)
+    {
         Console.WriteLine("\n[FAILURE] No YM_LE pulses detected. The Latch is never opening!");
         Console.WriteLine("Check Connection: GAL Pin 15 -> Latch Pin 11.");
-    } else {
+    }
+    else
+    {
         Console.WriteLine("\n[SUCCESS] YM_LE is pulsing. If data is still stuck, check Latch Pin 1 (OE).");
     }
 }

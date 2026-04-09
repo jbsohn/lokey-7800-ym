@@ -31,9 +31,9 @@ var psi = new ProcessStartInfo
 };
 
 int countCLK = 0, countBDIR = 0, countBC1 = 0;
-int countD0 = 0, countD1 = 0, countD2 = 0, countD3 = 0, countD4 = 0;
+int countD0 = 0, countD1 = 0;
 int lastCLK = -1, lastBDIR = -1, lastBC1 = -1;
-int lastD0 = -1, lastD1 = -1, lastD2 = -1, lastD3 = -1, lastD4 = -1;
+int lastD3 = -1, lastD4 = -1;
 int samplesProcessed = 0;
 
 // Register names for decoding
@@ -44,16 +44,17 @@ var regNames = new Dictionary<int, string> {
     { 12, "Env High" }, { 13, "Env Shape" }, { 14, "Port A" }, { 15, "Port B" }
 };
 
-try 
+try
 {
     using var process = new Process { StartInfo = psi };
-    process.OutputDataReceived += (s, e) => {
+    process.OutputDataReceived += (s, e) =>
+    {
         if (string.IsNullOrWhiteSpace(e.Data)) return;
         var line = e.Data.Trim();
         if (line.StartsWith("D") || line.StartsWith("l")) return; // Skip headers
 
         var parts = line.Split(',');
-        if (parts.Length >= 8 && 
+        if (parts.Length >= 8 &&
             int.TryParse(parts[0], out int d0) &&  // CLK
             int.TryParse(parts[1], out int d1) &&  // BDIR
             int.TryParse(parts[2], out int d2) &&  // BC1
@@ -67,20 +68,22 @@ try
             if (lastCLK != -1 && d0 == 1 && lastCLK == 0) countCLK++;
             if (lastBDIR != -1 && d1 == 1 && lastBDIR == 0) countBDIR++;
             if (lastBC1 != -1 && d2 == 1 && lastBC1 == 0) countBC1++;
-            
+
             // Data Bits
             if (lastD4 != -1 && d4 == 1 && lastD4 == 0) countD0++;
             if (lastD3 != -1 && d3 == 1 && lastD3 == 0) countD1++;
 
             // Real-time Decoder: Look for Latch Address (BDIR=1, BC1=1)
-            if (d1 == 1 && d2 == 1 && (lastBDIR == 0 || lastBC1 == 0)) {
+            if (d1 == 1 && d2 == 1 && (lastBDIR == 0 || lastBC1 == 0))
+            {
                 int regIdx = (d4 << 3) | (d5 << 2) | (d6 << 1) | d7;
                 string name = regNames.ContainsKey(regIdx) ? regNames[regIdx] : "Unknown";
                 Console.WriteLine($"[LATCH] Register {regIdx:X} ({name})");
             }
-            
+
             // Real-time Decoder: Look for Write Data (BDIR=1, BC1=0)
-            if (d1 == 1 && d2 == 0 && (lastBDIR == 0 || lastBC1 == 1)) {
+            if (d1 == 1 && d2 == 0 && (lastBDIR == 0 || lastBC1 == 1))
+            {
                 int val = (d3 << 4) | (d4 << 3) | (d5 << 2) | (d6 << 1) | d7;
                 Console.WriteLine($"[WRITE] Value: ${val:X2} (%{Convert.ToString(val, 2).PadLeft(5, '0')})");
             }
