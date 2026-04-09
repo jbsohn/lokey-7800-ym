@@ -10,6 +10,18 @@ This repository is a playground for experiments with the Atari 7800 using a YM21
 
 > This project has successfully graduated from its early breadboard phase to **Stable Alpha**. We have officially achieved emulator-perfect sound on real hardware. (Beta status is reserved for the first professional PCB run!)
 
+### Feature Demo: The "ANCOOL1" Stress Test
+
+The video below shows the 7800 playing a full 92-second capture of the "ANCOOL1" track. This served as our stress test: by filling **96% of a single 32KB ROM bank** with a bitmask-compressed stream, we have proven the stability of the GAL address decoding, latch, and the efficiency of our 6502 playback engine.
+
+> **Note on "Boot Interference":** You may notice some minor PSG noise/static during the initial boot sequence. This is a known hardware quirk we are still smoothing out—though we're half-tempted to leave it in for that authentic "hacker" aesthetic!
+
+**Comparison:** See the [original Atari ST Demo](https://www.youtube.com/watch?v=oC4D_XVIZwQ) from which this track was captured to hear how the 7800 compares to the 16-bit original.
+
+Click below to see it running on **real 7800 hardware**:
+
+[![ANCOOL1 Stress Test on Atari 7800 Hardware](https://img.youtube.com/vi/LWzkfaaal2E/0.jpg)](https://www.youtube.com/shorts/LWzkfaaal2E)
+
 ### Current Working Prototype (Cartridge)
 
 ![Atari 7800 YM2149 Cartridge Prototype](docs/prototype.jpg)
@@ -40,6 +52,14 @@ To clean all generated files (ROMs, temporary binaries, and GAL output):
 ```bash
 make clean
 ```
+
+### Quick Start (Emulator)
+
+You can download and run our latest verified music demo directly in the emulator:
+
+- **Download**: [ym2149_player_ancool.a78](docs/ym2149_player_ancool.a78) (92-second bitmask stream)
+
+This ROM uses the specialized physical mapping described below.
 
 ## Emulator Support
 
@@ -275,6 +295,16 @@ This is our **Stable Alpha** baseline. It verified that:
 
 **Tempo**: 1.0 seconds per note (Ideal for hardware verification).
 
+### The "Software Heartbeat"
+
+You may notice the background color flashing rapidly during our demos. This is an intentional **Software Heartbeat**. In bare-metal development without a debugger, this serves as our primary diagnostic tool:
+
+- **Flashing**: The 6502 is alive and successfully executing the main loop.
+- **Frozen**: The system has crashed or is stuck in an infinite loop.
+- **Consistent Cycle**: Confirms our VBI/Delay timing is hitting the expected 50Hz/60Hz targets.
+
+For this "Lab" project, we've kept this heartbeat active to prove that the music playback is leaving plenty of CPU "breathing room" for future game logic. In fact, this diagnostic proved its worth dozens of times during early development, providing the only visual indicator that the code had locked up before we stabilized the bus timing!
+
 ### Hardware Tests in Action
 
 Check out the current state of tests running on the dev board:
@@ -375,7 +405,6 @@ From [AtariHQ](https://atarihq.com/danb/7800cart/a7800cart.shtml):
 | **20** | IOA1 | **21** | IOA0 |
 
 **Note:** On the YM2149, Pin 26 (**SEL**) acts as an internal clock divider. When tied **Low**, the master clock is divided by 2. When tied **High**, the clock is used as-is. On the original AY-3-8910, this pin is part of the bus control logic.
-
 
 ## AI Assistance
 
