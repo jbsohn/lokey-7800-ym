@@ -12,10 +12,15 @@ ay_data    = $4001
 background = $0020
 
 ; Zero Page
-music_ptr  = $80 ; 16-bit pointer to current stream position
-frame_cnt  = $82 ; 16-bit frame counter
-vbi_div    = $84
+music_ptr  = $80 ; 16-bit pointer to current compressed frame
+frame_cnt  = $82 ; 16-bit total frame counter
+pat_frames = $84 ; 8-bit frames remaining in current pattern
+seq_idx    = $85 ; 8-bit index into sequence
 tmp_mask   = $86 ; 16-bit mask temporary storage
+pat_table  = $88 ; 16-bit pointer to offset table
+pat_base   = $8a ; 16-bit pointer to patterns start
+seq_base   = $8c ; 16-bit pointer to sequence start
+pat_size   = $8e ; 8-bit frames per pattern
 
 ; Constants
 NUM_REGS   = 14
@@ -37,7 +42,7 @@ reset:
         ldx #$ff
         txs
 
-        ; Power-on Delay (For hardware stability)
+        ; Power-on Delay
         ldx #$00
         ldy #$00
 p_1:    dex
@@ -46,15 +51,8 @@ p_1:    dex
         bne p_1
 
         ; 1. Hardware Initialization
-        lda #<MusicData
-        sta music_ptr
-        lda #>MusicData
-        sta music_ptr+1
+        jsr init_music
         
-        lda #0
-        sta frame_cnt
-        sta frame_cnt+1
-
         ; Clear YM Registers
         ldx #NUM_REGS-1
 .clear:
@@ -71,27 +69,100 @@ main_loop:
         jmp main_loop
 
 ; ---------------------------------------------------------
-; Play a single compressed frame to the YM2149
+; Initialize Music Pointers from Header
 ; ---------------------------------------------------------
-play_frame:
-        ; Check if we reached the end
-        lda frame_cnt+1
-        cmp #>MAX_FRAMES
-        bne .do_play
-        lda frame_cnt
-        cmp #<MAX_FRAMES
-        bcc .do_play
-        
-        ; Loop back to start
-        lda #<MusicData
-        sta music_ptr
-        lda #>MusicData
-        sta music_ptr+1
+init_music:
         lda #0
         sta frame_cnt
         sta frame_cnt+1
+        sta seq_idx
+        sta pat_frames ; Force new pattern fetch
+
+        lda MusicData
+        sta pat_size
+        
+        ; seq_base = MusicData + 3
+        clc
+        lda #<MusicData
+        adc #3
+        sta seq_base
+        lda #>MusicData
+        adc #0
+        sta seq_base+1
+
+        ; pat_table = seq_base + seq_len
+        clc
+        lda seq_base
+        adc MusicData+2 ; seq_len
+        sta pat_table
+        lda seq_base+1
+        adc #0
+        sta pat_table+1
+
+        ; pat_base = pat_table + num_patterns * 2
+        lda MusicData+1 ; num_patterns
+        asl ; * 2
+        tay ; Save low byte of (num_patterns * 2) in Y
+        lda #0
+        rol ; Get carry from asl
+        tax ; Save high byte of (num_patterns * 2) in X
+        
+        clc
+        tya
+        adc pat_table
+        sta pat_base
+        txa
+        adc pat_table+1
+        sta pat_base+1
+        rts
+
+; ---------------------------------------------------------
+; Play a single compressed frame
+; ---------------------------------------------------------
+play_frame:
+        ; Check if we reached the end of the song
+        lda frame_cnt+1
+        cmp #>MAX_FRAMES
+        bne .check_pattern
+        lda frame_cnt
+        cmp #<MAX_FRAMES
+        bcc .check_pattern
+        
+        jsr init_music
+
+.check_pattern:
+        lda pat_frames
+        bne .do_play
+        
+        ; Fetch next pattern from sequence
+        ldy seq_idx
+        lda (seq_base),y
+        inc seq_idx
+        
+        ; Calculate offset in pat_table
+        asl ; index * 2
+        tay
+        lda (pat_table),y
+        sta music_ptr
+        iny
+        lda (pat_table),y
+        sta music_ptr+1
+        
+        ; Add pat_base to music_ptr
+        clc
+        lda music_ptr
+        adc pat_base
+        sta music_ptr
+        lda music_ptr+1
+        adc pat_base+1
+        sta music_ptr+1
+        
+        lda pat_size
+        sta pat_frames
 
 .do_play:
+        dec pat_frames
+
         ; 1. Read Mask (2 bytes)
         ldy #0
         lda (music_ptr),y
