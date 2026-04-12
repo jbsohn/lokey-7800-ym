@@ -2,14 +2,19 @@
 
 # Find all 6502 assembly sources
 ASM_SOURCES := $(wildcard src/ym2149_*.asm)
-ASM_BASENAMES := $(notdir $(ASM_SOURCES))
-BIN_OUTPUTS := $(ASM_BASENAMES:.asm=.bin)
-A78_OUTPUTS := $(ASM_BASENAMES:.asm=.a78)
+# Find all YM sources in src to ensure they are converted
+YM_SOURCES := $(wildcard src/*.ym) $(wildcard src/*.YM)
+BIN_FROM_YM := $(YM_SOURCES:.ym=.bin)
+BIN_FROM_YM := $(BIN_FROM_YM:.YM=.bin)
+
+BIN_OUTPUTS := $(ASM_SOURCES:.asm=.bin)
+A78_OUTPUTS := $(ASM_SOURCES:.asm=.a78)
 
 # Tools
 SIGN_TOOL := /home/john/7800AsmDevKit/7800sign
 DASM_FLAGS := -Isrc
-YM_TOOL    := tools/ym-tool.sh
+YM2BIN     := tools/YmToBin.cs
+DOTNET_SCRIPT := dotnet script
 GAL_SOURCE := gal/rom_ym.pld
 
 .PHONY: all help a78 bin sign hw gal clean process-test process-stress
@@ -26,15 +31,16 @@ help:
 	@echo "  make process-stress - Generate test1.bin stress test (C# Tool)"
 	@echo "  make clean         - Nuke all generated files"
 
-a78: $(A78_OUTPUTS)
+# Ensure YM bins are created before assembly
+a78: $(BIN_FROM_YM) $(A78_OUTPUTS)
 
-bin: $(BIN_OUTPUTS)
+bin: $(BIN_FROM_YM) $(BIN_OUTPUTS)
 
-# Pattern rules for DASM
-%.a78: src/%.asm src/a78_ym2149_header.asm
+# Pattern rules for DASM (keeps output in src/)
+src/%.a78: src/%.asm src/a78_ym2149_header.asm
 	dasm $< $(DASM_FLAGS) -f3 -o$@
 
-%.bin: src/%.asm src/a78_ym2149_header.asm
+src/%.bin: src/%.asm src/a78_ym2149_header.asm
 	dasm $< $(DASM_FLAGS) -Dbuild_with_header=0 -f3 -o$@
 
 # Signing for real hardware
@@ -58,17 +64,35 @@ gal: $(GAL_JEDECS)
 	galette $<
 
 
-# YM Tooling (C# Toolbox)
-process-test: $(YM_TOOL)
-	$(YM_TOOL) process --test ym_test_data.bin
+# Specific rule for large songs to fit in 32K
+src/enchant1.bin: src/enchant1.ym $(YM2BIN)
+	$(DOTNET_SCRIPT) $(YM2BIN) $< $@ 65535 2
 
-process-stress: $(YM_TOOL)
-	$(YM_TOOL) stress test1.bin
+# Pattern rule to convert any .ym file in src/ to .bin
+src/%.bin: src/%.ym $(YM2BIN)
+	$(DOTNET_SCRIPT) $(YM2BIN) $< $@
+
+src/%.bin: src/%.YM $(YM2BIN)
+	$(DOTNET_SCRIPT) $(YM2BIN) $< $@
+
+# Pattern rule to convert any .ym file in samples/ to .bin
+src/%.bin: samples/%.ym $(YM2BIN)
+	$(DOTNET_SCRIPT) $(YM2BIN) $< $@
+
+src/%.bin: samples/%.YM $(YM2BIN)
+	$(DOTNET_SCRIPT) $(YM2BIN) $< $@
+
+process-test: $(YM2BIN)
+	$(DOTNET_SCRIPT) $(YM2BIN) samples/Scout.ym src/ym_test_data.bin
+
+process-stress: $(YM2BIN)
+	$(DOTNET_SCRIPT) $(YM2BIN) samples/Scout.ym src/test1.bin
 
 # Legacy targets for compatibility
-test1.bin: process-stress
-ym_test_data.bin: process-test
+src/test1.bin: process-stress
+src/ym_test_data.bin: process-test
 
 clean:
-	rm -f $(A78_OUTPUTS) $(BIN_OUTPUTS) test1.bin ym_test_data.bin
+	rm -f src/*.a78 src/*.bin src/*.yminc src/*.inc
+	rm -f samples/*.bin samples/*.yminc samples/*.inc
 	rm -f gal/*.jed gal/*.chp gal/*.pin gal/*.fus gal/*.pdf gal/*.sr gal/*.sim gal/*.abs

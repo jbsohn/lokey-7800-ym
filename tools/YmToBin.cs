@@ -1,5 +1,6 @@
 #!/usr/bin/env dotnet-script
 using System.Diagnostics;
+using System.Linq;
 
 // YM to Atari 7800 Binary Converter (Pattern-Based)
 // ------------------------------------------------
@@ -24,20 +25,31 @@ public class YMConverter
 {
     private const int NumRegisters = 14;
     private const double Atari7800Clock = 1.792000;
-    private const int CyclesPerYCycle = 1280; 
     private const int DefaultPatternSize = 64;
 
     public static int Run(string[] args)
     {
-        if (args.Length < 2)
+        if (args.Length < 1)
         {
-            Console.WriteLine("Usage: dotnet script YM2ToBin.cs <input.ym> <output.bin> [max_frames] [pattern_size] [step]");
+            Console.WriteLine("Usage: dotnet script YmToBin.cs <input.ym> [output.bin] [max_frames] [pattern_size] [step] [-hz <value>]");
             return 1;
         }
 
+        // Parse -hz <value> if it exists
+        int? overrideHz = null;
+        var argList = args.ToList();
+        int hzIdx = argList.IndexOf("-hz");
+        if (hzIdx != -1 && hzIdx + 1 < argList.Count)
+        {
+            overrideHz = int.Parse(argList[hzIdx + 1]);
+            argList.RemoveAt(hzIdx + 1);
+            argList.RemoveAt(hzIdx);
+        }
+        args = argList.ToArray();
+
         string inputFile = args[0];
-        string outputFile = args[1];
-        string configFile = Path.ChangeExtension(outputFile, ".inc");
+        string outputFile = args.Length > 1 ? args[1] : Path.ChangeExtension(inputFile, ".bin");
+        string configFile = Path.ChangeExtension(outputFile, ".yminc");
         int maxFramesInput = args.Length > 2 ? int.Parse(args[2]) : 65535;
         int patternSize = args.Length > 3 ? int.Parse(args[3]) : DefaultPatternSize;
         int step = args.Length > 4 ? int.Parse(args[4]) : 1;
@@ -46,6 +58,13 @@ public class YMConverter
         {
             byte[] rawData = ExtractRawData(inputFile);
             YMHeader header = ParseHeader(rawData);
+
+            if (overrideHz.HasValue)
+            {
+                Console.WriteLine($"Overriding PlayerHz: {header.PlayerHz} -> {overrideHz.Value}");
+                header.PlayerHz = overrideHz.Value;
+            }
+
             int framesToProcess = Math.Min(header.TotalFrames, maxFramesInput);
             int effectiveHz = header.PlayerHz / step;
 
@@ -84,8 +103,8 @@ public class YMConverter
                 }
             }
 
-            int yDelay = CalculateDelay(effectiveHz);
-            SaveOutput(outputFile, configFile, inputFile, bestData, header, outputFrames, yDelay, bestUnique, bestSeq, bestSize);
+            int yDelay = CalculateDelay(effectiveHz, out int xFine);
+            SaveOutput(outputFile, configFile, inputFile, bestData, header, outputFrames, yDelay, bestUnique, bestSeq, bestSize, effectiveHz);
             return 0;
         }
         catch (Exception ex)
@@ -97,6 +116,12 @@ public class YMConverter
 
     private static byte[] ExtractRawData(string filePath)
     {
+        byte[] buffer = File.ReadAllBytes(filePath);
+        if (buffer.Length > 4 && System.Text.Encoding.ASCII.GetString(buffer, 0, 2) == "YM")
+        {
+            return buffer;
+        }
+
         var psi = new ProcessStartInfo
         {
             FileName = "7z",
@@ -149,7 +174,6 @@ public class YMConverter
 
     private static byte[] DeinterleaveAndScale(byte[] rawData, YMHeader header, int framesToProcess, int step)
     {
-        // Only sample frames that are actually within framesToProcess
         int outputFrames = 0;
         for (int i = 0; i < framesToProcess; i += step) outputFrames++;
 
@@ -162,7 +186,6 @@ public class YMConverter
             byte[] frame = new byte[NumRegisters];
             for (int r = 0; r < NumRegisters; r++)
             {
-                // Safety check for source data offset
                 int offset = header.DataOffset + (r * header.TotalFrames) + sourceFrame;
                 frame[r] = rawData[offset];
             }
@@ -273,26 +296,45 @@ public class YMConverter
         return compressed.ToArray();
     }
 
-    private static int CalculateDelay(int playerHz)
+    private static int CalculateDelay(int playerHz, out int fine)
     {
-        double cyclesPerFrame = (Atari7800Clock * 1000000.0) / playerHz;
-        return (int)Math.Round(cyclesPerFrame / CyclesPerYCycle);
+        // Atari 7800 NTSC PHI2 = 1.789773 MHz
+        double ntscClock = 1789773.0; 
+        double targetCycles = ntscClock / playerHz;
+        
+        // Estimated Player Overhead (fetching patterns, writing YM)
+        double playerOverhead = 1800.0; 
+        double remainingCycles = Math.Max(0, targetCycles - playerOverhead);
+        
+        // 1. Coarse Delay (Y Loop, 1285 cycles per step)
+        int yDelay = (int)Math.Floor(remainingCycles / 1285.0);
+        remainingCycles -= (yDelay * 1285.0);
+
+        // 2. Fine Delay (X Loop, 5 cycles per step)
+        fine = (int)Math.Round(remainingCycles / 5.0);
+        if (fine > 255) fine = 255; 
+
+        return (int)Math.Max(1, yDelay);
     }
 
-    private static void SaveOutput(string binPath, string incPath, string inputFile, byte[] data, YMHeader header, int frames, int delay, int uniqueCount, int seqLen, int patternSize)
+    private static void SaveOutput(string binPath, string incPath, string inputFile, byte[] data, YMHeader header, int frames, int delay, int uniqueCount, int seqLen, int patternSize, int playerHz)
     {
+        int yDelay = CalculateDelay(playerHz, out int xFine);
+
         File.WriteAllBytes(binPath, data);
         using (var sw = new StreamWriter(incPath))
         {
             sw.WriteLine($"; Generated config for {inputFile}");
             sw.WriteLine($"MAX_FRAMES   = {frames}");
-            sw.WriteLine($"YM_DELAY     = ${delay:X2}");
+            sw.WriteLine($"PLAYER_HZ    = {playerHz}");
+            sw.WriteLine($"YM_DELAY     = {yDelay}");
+            sw.WriteLine($"YM_FINE      = {xFine}");
             sw.WriteLine($"PATTERN_SIZE = {patternSize}");
             sw.WriteLine($"NUM_PATTERNS = {uniqueCount}");
             sw.WriteLine($"SEQ_LEN      = {seqLen}");
         }
         Console.WriteLine($"Wrote {data.Length} bytes to {binPath}");
-        Console.WriteLine($"Unique Patterns: {uniqueCount} | Sequence Length: {seqLen}");
+        Console.WriteLine($"Calculated Delay: Y={yDelay}, X={xFine} for {playerHz}Hz");
         double originalSize = frames * NumRegisters;
         Console.WriteLine($"Compression Ratio: {data.Length / originalSize * 100:F1}%");
     }

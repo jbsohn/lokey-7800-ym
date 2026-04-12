@@ -270,6 +270,37 @@ To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided 
 
 ## Included Tools
 
+### `tools/YmToBin.cs`
+
+A high-performance YM (Atari ST/Amstrad CPC) to Atari 7800 binary converter. It processes raw YM register streams into a highly compressed format suitable for 8-bit playback.
+
+- **Supported Formats**: YM2, YM3, YM4, YM5, and YM6.
+- **Features**:
+  - **Pitch Scaling**: Automatically adjusts frequency registers to account for the difference between the original chip clock (e.g., 2MHz) and the Atari 7800's PHI2 clock (1.79MHz).
+  - **Multi-Stage Compression**:
+    - **Pattern-Based**: Identifies repeating sequences of frames and extracts them into a "Pattern Table" to save space.
+    - **Bitmask Deltas**: Within each pattern, only registers that *change* between frames are stored, using a 16-bit mask.
+  - **Delay Calculation**: Computes the optimal `DEX/BNE` delay loop value to maintain the target playback speed (e.g., 50Hz) on the 6502.
+  - **Optimization**: Automatically tests multiple "Pattern Sizes" to find the best compression ratio for a specific song.
+- **Requirements**: `.NET SDK` and `7z` (for extracting compressed `.ym` files).
+- **Usage**:
+  ```bash
+  dotnet script tools/YmToBin.cs <input.ym> <output.bin> [max_frames] [pattern_size] [step]
+  ```
+  - `max_frames`: Limit the number of frames to process (useful for fitting into 32KB).
+  - `pattern_size`: Fixed size for pattern blocks (set to 0 for auto-optimization).
+  - `step`: Frame skipping used to balance audio fidelity against ROM space.
+    - **Step 1 (Full Fidelity - 50Hz/60Hz)**:
+      - *What it does*: Processes 100% of the source frames.
+      - *Limitations*: Maximum file size. A typical 90-second YM track will often exceed the 32KB ROM limit even with compression.
+    - **Step 2 (The "Sweet Spot" - 25Hz/30Hz)**:
+      - *What it does*: Skips every other frame, reducing data size by ~50%.
+      - *Pros*: Excellent balance. Most 2-3 minute tracks will fit comfortably in 32KB.
+      - *Cons*: Slight loss of resolution in very fast vibrato or rapid percussion, but usually imperceptible on 7800 hardware.
+    - **Step 3 (Maximum Compression - ~16Hz/20Hz)**:
+      - *What it does*: Processes every 3rd frame.
+      - *Limitations*: Noticeable "stutter" in fast melodies. Only recommended for extremely long tracks or when ROM space is critically low.
+
 ### `tools/ValidateCartSignals.cs`
 
 A diagnostic C# script used to validate the raw physical signals coming off the Atari 7800 cartridge edge connector before they reach the ROM or YM2149.

@@ -1,30 +1,29 @@
         processor 6502
 
 ; ---------------------------------------------------------
-; YM2149 Stream Player for Atari 7800
+; YM2149 MVP Player for Atari 7800
 ; ---------------------------------------------------------
-; Streams compressed bitmask frames from a pre-processed YM2 binary.
-; Target: 32KB ROM ($8000-$FFFF)
+; Simple, high-precision delay-based player for the 60Hz MVP.
 ; ---------------------------------------------------------
 
 ay_addr    = $4000
 ay_data    = $4001
-background = $0020
+background = $0020 
 
 ; Zero Page
-music_ptr  = $80 ; 16-bit pointer to current compressed frame
-frame_cnt  = $82 ; 16-bit total frame counter
-pat_frames = $84 ; 8-bit frames remaining in current pattern
-seq_idx    = $85 ; 8-bit index into sequence
-tmp_mask   = $86 ; 16-bit mask temporary storage
-pat_table  = $88 ; 16-bit pointer to offset table
-pat_base   = $8a ; 16-bit pointer to patterns start
-seq_base   = $8c ; 16-bit pointer to sequence start
-pat_size   = $8e ; 8-bit frames per pattern
+music_ptr  = $80 
+frame_cnt  = $82 
+pat_frames = $84 
+seq_idx    = $85 
+tmp_mask   = $86 
+pat_table  = $88 
+pat_base   = $8a 
+seq_base   = $8c 
+pat_size   = $8e 
 
 ; Constants
 NUM_REGS   = 14
-        include "ancool1_test.inc"
+        include "ancool1.yminc"
 
         ifnconst build_with_header
 build_with_header SET 1
@@ -36,6 +35,15 @@ build_with_header SET 1
             include "a78_ym2149_header.asm"
         endif
 
+; ---------------------------------------------------------
+; Music Data (At start of ROM after header)
+; ---------------------------------------------------------
+MusicData:
+        incbin "ancool1.bin"
+
+; ---------------------------------------------------------
+; Entry Point
+; ---------------------------------------------------------
 reset:
         sei
         cld
@@ -69,6 +77,34 @@ main_loop:
         jmp main_loop
 
 ; ---------------------------------------------------------
+; Utilities
+; ---------------------------------------------------------
+
+sync_vbi:
+        ; 1. Coarse Delay (Y steps)
+        ldy #YM_DELAY
+.d1:    ldx #$00
+.d2:    dex
+        bne .d2
+        dey
+        bne .d1
+
+        ; 2. Fine Delay (X steps)
+        ldx #YM_FINE
+        beq .done
+.d3:    dex
+        bne .d3
+.done:
+        rts
+
+update_visuals:
+        lda frame_cnt
+        and #$0F
+        ora #$40 
+        sta background
+        rts
+
+; ---------------------------------------------------------
 ; Initialize Music Pointers from Header
 ; ---------------------------------------------------------
 init_music:
@@ -78,9 +114,10 @@ init_music:
         sta seq_idx
         sta pat_frames ; Force new pattern fetch
 
+        ; pat_size is stored as first byte of MusicData
         lda MusicData
         sta pat_size
-        
+
         ; seq_base = MusicData + 3
         clc
         lda #<MusicData
@@ -219,40 +256,13 @@ play_frame:
         bne .reg_loop
 
         inc frame_cnt
-        bne .done
+        bne .p_done
         inc frame_cnt+1
-.done:
+.p_done:
         rts
 
 bit_table:
         .byte $01, $02, $04, $08, $10, $20, $40, $80
-
-; ---------------------------------------------------------
-; Utilities
-; ---------------------------------------------------------
-sync_vbi:
-        ; Simple delay to approximate Hz
-        ldy #YM_DELAY
-.d1:    ldx #$00
-.d2:    dex
-        bne .d2
-        dey
-        bne .d1
-        rts
-
-update_visuals:
-        lda frame_cnt
-        and #$0F
-        ora #$40 
-        sta background
-        rts
-
-; ---------------------------------------------------------
-; Music Data (Compressed)
-; ---------------------------------------------------------
-        org $8800 
-MusicData:
-        incbin "ancool1_test.bin"
 
 ; ---------------------------------------------------------
 ; 7800 ROM Footer
