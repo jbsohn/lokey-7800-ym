@@ -63,10 +63,16 @@ This ROM uses the specialized physical mapping described below.
 
 ## Emulator Support
 
-Before testing on real hardware, you can verify your builds using a specialized branch of the **a7800** emulator that supports this physical YM2149 mapping:
+Before testing on real hardware, you can verify your builds using specialized versions of emulators that support this physical YM2149 mapping:
 
+### a7800 (Desktop)
 - **Repository**: [https://github.com/jbsohn/a7800](https://github.com/jbsohn/a7800)
 - **Branch**: `ym2149`
+
+### js7800 (Web-based)
+- **Repository**: [https://github.com/jbsohn/js7800](https://github.com/jbsohn/js7800)
+- **Branch**: `ym2149`
+- **Note**: This fork allows you to test YM2149 audio directly in your browser.
 
 ### Compatibility Notes
 
