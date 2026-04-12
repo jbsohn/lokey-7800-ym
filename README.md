@@ -268,38 +268,48 @@ To connect a **YM2149** (or **AY-3-8910**) to the Atari 7800 using the provided 
 
 1. **Clocking**: Pin 22 (CLOCK) typically receives PHI2OUT from the GAL (1.79 MHz) for 1:1 emulator parity. However, the logic is robust enough to support an external 2 MHz crystal directly. This provides exact Atari ST sound compatibility for imported assets without needing software frequency adjustments.
 
+## Playback & Clock Accuracy
+
+Porting audio from the Atari ST (16-bit 68000) to the Atari 7800 (8-bit 6502) involves managing several technical discrepancies:
+
+- **Chip Clocks**: The Atari ST's YM2149 typically runs at **2.0 MHz**, while the Atari 7800's PHI2 clock (and thus the YM clock in our default mapping) is approximately **1.79 MHz**.
+- **Refresh Rates**: Original YM tracks were often composed for **50Hz (PAL)** or **60Hz (NTSC)**. The Atari 7800 also supports both **50Hz** and **60Hz** output depending on the region.
+- **CPU Overhead**: The 6502 must spend cycles parsing the compressed stream, which can introduce micro-variations in timing compared to the ST's 68000.
+
+**How we handle this**: The `YmToBin.cs` tool performs **Automatic Pitch Scaling**. It calculates the ratio between the source chip clock and the 7800's 1.79 MHz clock, re-calculating every frequency register to keep the music in tune. While this achieves "Emulator-Perfect" sound, subtle "character" differences from the original hardware may remain.
+
 ## Included Tools
 
 ### `tools/YmToBin.cs`
 
+> **WORK IN PROGRESS**: While this tool currently provides a stable and functional "Pattern-Based Delta" format for the Atari 7800, research into even more efficient storage methods is ongoing to maximize the music capacity of future cartridges.
+
 A high-performance YM (Atari ST/Amstrad CPC) to Atari 7800 binary converter. It processes raw YM register streams into a highly compressed format suitable for 8-bit playback.
 
 - **Supported Formats**: YM2, YM3, YM4, YM5, and YM6.
-- **Features**:
-  - **Pitch Scaling**: Automatically adjusts frequency registers to account for the difference between the original chip clock (e.g., 2MHz) and the Atari 7800's PHI2 clock (1.79MHz).
+- **Key Features**:
+  - **Pitch Scaling**: Automatically adjusts frequency registers to account for the difference between the original chip clock (e.g., 2.0MHz) and the Atari 7800's PHI2 clock (1.79MHz).
   - **Multi-Stage Compression**:
     - **Pattern-Based**: Identifies repeating sequences of frames and extracts them into a "Pattern Table" to save space.
     - **Bitmask Deltas**: Within each pattern, only registers that *change* between frames are stored, using a 16-bit mask.
-  - **Delay Calculation**: Computes the optimal `DEX/BNE` delay loop value to maintain the target playback speed (e.g., 50Hz) on the 6502.
-  - **Optimization**: Automatically tests multiple "Pattern Sizes" to find the best compression ratio for a specific song.
-- **Requirements**: `.NET SDK` and `7z` (for extracting compressed `.ym` files).
+  - **Auto-Optimization**: If no pattern size is provided, the tool automatically tests multiple sizes (16, 32, 64, etc.) to find the best compression ratio for your specific song.
+  - **Delay Calculation**: Computes the optimal `DEX/BNE` delay loop values (Y and X) to maintain perfect playback speed on the 6502.
+- **Requirements**:
+  - **.NET SDK**: Required to run the C# script.
+  - **7-Zip (`7z`)**: Required to extract compressed `.ym` files (LZH archives). Ensure `7z` is in your system PATH.
 - **Usage**:
   ```bash
-  dotnet script tools/YmToBin.cs <input.ym> <output.bin> [max_frames] [pattern_size] [step]
+  dotnet script tools/YmToBin.cs <input.ym> [options]
   ```
-  - `max_frames`: Limit the number of frames to process (useful for fitting into 32KB).
-  - `pattern_size`: Fixed size for pattern blocks (set to 0 for auto-optimization).
-  - `step`: Frame skipping used to balance audio fidelity against ROM space.
-    - **Step 1 (Full Fidelity - 50Hz/60Hz)**:
-      - *What it does*: Processes 100% of the source frames.
-      - *Limitations*: Maximum file size. A typical 90-second YM track will often exceed the 32KB ROM limit even with compression.
-    - **Step 2 (The "Sweet Spot" - 25Hz/30Hz)**:
-      - *What it does*: Skips every other frame, reducing data size by ~50%.
-      - *Pros*: Excellent balance. Most 2-3 minute tracks will fit comfortably in 32KB.
-      - *Cons*: Slight loss of resolution in very fast vibrato or rapid percussion, but usually imperceptible on 7800 hardware.
-    - **Step 3 (Maximum Compression - ~16Hz/20Hz)**:
-      - *What it does*: Processes every 3rd frame.
-      - *Limitations*: Noticeable "stutter" in fast melodies. Only recommended for extremely long tracks or when ROM space is critically low.
+  - `<input.ym>`: Input YM file (required positional argument).
+  - `-o <file>`: Output binary file (default: input.bin).
+  - `-f <frames>`: Limit the number of frames to process (default: 65535).
+  - `-p <size>`: Fixed size for pattern blocks (set to 0 for auto-optimization).
+  - `-s <step>`: Frame skipping used to balance audio fidelity against ROM space.
+    - **Step 1 (Full Fidelity - 50Hz/60Hz)**: Full fidelity, largest size.
+    - **Step 2 (The "Sweet Spot" - 25Hz/30Hz)**: Halves the data size with minimal impact on sound quality.
+    - **Step 3 (Maximum Compression - ~16Hz/20Hz)**: Noticeable melody stutter, but saves the most space.
+  - `-hz <value>`: Override the player frequency (e.g., force a 50Hz song to play at 60Hz).
 
 ### `tools/ValidateCartSignals.cs`
 

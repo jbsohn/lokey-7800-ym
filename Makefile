@@ -66,31 +66,14 @@ gal: $(GAL_JEDECS)
 
 # Specific rule for large songs to fit in 32K
 src/enchant1.bin: src/enchant1.ym $(YM2BIN)
-	$(DOTNET_SCRIPT) $(YM2BIN) $< $@ 65535 2
+	$(DOTNET_SCRIPT) $(YM2BIN) $< -o $@ -s 2
 
 # Pattern rule to convert any .ym file in src/ to .bin
 src/%.bin: src/%.ym $(YM2BIN)
-	$(DOTNET_SCRIPT) $(YM2BIN) $< $@
+	$(DOTNET_SCRIPT) $(YM2BIN) $< -o $@
 
 src/%.bin: src/%.YM $(YM2BIN)
-	$(DOTNET_SCRIPT) $(YM2BIN) $< $@
-
-# Pattern rule to convert any .ym file in samples/ to .bin
-src/%.bin: samples/%.ym $(YM2BIN)
-	$(DOTNET_SCRIPT) $(YM2BIN) $< $@
-
-src/%.bin: samples/%.YM $(YM2BIN)
-	$(DOTNET_SCRIPT) $(YM2BIN) $< $@
-
-process-test: $(YM2BIN)
-	$(DOTNET_SCRIPT) $(YM2BIN) samples/Scout.ym src/ym_test_data.bin
-
-process-stress: $(YM2BIN)
-	$(DOTNET_SCRIPT) $(YM2BIN) samples/Scout.ym src/test1.bin
-
-# Legacy targets for compatibility
-src/test1.bin: process-stress
-src/ym_test_data.bin: process-test
+	$(DOTNET_SCRIPT) $(YM2BIN) $< -o $@
 
 clean:
 	rm -f src/*.a78 src/*.bin src/*.yminc src/*.inc

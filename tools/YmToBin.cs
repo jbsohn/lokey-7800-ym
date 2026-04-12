@@ -1,11 +1,24 @@
 #!/usr/bin/env dotnet-script
+#nullable enable
 using System.Diagnostics;
-using System.Linq;
 
-// YM to Atari 7800 Binary Converter (Pattern-Based)
-// ------------------------------------------------
-// Supports YM2, YM3, YM4, YM5, YM6 formats.
-// Extracts repeating sequences to save space.
+// YM to Atari 7800 Binary Converter (Pattern-Based Delta)
+// ------------------------------------------------------
+// This tool converts Atari ST YM files into a custom binary format optimized for the 6502.
+// DEPENDENCIES: Requires '7z' (7-Zip) to be installed and in the system PATH for extracting .ym archives.
+//
+// It performs three key optimizations:
+// 1. PITCH SCALING: Adjusts the YM chip clock (2.0MHz) to the Atari 7800 PHI2 (1.79MHz).
+// 2. DELTA MASKING: Only stores the registers that actually change between frames.
+// 3. PATTERN DEDUPLICATION: Slices the song into blocks and deduplicates identical ones.
+//
+// BINARY FORMAT:
+// [1 byte] Pattern Size (frames per block)
+// [1 byte] Unique Pattern Count
+// [1 byte] Sequence Length
+// [Sequence Data...] IDs of patterns in order
+// [Offset Table...] 16-bit relative pointers to unique pattern data
+// [Pattern Data...] Delta-masked frame data: [2-byte Mask] [Changed Bytes...]
 
 #pragma warning disable CA1050 
 
@@ -27,32 +40,55 @@ public class YMConverter
     private const double Atari7800Clock = 1.792000;
     private const int DefaultPatternSize = 64;
 
+    /// <summary>
+    /// The entry point for the YM conversion process. Parses arguments and orchestrates the conversion.
+    /// </summary>
+    /// <param name="args">Command line arguments</param>
+    /// <returns>0 on success, 1 on error.</returns>
     public static int Run(string[] args)
     {
-        if (args.Length < 1)
+        if (args.Length < 1 || args.Contains("-h") || args.Contains("--help"))
         {
-            Console.WriteLine("Usage: dotnet script YmToBin.cs <input.ym> [output.bin] [max_frames] [pattern_size] [step] [-hz <value>]");
+            Console.WriteLine("Usage: dotnet script YmToBin.cs <input.ym> [options]");
+            Console.WriteLine("Options:");
+            Console.WriteLine("  -o <file>      Output binary file (default: input.bin)");
+            Console.WriteLine("  -f <frames>    Maximum frames to process (default: 65535)");
+            Console.WriteLine("  -p <size>      Pattern block size (default: 0 for auto)");
+            Console.WriteLine("  -s <step>      Frame step/skip (default: 1)");
+            Console.WriteLine("  -hz <value>    Override PlayerHz (default: from YM header)");
             return 1;
         }
 
-        // Parse -hz <value> if it exists
-        int? overrideHz = null;
-        var argList = args.ToList();
-        int hzIdx = argList.IndexOf("-hz");
-        if (hzIdx != -1 && hzIdx + 1 < argList.Count)
-        {
-            overrideHz = int.Parse(argList[hzIdx + 1]);
-            argList.RemoveAt(hzIdx + 1);
-            argList.RemoveAt(hzIdx);
-        }
-        args = argList.ToArray();
-
         string inputFile = args[0];
-        string outputFile = args.Length > 1 ? args[1] : Path.ChangeExtension(inputFile, ".bin");
+        string? outputFile = null;
+        int maxFramesInput = 65535;
+        int patternSize = 0;
+        int step = 1;
+        int? overrideHz = null;
+
+        for (int i = 1; i < args.Length; i++)
+        {
+            switch (args[i])
+            {
+                case "-o": if (i + 1 < args.Length) outputFile = args[++i]; break;
+                case "-f": if (i + 1 < args.Length) maxFramesInput = int.Parse(args[++i]); break;
+                case "-p": if (i + 1 < args.Length) patternSize = int.Parse(args[++i]); break;
+                case "-s": if (i + 1 < args.Length) step = int.Parse(args[++i]); break;
+                case "-hz": if (i + 1 < args.Length) overrideHz = int.Parse(args[++i]); break;
+            }
+        }
+
+        if (string.IsNullOrEmpty(outputFile))
+            outputFile = Path.ChangeExtension(inputFile, ".bin");
+
         string configFile = Path.ChangeExtension(outputFile, ".yminc");
-        int maxFramesInput = args.Length > 2 ? int.Parse(args[2]) : 65535;
-        int patternSize = args.Length > 3 ? int.Parse(args[3]) : DefaultPatternSize;
-        int step = args.Length > 4 ? int.Parse(args[4]) : 1;
+
+        // Pre-flight check: Verify 7-Zip is installed (only if input is likely an archive)
+        if (!IsToolInstalled("7z"))
+        {
+            Console.WriteLine("WARNING: '7z' (7-Zip) is not installed or not in your PATH.");
+            Console.WriteLine("This tool is required to extract .ym archives. Raw .ym files will still work.");
+        }
 
         try
         {
@@ -73,15 +109,14 @@ public class YMConverter
 
             byte[] interleavedData = DeinterleaveAndScale(rawData, header, framesToProcess, step);
             int outputFrames = interleavedData.Length / NumRegisters;
-            
-            byte[] bestData = null;
+
+            byte[]? bestData = null;
             int bestSize = 0;
             int bestUnique = 0;
             int bestSeq = 0;
 
-            if (args.Length > 3 && int.Parse(args[3]) > 0)
+            if (patternSize > 0)
             {
-                patternSize = int.Parse(args[3]);
                 bestData = CompressWithPatterns(interleavedData, outputFrames, patternSize, out bestUnique, out bestSeq);
                 bestSize = patternSize;
             }
@@ -104,7 +139,7 @@ public class YMConverter
             }
 
             int yDelay = CalculateDelay(effectiveHz, out int xFine);
-            SaveOutput(outputFile, configFile, inputFile, bestData, header, outputFrames, yDelay, bestUnique, bestSeq, bestSize, effectiveHz);
+            SaveOutput(outputFile, configFile, inputFile, bestData, header, outputFrames, yDelay, xFine, bestUnique, bestSeq, bestSize, effectiveHz);
             return 0;
         }
         catch (Exception ex)
@@ -114,6 +149,38 @@ public class YMConverter
         }
     }
 
+    /// <summary>
+    /// Checks if a command-line tool is installed and accessible in the system PATH.
+    /// </summary>
+    /// <param name="toolName">The name of the executable to check.</param>
+    /// <returns>True if the tool is found, false otherwise.</returns>
+    private static bool IsToolInstalled(string toolName)
+    {
+        try
+        {
+            using var process = Process.Start(new ProcessStartInfo
+            {
+                FileName = toolName,
+                Arguments = "", // No arguments, just checking for existence
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            });
+            process?.WaitForExit();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Reads the input file and decompresses it if it's an archive (like LZH).
+    /// </summary>
+    /// <param name="filePath">Path to the .ym file.</param>
+    /// <returns>Raw byte array of the YM file.</returns>
     private static byte[] ExtractRawData(string filePath)
     {
         byte[] buffer = File.ReadAllBytes(filePath);
@@ -139,6 +206,11 @@ public class YMConverter
         return data;
     }
 
+    /// <summary>
+    /// Parses the YM file header to extract chip clock, player rate, and data offset.
+    /// </summary>
+    /// <param name="data">The raw YM file bytes.</param>
+    /// <returns>A YMHeader object with the parsed metadata.</returns>
     private static YMHeader ParseHeader(byte[] data)
     {
         string signature = System.Text.Encoding.ASCII.GetString(data, 0, 4);
@@ -172,6 +244,10 @@ public class YMConverter
         return header;
     }
 
+    /// <summary>
+    /// Reorders the YM's register-first format into a frame-first format
+    /// and scales the pitches to match the 7800's slightly slower CPU clock.
+    /// </summary>
     private static byte[] DeinterleaveAndScale(byte[] rawData, YMHeader header, int framesToProcess, int step)
     {
         int outputFrames = 0;
@@ -186,11 +262,16 @@ public class YMConverter
             byte[] frame = new byte[NumRegisters];
             for (int r = 0; r < NumRegisters; r++)
             {
+                // YM files store all R0 bytes, then all R1 bytes. We need them interleaved per frame.
                 int offset = header.DataOffset + (r * header.TotalFrames) + sourceFrame;
                 frame[r] = rawData[offset];
             }
 
-            int Scale(int low, int hi, int mask) {
+            // --- PITCH SCALING ---
+            // The 7800 PHI2 clock is roughly 1.79MHz while the Atari ST YM clock is 2.0MHz.
+            // Without scaling, the notes would sound out of tune.
+            int Scale(int low, int hi, int mask)
+            {
                 int val = ((hi & mask) << 8) | low;
                 return (int)Math.Round(val * pitchScale);
             }
@@ -211,6 +292,10 @@ public class YMConverter
         return interleavedData;
     }
 
+    /// <summary>
+    /// Slices the song into fixed-size blocks (patterns) and identifies identical ones
+    /// to store only the unique patterns.
+    /// </summary>
     private static byte[] CompressWithPatterns(byte[] interleavedData, int framesToProcess, int patternSize, out int uniqueCount, out int seqLen)
     {
         int numBlocks = (int)Math.Ceiling((double)framesToProcess / patternSize);
@@ -223,6 +308,7 @@ public class YMConverter
             byte[] block = new byte[actualFrames * NumRegisters];
             Array.Copy(interleavedData, b * patternSize * NumRegisters, block, 0, block.Length);
 
+            // Check if this block already exists
             int patternId = -1;
             for (int i = 0; i < uniquePatternRaw.Count; i++)
             {
@@ -239,12 +325,14 @@ public class YMConverter
         uniqueCount = uniquePatternRaw.Count;
         seqLen = sequence.Count;
 
+        // Apply Delta-Masking to each unique pattern
         var compressedPatterns = new List<byte[]>();
         foreach (var raw in uniquePatternRaw)
         {
             compressedPatterns.Add(CompressPattern(raw));
         }
 
+        // --- DATA ASSEMBLY ---
         var output = new List<byte>();
         output.Add((byte)patternSize);
         output.Add((byte)uniqueCount);
@@ -266,9 +354,13 @@ public class YMConverter
         }
         foreach (var cp in compressedPatterns) output.AddRange(cp);
 
-        return output.ToArray();
+        return [.. output];
     }
 
+    /// <summary>
+    /// Performs Delta-Masking: Compares each frame to the previous one and
+    /// generates a bitmask to indicate which registers changed.
+    /// </summary>
     private static byte[] CompressPattern(byte[] rawData)
     {
         int frames = rawData.Length / NumRegisters;
@@ -282,6 +374,7 @@ public class YMConverter
             for (int r = 0; r < NumRegisters; r++)
             {
                 byte current = rawData[(f * NumRegisters) + r];
+                // Only store a register if its value changed (or if it's the very first frame)
                 if (f == 0 || current != lastFrame[r])
                 {
                     mask |= (ushort)(1 << r);
@@ -289,37 +382,64 @@ public class YMConverter
                 }
                 lastFrame[r] = current;
             }
+            // Store the 16-bit mask (low byte first) followed by only the changed register values
             compressed.Add((byte)(mask & 0xFF));
             compressed.Add((byte)((mask >> 8) & 0xFF));
             compressed.AddRange(frameData);
         }
-        return compressed.ToArray();
+        return [.. compressed];
     }
 
+    /// <summary>
+    /// Calculates the 6502 delay loop values (Y and X) needed to achieve the target playback rate.
+    /// accounts for an estimated player overhead of 1800 cycles.
+    /// </summary>
+    /// <param name="playerHz">The target frequency (e.g. 50Hz, 60Hz).</param>
+    /// <param name="fine">Output: The X-loop (fine) delay value (0-255).</param>
+    /// <returns>The Y-loop (coarse) delay value.</returns>
     private static int CalculateDelay(int playerHz, out int fine)
     {
         // Atari 7800 NTSC PHI2 = 1.789773 MHz
-        double ntscClock = 1789773.0; 
+        double ntscClock = 1789773.0;
         double targetCycles = ntscClock / playerHz;
-        
+
         // Estimated Player Overhead (fetching patterns, writing YM)
-        double playerOverhead = 1800.0; 
+        double playerOverhead = 1800.0;
         double remainingCycles = Math.Max(0, targetCycles - playerOverhead);
-        
-        // 1. Coarse Delay (Y Loop, 1285 cycles per step)
+
+        // Coarse Delay (Y Loop, 1285 cycles per step)
         int yDelay = (int)Math.Floor(remainingCycles / 1285.0);
         remainingCycles -= (yDelay * 1285.0);
 
-        // 2. Fine Delay (X Loop, 5 cycles per step)
+        // Fine Delay (X Loop, 5 cycles per step)
         fine = (int)Math.Round(remainingCycles / 5.0);
-        if (fine > 255) fine = 255; 
+        if (fine > 255) fine = 255;
 
         return (int)Math.Max(1, yDelay);
     }
 
-    private static void SaveOutput(string binPath, string incPath, string inputFile, byte[] data, YMHeader header, int frames, int delay, int uniqueCount, int seqLen, int patternSize, int playerHz)
+    /// <summary>
+    /// Saves the compressed binary data and the generated assembly include file.
+    /// </summary>
+    /// <param name="binPath">Path to write the .bin file.</param>
+    /// <param name="incPath">Path to write the .yminc file.</param>
+    /// <param name="inputFile">The original input filename (for comments).</param>
+    /// <param name="data">The compressed binary data bytes.</param>
+    /// <param name="header">The YM metadata header.</param>
+    /// <param name="frames">Total number of frames in the output.</param>
+    /// <param name="yDelay">The calculated coarse delay for the 6502.</param>
+    /// <param name="xFine">The calculated fine delay for the 6502.</param>
+    /// <param name="uniqueCount">Number of unique patterns identified.</param>
+    /// <param name="seqLen">Length of the pattern sequence.</param>
+    /// <param name="patternSize">Number of frames per pattern block.</param>
+    /// <param name="playerHz">The final playback frequency in Hz.</param>
+    private static void SaveOutput(string binPath, string incPath, string inputFile, byte[]? data, YMHeader header, int frames, int yDelay, int xFine, int uniqueCount, int seqLen, int patternSize, int playerHz)
     {
-        int yDelay = CalculateDelay(playerHz, out int xFine);
+        if (data == null)
+        {
+            Console.WriteLine("ERROR: input data is empty.");
+            return;
+        }
 
         File.WriteAllBytes(binPath, data);
         using (var sw = new StreamWriter(incPath))
