@@ -53,6 +53,14 @@ To clean all generated files (ROMs, temporary binaries, and GAL output):
 make clean
 ```
 
+### Assembler & Toolchain
+
+The source code is currently written for the **DASM** assembler to facilitate rapid prototyping and get the initial hardware working. "Hardware working first" is the current priority.
+
+Once the project is stable, we plan to transition to a more robust toolchain:
+- **cc65**: To leverage its powerful macro assembler and flexible linking options.
+- **MADS**: Widely considered one of the best Atari assemblers available.
+
 ### Quick Start (Emulator)
 
 You can download and run our verified music demos directly in the emulator:
