@@ -6,9 +6,9 @@ The goal is to provide a stable, low-cost (~$2 USD) bridge between the Atari 780
 
 This repository is a playground for experiments with the Atari 7800 using a YM2149 on a cartridge.
 
-## Status: **[SUCCESS] STABLE ALPHA / "IT ACTUALLY WORKS!"**
+## Status: **STABLE ALPHA / "IT ACTUALLY WORKS!" (Work in Progress)**
 
-> This project has successfully graduated from its early breadboard phase to **Stable Alpha**. We have officially achieved emulator-perfect sound on real hardware. (Beta status is reserved for the first professional PCB run!)
+> This project has successfully graduated from its early breadboard phase to **Stable Alpha**. We have officially achieved highly accurate sound on real hardware. (Beta status is reserved for the first professional PCB run!) This project is still being actively developed and is a work in progress.
 
 ### Feature Demo: The "ANCOOL1" Stress Test
 
@@ -287,7 +287,7 @@ Porting audio from the Atari ST (16-bit 68000) to the Atari 7800 (8-bit 6502) in
 - **Refresh Rates**: Original YM tracks were often composed for **50Hz (PAL)** or **60Hz (NTSC)**. The Atari 7800 also supports both **50Hz** and **60Hz** output depending on the region.
 - **CPU Overhead**: The 6502 must spend cycles parsing the compressed stream, which can introduce micro-variations in timing compared to the ST's 68000.
 
-**How we handle this**: The `YmToBin.cs` tool performs **Automatic Pitch Scaling**. It calculates the ratio between the source chip clock and the 7800's 1.79 MHz clock, re-calculating every frequency register to keep the music in tune. While this achieves "Emulator-Perfect" sound, subtle "character" differences from the original hardware may remain.
+**How we handle this**: The `YmToBin.cs` tool performs **Automatic Pitch Scaling**. It calculates the ratio between the source chip clock and the 7800's 1.79 MHz clock, re-calculating every frequency register to keep the music in tune. While this achieves "Accurate" sound, subtle "character" differences from the original hardware may remain.
 
 ## Included Tools
 
@@ -311,7 +311,7 @@ A high-performance YM (Atari ST/Amstrad CPC) to Atari 7800 binary converter. It 
     - **Pattern-Based**: Identifies repeating sequences of frames and extracts them into a "Pattern Table" to save space.
     - **Bitmask Deltas**: Within each pattern, only registers that *change* between frames are stored, using a 16-bit mask.
   - **Auto-Optimization**: If no pattern size is provided, the tool automatically tests multiple sizes (16, 32, 64, etc.) to find the best compression ratio for your specific song.
-  - **Delay Calculation**: Computes the optimal `DEX/BNE` delay loop values (Y and X) to maintain perfect playback speed on the 6502.
+  - **Delay Calculation**: Computes the optimal `DEX/BNE` delay loop values (Y and X) to maintain consistent playback speed on the 6502.
 - **Requirements**:
   - **.NET SDK**: Required to run the C# script.
   - **7-Zip (`7z`)**: Required to extract compressed `.ym` files (LZH archives). Ensure `7z` is in your system PATH.
@@ -383,7 +383,7 @@ Check out the current state of tests running on the dev board:
 ## Future Plans & Extensibility
 
 - **Hardware Roadmap**: Our MVP (Minimum Viable Project) focus is a stable **32KB ROM (27C256)** that plays music reliably on real hardware. Future revisions will expand compatibility to support all **28-pin ROMs**, eventually moving to **32-pin ROMs** and more complex bank-switching versions.
-- **YM2 as Canonical Source**: We have established **YM2** as the preferred "raw" source format for incoming Atari ST data. Its logic overhead and predictable register-interleaving makes it the perfect baseline for future compression research.
+- **YM2 as Canonical Source**: We have established **YM2** as the preferred "raw" source format for incoming Atari ST data. Its logic overhead and predictable register-interleaving makes it the ideal baseline for future compression research.
 - **Advanced Compression**: Future research will explore **RLE (Run-Length Encoding)** and custom **Bitpacking** (similar to VGM or YM-Pro formats) to squeeze minutes of high-fidelity music into standard 32KB/48KB 7800 banksets.
 - **I/O Port Logging**: The YM2149 I/O ports provide 16 additional lines of communication. We plan to implement a high-speed "Diagnostic Logging" system to stream real-time debug data back from the 7800 to a host machine.
 - **Enhanced Interfacing**: Using the spare ports for external controllers or status LEDs to assist in hardware bring-up.
