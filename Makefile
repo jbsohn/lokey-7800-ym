@@ -27,8 +27,6 @@ help:
 	@echo "  make bin           - Build headerless .bin ROMs"
 	@echo "  make hw            - Build and sign .bin ROMs for real hardware"
 	@echo "  make gal           - Build JEDEC using galette"
-	@echo "  make process-test   - Generate ym_test_data.bin (C# Tool)"
-	@echo "  make process-stress - Generate test1.bin stress test (C# Tool)"
 	@echo "  make clean         - Nuke all generated files"
 
 # Ensure YM bins are created before assembly

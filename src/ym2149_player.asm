@@ -23,7 +23,7 @@ pat_size   = $8e
 
 ; Constants
 NUM_REGS   = 14
-        include "ancool1.yminc"
+        include "enchant1.yminc"
 
         ifnconst build_with_header
 build_with_header SET 1
@@ -39,7 +39,7 @@ build_with_header SET 1
 ; Music Data (At start of ROM after header)
 ; ---------------------------------------------------------
 MusicData:
-        incbin "ancool1.bin"
+        incbin "enchant1.bin"
 
 ; ---------------------------------------------------------
 ; Entry Point

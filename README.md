@@ -55,33 +55,38 @@ make clean
 
 ### Quick Start (Emulator)
 
-You can download and run our latest verified music demo directly in the emulator:
+You can download and run our verified music demos directly in the emulator:
 
-- **Download**: [ym2149_player_ancool.a78](docs/ym2149_player_ancool.a78) (92-second bitmask stream)
+- **Download**: [ym2149_player_ancool1.a78](docs/ym2149_player_ancool1.a78) (92-second bitmask stream)
+- **Download**: [ym2149_player_enchant1.a78](docs/ym2149_player_enchant1.a78) (Melodic bitmask stream)
 
-This ROM uses the specialized physical mapping described below.
+These ROMs use the specialized physical mapping described below.
 
 ## Emulator Support
 
-Before testing on real hardware, you can verify your builds using specialized versions of emulators that support this physical YM2149 mapping:
+To iterate rapidly without burning EPROMs, you can use these specialized forks that include full support for the physical YM2149 hardware mapping.
 
 ### a7800 (Desktop)
+The premier desktop emulator for the 7800, now updated with physical YM2149 support and modern development fixes.
+
 - **Repository**: [https://github.com/jbsohn/a7800](https://github.com/jbsohn/a7800)
 - **Branch**: `ym2149`
+- **Key Enhancements**:
+  - **Native Apple Silicon Support**: Runs natively on **macOS M1/M2/M3** CPUs. Unlike the official release, this fork does not require Rosetta and provides full native performance.
+  - **Modernized Build System**: Updated to compile cleanly with current toolchains on Linux and macOS.
+  - **Hardware Accuracy**: Implements the exact 16000-byte physical memory mapping ($4000–$7FFF) used by this project.
+  - **AY/YM Engine**: Full emulation of the YM2149 PSG, synchronized with the 7800 PHI2 clock.
 
 ### js7800 (Web-based)
+A browser-based emulator that allows for zero-setup testing and sharing.
+
+- **Live Demo**: [**Play the YM2149 Demo in your Browser**](https://jbsohn.github.io/js7800-ym-player/)
 - **Repository**: [https://github.com/jbsohn/js7800](https://github.com/jbsohn/js7800)
 - **Branch**: `ym2149`
-- **Note**: This fork allows you to test YM2149 audio directly in your browser.
-
-### Compatibility Notes
-
-- **Modern Hardware**: This branch includes specific updates for **macOS on Apple Silicon (M1/M2/M3)**.
-- **C# / .NET Tooling**: All diagnostic and processing tools require the **.NET SDK** (verified on Linux and macOS).
-- **Supported Platforms**: Built and tested for **macOS** and **Linux**.
-- **Windows**: Currently **untested**. If you are on Windows, your mileage may vary as the build environment has not been verified for that platform yet.
-
-This is the recommended way to iterate on your code and musical assets before committing to a hardware burn.
+- **Key Enhancements**:
+  - **WebAudio Integration**: Bridges the 6502 register writes to the browser's audio engine for real-time YM2149 playback.
+  - **Rapid Iteration**: The fastest way to test your `.a78` builds—just drag and drop into the browser.
+  - **Cross-Platform**: Works anywhere a modern browser runs, making it the ideal "first test" for music assets.
 
 ## Signing for Real 7800 Hardware
 
@@ -286,11 +291,18 @@ Porting audio from the Atari ST (16-bit 68000) to the Atari 7800 (8-bit 6502) in
 
 ## Included Tools
 
+All diagnostic and processing tools in this repository require the **.NET SDK**. They have been verified on **Linux** and **macOS** (Intel and Apple Silicon). 
+
+> **Note on Windows**: These tools are currently **untested** on Windows. While they should run via `dotnet script`, the build environment and shell-based diagnostics have not been verified for that platform yet.
+
 ### `tools/YmToBin.cs`
 
 > **WORK IN PROGRESS**: While this tool currently provides a stable and functional "Pattern-Based Delta" format for the Atari 7800, research into even more efficient storage methods is ongoing to maximize the music capacity of future cartridges.
 
 A high-performance YM (Atari ST/Amstrad CPC) to Atari 7800 binary converter. It processes raw YM register streams into a highly compressed format suitable for 8-bit playback.
+
+[**View Technical Documentation**](docs/YmToBin.md)
+
 
 - **Supported Formats**: YM2, YM3, YM4, YM5, and YM6.
 - **Key Features**:
