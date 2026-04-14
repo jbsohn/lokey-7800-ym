@@ -74,6 +74,16 @@ These ROMs use the specialized physical mapping described below.
 
 To iterate rapidly without burning EPROMs, you can use these specialized forks that include full support for the physical YM2149 hardware mapping.
 
+### A78 Header & Emulator Detection
+
+The project uses a **v4 A78 Header** (an extension of the standard 128-byte header) to signal to the emulator that YM2149 hardware is present. This avoids the need for manual emulator configuration.
+
+- **Header Version**: `4` (Offset 0)
+- **Audio Flags (Hi)**: Bit 6 is set (`%01000000`) to indicate YM2149 presence (Offset 66).
+- **Mapper**: `0` (Linear/No Bankswitching, Offset 64).
+
+When the `a7800` or `js7800` forks detect this flag in a `.a78` file, they automatically enable the YM2149 engine and map it to the $4000-$7FFF range.
+
 ### a7800 (Desktop)
 The premier desktop emulator for the 7800, now updated with physical YM2149 support and modern development fixes.
 
