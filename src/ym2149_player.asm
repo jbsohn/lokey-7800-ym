@@ -23,7 +23,9 @@ pat_size   = $8e
 
 ; Constants
 NUM_REGS   = 14
-        include "enchant1.yminc"
+
+        ; These are injected via -D from the Makefile
+        include MUSIC_INC
 
         ifnconst build_with_header
 build_with_header SET 1
@@ -36,10 +38,10 @@ build_with_header SET 1
         endif
 
 ; ---------------------------------------------------------
-; Music Data (At start of ROM after header)
+; Music Data
 ; ---------------------------------------------------------
 MusicData:
-        incbin "enchant1.bin"
+        incbin MUSIC_BIN
 
 ; ---------------------------------------------------------
 ; Entry Point
@@ -114,7 +116,7 @@ init_music:
         sta seq_idx
         sta pat_frames ; Force new pattern fetch
 
-        ; pat_size is stored as first byte of MusicData
+        ; Header: [pat_size][num_patterns][seq_len]
         lda MusicData
         sta pat_size
 
@@ -171,7 +173,7 @@ play_frame:
         lda pat_frames
         bne .do_play
         
-        ; Fetch next pattern from sequence
+        ; Fetch next pattern from sequence (Strict 8-bit)
         ldy seq_idx
         lda (seq_base),y
         inc seq_idx

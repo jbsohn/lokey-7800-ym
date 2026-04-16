@@ -1,79 +1,92 @@
 # Atari 7800 YM2149 Project Makefile
 
-# Find all 6502 assembly sources
-ASM_SOURCES := $(wildcard src/ym2149_*.asm)
-# Find all YM sources in src to ensure they are converted
-YM_SOURCES := $(wildcard src/*.ym) $(wildcard src/*.YM)
-BIN_FROM_YM := $(YM_SOURCES:.ym=.bin)
-BIN_FROM_YM := $(BIN_FROM_YM:.YM=.bin)
-
-BIN_OUTPUTS := $(ASM_SOURCES:.asm=.bin)
-A78_OUTPUTS := $(ASM_SOURCES:.asm=.a78)
+# Configuration & Directories
+BUILD_DIR     := build
+SRC_DIR       := src
+YM_DIR        := YmSamples
+VGM_DIR       := VgmSamples
+PREVIEW_FLAGS := -s 2 -f 5000
 
 # Tools
-SIGN_TOOL := /home/john/7800AsmDevKit/7800sign
-DASM_FLAGS := -Isrc
-YM2BIN     := tools/YmToBin.cs
-DOTNET_SCRIPT := dotnet script
-GAL_SOURCE := gal/rom_ym.pld
+YM2BIN        := tools/YmToBin.cs
+VGM2BIN       := tools/VgmToBin.cs
+DOTNET        := dotnet script
+DASM          := dasm
+SIGN          := /home/john/7800AsmDevKit/7800sign
+DASM_FLAGS    := -I$(SRC_DIR) -I$(BUILD_DIR)
 
-.PHONY: all help a78 bin sign hw gal clean process-test process-stress
+# Dynamic Asset
+YM_SOURCES    := $(wildcard $(YM_DIR)/*.ym) $(wildcard $(YM_DIR)/*.YM)
+VGM_SOURCES   := $(wildcard $(VGM_DIR)/*.vgm) $(wildcard $(VGM_DIR)/*.vgz)
+
+# Map source filenames to build artifacts
+ALL_MUSIC_BINS := $(foreach f,$(YM_SOURCES) $(VGM_SOURCES),$(BUILD_DIR)/$(notdir $(basename $(f))).bin)
+MUSIC_ROMS     := $(ALL_MUSIC_BINS:.bin=.a78)
+MUSIC_WAVS     := $(ALL_MUSIC_BINS:.bin=.wav)
+
+# Fixed logic ROMs (Heartbeat, etc.)
+FIXED_ROMS     := $(BUILD_DIR)/ym2149_heartbeat_main.a78 $(BUILD_DIR)/ym2149_melody_vbi.a78
+
+# Core Targets
+.PHONY: all help clean gal hw a78 bin wav
 
 all: a78
 
+a78: $(BUILD_DIR) $(MUSIC_ROMS) $(FIXED_ROMS)
+
+bin: $(BUILD_DIR) $(ALL_MUSIC_BINS) $(FIXED_ROMS:.a78=.bin)
+
+wav: $(BUILD_DIR) $(MUSIC_WAVS)
+
 help:
-	@echo "Build Targets:"
-	@echo "  make a78           - Build .a78 ROMs for all ASM sources"
-	@echo "  make bin           - Build headerless .bin ROMs"
-	@echo "  make hw            - Build and sign .bin ROMs for real hardware"
-	@echo "  make gal           - Build JEDEC using galette"
-	@echo "  make clean         - Nuke all generated files"
+	@echo "Atari 7800 YM2149 SDK"
+	@echo "Targets:"
+	@echo "  make a78    - Build full library of preview ROMs"
+	@echo "  make wav    - Generate verification .wav files for all tracks"
+	@echo "  make hw     - Build and sign all assets for real hardware"
+	@echo "  make clean  - Wipe all build artifacts"
 
-# Ensure YM bins are created before assembly
-a78: $(BIN_FROM_YM) $(A78_OUTPUTS)
+$(BUILD_DIR):
+	@mkdir -p $(BUILD_DIR)
 
-bin: $(BIN_FROM_YM) $(BIN_OUTPUTS)
+# Conversion Rules (Source -> Binary)
 
-# Pattern rules for DASM (keeps output in src/)
-src/%.a78: src/%.asm src/a78_ym2149_header.asm
-	dasm $< $(DASM_FLAGS) -f3 -o$@
+$(BUILD_DIR)/%.bin: $(YM_DIR)/%.ym $(YM2BIN) | $(BUILD_DIR)
+	$(DOTNET) $(YM2BIN) $< -o $@ $(PREVIEW_FLAGS)
 
-src/%.bin: src/%.asm src/a78_ym2149_header.asm
-	dasm $< $(DASM_FLAGS) -Dbuild_with_header=0 -f3 -o$@
+$(BUILD_DIR)/%.bin: $(YM_DIR)/%.YM $(YM2BIN) | $(BUILD_DIR)
+	$(DOTNET) $(YM2BIN) $< -o $@ $(PREVIEW_FLAGS)
 
-# Signing for real hardware
-sign: bin
-	@for f in $(BIN_OUTPUTS); do \
+$(BUILD_DIR)/%.bin: $(VGM_DIR)/%.vgm $(VGM2BIN) | $(BUILD_DIR)
+	$(DOTNET) $(VGM2BIN) $< -o $@ $(PREVIEW_FLAGS)
+
+$(BUILD_DIR)/%.bin: $(VGM_DIR)/%.vgz $(VGM2BIN) | $(BUILD_DIR)
+	$(DOTNET) $(VGM2BIN) $< -o $@ $(PREVIEW_FLAGS)
+
+# 6. Assembly Rules (Logic + Asset -> ROM)
+$(BUILD_DIR)/%.a78: $(SRC_DIR)/ym2149_player.asm $(BUILD_DIR)/%.bin | $(BUILD_DIR)
+	@echo "  Assembling ROM: $*"
+	@$(DASM) $< $(DASM_FLAGS) -DMUSIC_INC=\"$*.yminc\" -DMUSIC_BIN=\"$*.bin\" -f3 -o$@
+
+$(BUILD_DIR)/ym2149_%.a78: $(SRC_DIR)/ym2149_%.asm | $(BUILD_DIR)
+	@$(DASM) $< $(DASM_FLAGS) -f3 -o$@
+
+# Verification Rules (Binary -> WAV)
+$(BUILD_DIR)/%.wav: $(BUILD_DIR)/%.bin tools/BinToWav.cs | $(BUILD_DIR)
+	@echo "  Generating WAV: $*"
+	@$(DOTNET) tools/BinToWav.cs $< $@
+
+# Utilities
+gal: $(BUILD_DIR)
+	@galette gal/rom.pld && galette gal/rom_ym.pld
+	@mv *.jed $(BUILD_DIR)/ 2>/dev/null || true
+
+hw: bin
+	@for f in $(BUILD_DIR)/*.bin; do \
 		echo "Signing $$f"; \
-		$(SIGN_TOOL) -w "$$f"; \
-		$(SIGN_TOOL) -t "$$f" || true; \
+		$(SIGN) -w "$$f" && $(SIGN) -t "$$f" || true; \
 	done
 
-hw: sign
-
-# GAL Logic (galette)
-GAL_SOURCES := gal/rom.pld gal/rom_ym.pld
-GAL_JEDECS := $(GAL_SOURCES:.pld=.jed)
-
-gal: $(GAL_JEDECS)
-	@command -v galette >/dev/null || { echo "Missing galette in PATH"; exit 1; }
-
-%.jed: %.pld
-	galette $<
-
-
-# Specific rule for large songs to fit in 32K
-src/enchant1.bin: src/enchant1.ym $(YM2BIN)
-	$(DOTNET_SCRIPT) $(YM2BIN) $< -o $@ -s 2
-
-# Pattern rule to convert any .ym file in src/ to .bin
-src/%.bin: src/%.ym $(YM2BIN)
-	$(DOTNET_SCRIPT) $(YM2BIN) $< -o $@
-
-src/%.bin: src/%.YM $(YM2BIN)
-	$(DOTNET_SCRIPT) $(YM2BIN) $< -o $@
-
 clean:
-	rm -f src/*.a78 src/*.bin src/*.yminc src/*.inc
-	rm -f samples/*.bin samples/*.yminc samples/*.inc
-	rm -f gal/*.jed gal/*.chp gal/*.pin gal/*.fus gal/*.pdf gal/*.sr gal/*.sim gal/*.abs
+	@rm -rf $(BUILD_DIR)
+	@rm -f src/*.wav samples/*.wav

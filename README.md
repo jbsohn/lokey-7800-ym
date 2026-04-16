@@ -6,6 +6,14 @@ The goal is to provide a stable, low-cost (~$2 USD) bridge between the Atari 780
 
 This repository is a playground for experiments with the Atari 7800 using a YM2149 on a cartridge.
 
+> **Research Note**: While we have achieved high-accuracy playback from modern trackers and Atari ST assets, research is ongoing to perfect the asset conversion process for complex tracks that utilize advanced hardware envelope techniques. 
+> 
+> Some legendary tracks (like those by Jess/Overlanders) were designed for high-speed 16-bit interrupts. Trying to play them on a standard 32KB / 60Hz Atari 7800 engine is like **trying to play a Blu-ray on a VHS tape**—the "soul" of the composition survives, but the extreme high-speed "magic" can sometimes be blurred by the physical limits of the 8-bit hardware. 
+> 
+> We may revisit these 'beasts' in future versions of the SDK (likely once we unlock the power of bank-switching), but for the **MVP** release, they have been sent to the `Unsupported/` folder to think about what they've done to our poor 6502. 
+> 
+> The fact that 1980s computer music is still "too complex" for an 8-bit console today says everything you need to know about the power of the Atari ST and the absolute wizardry of the **original song authors**. Some compositions, like those by **Jess (The Overlanders)**, are so dense with unique data that even our multi-stage `YmToBin` pattern compression couldn't squeeze them into a single 32KB ROM bank! We salute their 16-bit sorcery!
+
 ## Status: **STABLE ALPHA / "IT ACTUALLY WORKS!" (Work in Progress)**
 
 > This project has successfully graduated from its early breadboard phase to **Stable Alpha**. We have officially achieved highly accurate sound on real hardware. (Beta status is reserved for the first professional PCB run!) This project is still being actively developed and is a work in progress.
@@ -108,7 +116,7 @@ A browser-based emulator that allows for zero-setup testing and sharing.
 
 ## Signing for Real 7800 Hardware
 
-Atari 7800 cartridges must be cryptographically signed. After building a raw
+Atari 7800 cartridges must be signed. After building a raw
 `.bin`, run `7800sign -w` to write the signature into the ROM image:
 
 ```bash
@@ -313,39 +321,46 @@ All diagnostic and processing tools in this repository require the **.NET SDK**.
 
 > **Note on Windows**: These tools are currently **untested** on Windows. While they should run via `dotnet script`, the build environment and shell-based diagnostics have not been verified for that platform yet.
 
-### `tools/YmToBin.cs`
+### `tools/YmToBin.cs` & `tools/VgmToBin.cs`
 
-> **WORK IN PROGRESS**: While this tool currently provides a stable and functional "Pattern-Based Delta" format for the Atari 7800, research into even more efficient storage methods is ongoing to maximize the music capacity of future cartridges.
-
-A high-performance YM (Atari ST/Amstrad CPC) to Atari 7800 binary converter. It processes raw YM register streams into a highly compressed format suitable for 8-bit playback.
+A pair of high-performance music converters for the Atari 7800. They process raw register streams into a highly compressed "Pattern-Based Delta" format suitable for 8-bit playback.
 
 [**View Technical Documentation**](docs/YmToBin.md)
 
-
-- **Supported Formats**: YM2, YM3, YM4, YM5, and YM6.
+- **Supported Formats**:
+  - **YmToBin**: YM2, YM3, YM4, YM5, and YM6 (Atari ST / Amstrad CPC).
+  - **VgmToBin**: VGM and VGZ (Furnace Tracker / Arkos Tracker / ZX Spectrum).
 - **Key Features**:
-  - **Pitch Scaling**: Automatically adjusts frequency registers to account for the difference between the original chip clock (e.g., 2.0MHz) and the Atari 7800's PHI2 clock (1.79MHz).
+  - **Pitch Scaling**: Automatically adjusts frequency registers to account for the difference between the original chip clock (e.g., 2.0MHz or 1.0MHz) and the Atari 7800's PHI2 clock (1.79MHz).
+  - **Autonomous Metadata**: `VgmToBin` automatically extracts Title, Author, Game, and Recording Rate (50/60Hz) directly from the file header.
   - **Multi-Stage Compression**:
     - **Pattern-Based**: Identifies repeating sequences of frames and extracts them into a "Pattern Table" to save space.
     - **Bitmask Deltas**: Within each pattern, only registers that *change* between frames are stored, using a 16-bit mask.
-  - **Auto-Optimization**: If no pattern size is provided, the tool automatically tests multiple sizes (16, 32, 64, etc.) to find the best compression ratio for your specific song.
+  - **Auto-Optimization**: Automatically tests multiple pattern sizes (16, 32, 64, etc.) to find the best compression ratio for your specific song.
   - **Delay Calculation**: Computes the optimal `DEX/BNE` delay loop values (Y and X) to maintain consistent playback speed on the 6502.
+  - **Strict 8-Bit Limits**: Enforces a maximum of 255 unique patterns and 255 sequence entries to fit optimized for 7800 architecture and 32KB ROM space.
 - **Requirements**:
-  - **.NET SDK**: Required to run the C# script.
-  - **7-Zip (`7z`)**: Required to extract compressed `.ym` files (LZH archives). Ensure `7z` is in your system PATH.
+  - **.NET SDK**: Required to run the C# scripts.
+  - **7-Zip (`7z`)**: Required to extract compressed `.ym` (LZH) or `.vgz` (GZip) files.
 - **Usage**:
   ```bash
   dotnet script tools/YmToBin.cs <input.ym> [options]
+  dotnet script tools/VgmToBin.cs <input.vgm> [options]
   ```
-  - `<input.ym>`: Input YM file (required positional argument).
-  - `-o <file>`: Output binary file (default: input.bin).
-  - `-f <frames>`: Limit the number of frames to process (default: 65535).
-  - `-p <size>`: Fixed size for pattern blocks (set to 0 for auto-optimization).
-  - `-s <step>`: Frame skipping used to balance audio fidelity against ROM space.
-    - **Step 1 (Full Fidelity - 50Hz/60Hz)**: Full fidelity, largest size.
-    - **Step 2 (The "Sweet Spot" - 25Hz/30Hz)**: Halves the data size with minimal impact on sound quality.
-    - **Step 3 (Maximum Compression - ~16Hz/20Hz)**: Noticeable melody stutter, but saves the most space.
-  - `-hz <value>`: Override the player frequency (e.g., force a 50Hz song to play at 60Hz).
+
+### `tools/BinToWav.cs`
+
+A high-fidelity verification tool that converts your compressed 7800 `.bin` files back into standard `.wav` audio. 
+
+- **Key Features**:
+  - **Reference Emulation**: Uses a literal C# port of the `aym-js` core for high-accuracy hardware synchronization.
+  - **Hardware "Buzz"**: Accurately reproduces the YM2149's 32-step logarithmic volume curve and aggressive hardware envelopes.
+  - **High-Quality Filtering**: Implements box-filtered downsampling from 224kHz to 44.1kHz to eliminate digital aliasing.
+  - **Zero Setup**: Generates a standard WAV file that can be played on any modern OS without extra libraries.
+- **Usage**:
+  ```bash
+  dotnet script tools/BinToWav.cs src/your_song.bin [output.wav]
+  ```
 
 ### `tools/ValidateCartSignals.cs`
 
@@ -395,7 +410,9 @@ Check out the current state of tests running on the dev board:
 - **Karri Kaksonen (karrika)**: For the excellent [Otaku-flash](https://github.com/karrika/Otaku-flash) project. We have integrated the **Stable Alpha** Atari 7800 cartridge footprints, symbols, and professional design rules from this MIT-licensed repository.
 - **Simon Frankau ([galette](https://github.com/simon-frankau/galette))**: For the open-source **galette** GAL assembler. It provides a modern, cross-platform toolchain that saved us from the Windows VM nightmare of WinCUPL. Thanks for keeping our development environment in the 21st century!
 - **Dan Boris (AtariHQ)**: For the indispensable [7800 Cartridge Technical Specifications](https://atarihq.com/danb/7800cart/a7800cart.shtml) and reference diagrams that made this hardware mapping possible.
+- **Olivier PONCET (aym-js)**: For the high-fidelity [aym-js](https://github.com/ponceto/aym-js) YM2149 emulator core. Our `BinToWav` tool uses a literal C# port of this logic (synchronized with our `js7800` emulator fork) to ensure high-accuracy verification of music assets.
 - **Arnaud Carré (Leonard/OXG)**: For the excellent [StSound](https://github.com/arnaud-carre/StSound) project. The `samples/` directory contains melodic assets sourced from this project for hardware testing.
+
 - **The Atari Community**: We are grateful to the dedicated fans keeping the 16-bit and 8-bit flames alive through archival and homebrew development.
 
 ## Future Plans & Extensibility
@@ -496,3 +513,4 @@ For reflections on the legacy of the Atari ST and how AI is changing the landsca
 This project is licensed under the **GNU General Public License v2.0 (GPL-2.0)**. See the `LICENSE` file for details.
 
 **Use at your own risk.** The author is not responsible for any damage to your hardware, loss of data, or any other issues that may arise from using this code, following the wiring diagrams, or running the provided tools. There is no warranty, Expressed or Implied.
+thor is not responsible for any damage to your hardware, loss of data, or any other issues that may arise from using this code, following the wiring diagrams, or running the provided tools. There is no warranty, Expressed or Implied.

@@ -1,6 +1,7 @@
 *.a78
 *.bin
 *.yminc
+build/
 .vscode
 .idea
 *.chp
