@@ -41,7 +41,7 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 
 ## Documentation
 
-- **[Development Guide](DEVELOPMENT.md)** - Technical standards and build process.
+- **[Development Guide](CLAUDE.md)** - Technical standards and build process for developers and AI assistants.
 - **[Building & Toolchain](docs/Building.md)** - Compile ROMs and set up the environment.
 * **[File Extension Reference](docs/FileExtensions.md)** - Guide to `.ymb`, `.ymi`, `.rom`, and `.a78` files.
 * **[Hardware & Wiring](docs/Hardware.md)** - Pinouts, memory mapping, and GAL logic.
