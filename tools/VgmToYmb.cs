@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 
-// YM to Atari 7800 Binary Converter (Pattern-Based Delta)
+// VGM to Atari 7800 YMB Converter (Pattern-Based Delta)
 // ------------------------------------------------------
 // Optimized binary format for 6502 playback.
 // Performs pitch scaling, delta-masking, and pattern deduplication.
@@ -13,21 +13,23 @@ using System.Text;
 // ------------------------------------------------------
 
 var arguments = Environment.GetCommandLineArgs().Skip(2).ToArray();
-return YmConverter.Run(arguments);
+return VgmConverter.Run(arguments);
 
 /// <summary>
-///     Represents the header and technical metadata of an Atari ST YM file.
+///     Represents the metadata and structure of a VGM music file.
 /// </summary>
-internal record YmHeader(
-    string Signature,
-    int TotalFrames,
-    int ChipClock,
-    int PlayerHz,
-    int DataOffset
+internal record VgmHeader(
+    string Version,
+    int DataOffset,
+    int AyClock,
+    int RateHz,
+    string Title,
+    string Author,
+    string Game
 );
 
 /// <summary>
-///     Arguments passed to the YM conversion orchestrator.
+///     Arguments passed to the conversion orchestrator.
 /// </summary>
 internal record struct ConversionOptions(
     string InputFile,
@@ -39,15 +41,16 @@ internal record struct ConversionOptions(
 );
 
 /// <summary>
-///     Orchestrates the extraction, scaling, and compression of Atari ST YM assets.
+///     Orchestrates the parsing, scaling, and compression of VGM/VGZ files.
 /// </summary>
-internal static class YmConverter
+internal static class VgmConverter
 {
     private const int NumRegisters = 14;
     private const double Atari7800Clock = 1.792000;
+    private const int VgmSampleRate = 44100;
 
     /// <summary>
-    ///     Main entry point for the YM converter.
+    ///     Main entry point for the VGM converter.
     /// </summary>
     public static int Run(string[] args)
     {
@@ -58,38 +61,38 @@ internal static class YmConverter
         }
 
         var options = ParseArgs(args);
-        var binFile = options.OutputFile ?? Path.ChangeExtension(options.InputFile, ".bin");
-        var configFile = Path.ChangeExtension(binFile, ".yminc");
+        var binFile = options.InputFile;
+        var outFile = options.OutputFile ?? Path.ChangeExtension(binFile, ".bin");
+        var configFile = Path.ChangeExtension(outFile, ".ymi");
 
         if (!IsToolInstalled("7z"))
-            Console.WriteLine("WARNING: '7z' (7-Zip) not found. Required for compressed .ym files.");
+            Console.WriteLine("WARNING: '7z' (7-Zip) not found. Required for compressed .vgz files.");
 
         try
         {
-            var rawData = ExtractRawData(options.InputFile);
+            var rawData = ExtractRawData(binFile);
             var header = ParseHeader(rawData);
 
-            var playerHz = options.OverrideHz ?? header.PlayerHz;
-            var framesToProcess = Math.Min(header.TotalFrames, options.MaxFrames);
-            var effectiveHz = playerHz / options.Step;
+            var playerHz = options.OverrideHz ?? header.RateHz;
 
             Console.WriteLine("---------------------------------------------------------");
-            Console.WriteLine($"Song:   {options.InputFile}");
-            Console.WriteLine($"Format: {header.Signature} | Frames: {header.TotalFrames}");
-            Console.WriteLine(
-                $"Clock:  {header.ChipClock / 1000000.0:F3} MHz | Rate: {effectiveHz} Hz (Step {options.Step})");
+            Console.WriteLine($"Song:   {header.Title}");
+            Console.WriteLine($"Author: {header.Author}");
+            Console.WriteLine($"Game:   {header.Game}");
+            Console.WriteLine($"Format: VGM v{header.Version}");
+            Console.WriteLine($"Clock:  {header.AyClock / 1000000.0:F3} MHz | Rate: {playerHz} Hz");
             Console.WriteLine("---------------------------------------------------------");
 
-            var (interleavedData, r13Mask) = DeinterleaveAndScale(rawData, header, framesToProcess, options.Step);
+            var (interleavedData, r13Mask) =
+                ParseAndScaleVgm(rawData, header, playerHz, options.MaxFrames, options.Step);
             var outputFrames = interleavedData.Length / NumRegisters;
 
             var (bestData, bestSize, bestUnique, bestSeq) =
                 OptimizeCompression(interleavedData, outputFrames, options.PatternSize, r13Mask);
 
-            var yDelay = CalculateDelay(effectiveHz, out var xFine);
-            SaveOutput(binFile, configFile, options.InputFile, bestData, outputFrames, yDelay, xFine, bestUnique,
-                bestSeq,
-                bestSize, effectiveHz);
+            var yDelay = CalculateDelay(playerHz / options.Step, out var xFine);
+            SaveOutput(outFile, configFile, binFile, bestData, outputFrames, yDelay, xFine, bestUnique, bestSeq,
+                bestSize, playerHz / options.Step);
             return 0;
         }
         catch (Exception ex)
@@ -125,7 +128,7 @@ internal static class YmConverter
 
     private static void PrintUsage()
     {
-        Console.WriteLine("Usage: dotnet script YmToBin.cs <input.ym> [options]");
+        Console.WriteLine("Usage: dotnet script VgmToBin.cs <input.vgm/vgz> [options]");
         Console.WriteLine(
             "Options:\n  -o <file>   Output binary\n  -f <frames> Max frames\n  -p <size>   Pattern size (0=auto)\n  -s <step>   Frame step\n  -hz <val>   Override Hz");
     }
@@ -146,114 +149,207 @@ internal static class YmConverter
     }
 
     /// <summary>
-    ///     Uses 7-Zip to extract raw YM data from LZH-compressed containers.
+    ///     Extracts raw VGM data, handling transparent decompression of .vgz files.
     /// </summary>
     private static byte[] ExtractRawData(string filePath)
     {
         var buffer = File.ReadAllBytes(filePath);
-        if (buffer.Length > 4 && buffer[0] == 'Y' && buffer[1] == 'M') return buffer;
+        if (buffer.Length > 4 && buffer[0] == 'V' && buffer[1] == 'g' && buffer[2] == 'm') return buffer;
 
         using var process = Process.Start(new ProcessStartInfo("7z", $"x -so \"{filePath}\"")
         {
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false
-        }) ?? throw new InvalidOperationException("Failed to start '7z'. Ensure 7-Zip is installed.");
+        }) ?? throw new InvalidOperationException("Failed to start '7z'.");
 
         using var ms = new MemoryStream();
         process.StandardOutput.BaseStream.CopyTo(ms);
         process.WaitForExit();
-        return ms.ToArray();
+        var outData = ms.ToArray();
+        if (outData.Length > 4 && outData[0] == 'V' && outData[1] == 'g' && outData[2] == 'm') return outData;
+
+        throw new InvalidDataException("File is not a valid VGM or compressed VGZ.");
     }
 
     /// <summary>
-    ///     Parses the YM header, identifying the format version and jumping over digidrum blocks.
+    ///     Parses the VGM header and extracts metadata like chip clocks and GD3 tags.
     /// </summary>
-    private static YmHeader ParseHeader(ReadOnlySpan<byte> data)
+    private static VgmHeader ParseHeader(byte[] data)
     {
-        var sig = Encoding.ASCII.GetString(data[..4]);
-        if (sig is "YM2!" or "YM3!")
-            return new YmHeader(sig, (data.Length - 4) / NumRegisters, 2000000, 50, 4);
+        if (Encoding.ASCII.GetString(data[..4]) != "Vgm ")
+            throw new InvalidDataException("Not a VGM file.");
 
-        if (sig is not ("YM4!" or "YM5!" or "YM6!"))
-            throw new InvalidDataException($"Unsupported YM format: {sig}. This tool requires YM4, YM5, or YM6.");
+        var versionNum = BinaryPrimitives.ReadInt32LittleEndian(data[0x08..0x0C]);
+        var version = $"{versionNum >> 8:X}.{versionNum & 0xFF:X2}";
 
-        var frames = BinaryPrimitives.ReadInt32BigEndian(data[12..16]);
-        var clock = BinaryPrimitives.ReadInt32BigEndian(data[22..26]);
-        int hz = BinaryPrimitives.ReadInt16BigEndian(data[26..28]);
-        int digidrums = BinaryPrimitives.ReadInt16BigEndian(data[20..22]);
+        var rateHz = BinaryPrimitives.ReadInt32LittleEndian(data[0x24..0x28]);
+        if (rateHz == 0) rateHz = 60;
 
-        var skip = 34;
-        while (digidrums-- > 0)
+        var dataOffsetRel = BinaryPrimitives.ReadInt32LittleEndian(data[0x34..0x38]);
+        var dataOffset = dataOffsetRel == 0 ? 0x40 : 0x34 + dataOffsetRel;
+
+        var ayClock = BinaryPrimitives.ReadInt32LittleEndian(data[0x74..0x78]);
+        if (ayClock == 0)
+            throw new InvalidDataException("VGM does not contain AY8910/YM2149 data.");
+
+        ayClock &= 0x3FFFFFFF;
+        var (title, author, game) = ExtractMetadata(data);
+        return new VgmHeader(version, dataOffset, ayClock, rateHz, title, author, game);
+    }
+
+    private static (string title, string author, string game) ExtractMetadata(byte[] data)
+    {
+        var gd3OffsetRel = BinaryPrimitives.ReadInt32LittleEndian(data[0x14..0x18]);
+        if (gd3OffsetRel == 0) return ("Unknown", "Unknown", "Unknown");
+
+        var offset = 0x14 + gd3OffsetRel;
+        if (Encoding.ASCII.GetString(data[offset..(offset + 4)]) != "Gd3 ")
+            return ("Unknown", "Unknown", "Unknown");
+
+        offset += 12;
+
+        string ReadString(ref int off)
         {
-            var drumLength = BinaryPrimitives.ReadInt32BigEndian(data[skip..(skip + 4)]);
-            skip += 4 + drumLength;
+            var start = off;
+            while (off + 1 < data.Length && (data[off] != 0 || data[off + 1] != 0)) off += 2;
+            var res = Encoding.Unicode.GetString(data[start..off]);
+            off += 2;
+            return res;
         }
 
-        for (var i = 0; i < 3; i++)
-        {
-            while (data[skip] != 0) skip++;
-            skip++;
-        }
+        var title = ReadString(ref offset);
+        _ = ReadString(ref offset);
+        var game = ReadString(ref offset);
+        _ = ReadString(ref offset);
+        _ = ReadString(ref offset);
+        _ = ReadString(ref offset);
+        var author = ReadString(ref offset);
 
-        return new YmHeader(sig, frames, clock, hz, skip);
+        return (title, author, game);
     }
 
     /// <summary>
-    ///     Implements Peak Detection during frame-stepping to preserve percussive attacks.
+    ///     Parses the VGM command stream, scales pitches, and implements Peak Detection for frame stepping.
     /// </summary>
-    private static (byte[] data, bool[] r13Written) DeinterleaveAndScale(byte[] rawData, YmHeader header,
-        int framesToProcess, int step)
+    private static (byte[] data, bool[] r13Written) ParseAndScaleVgm(byte[] rawData, VgmHeader header, int playerHz,
+        int maxFrames, int step)
     {
-        var outputFrames = (framesToProcess + step - 1) / step;
-        var interleavedData = new byte[outputFrames * NumRegisters];
-        var r13Writes = new bool[outputFrames];
-        var pitchScale = Atari7800Clock / (header.ChipClock / 1000000.0);
+        var pitchScale = Atari7800Clock / (header.AyClock / 1000000.0);
+        var samplesPerFrame = (double)VgmSampleRate / playerHz;
 
         var registers = new byte[NumRegisters];
+        var workingRegs = new byte[NumRegisters];
+        var frames = new List<byte[]>();
+        var r13Writes = new List<bool>();
+        var r13WasWritten = false;
 
-        for (var f = 0; f < outputFrames; f++)
+        var offset = header.DataOffset;
+        var currentSample = 0;
+        double nextFrameSample = 0;
+
+        while (offset < rawData.Length && frames.Count < maxFrames)
         {
-            var r13TriggeredInWindow = false;
+            var cmd = rawData[offset++];
 
-            // Peak Detection: Scan all frames in the step window
-            for (var s = 0; s < step; s++)
+            if (cmd == 0xA0) // AY8910 write
             {
-                var sourceFrame = f * step + s;
-                if (sourceFrame >= header.TotalFrames) break;
-
-                for (var r = 0; r < NumRegisters; r++)
+                var reg = rawData[offset++];
+                var val = rawData[offset++];
+                if (reg < NumRegisters)
                 {
-                    var val = rawData[header.DataOffset + r * header.TotalFrames + sourceFrame];
-
-                    // Take the MAX volume for drum channels (R8,9,10) during stepping
-                    if (step > 1 && r is >= 8 and <= 10)
-                    {
-                        if (val > registers[r]) registers[r] = val;
-                    }
-                    // Capture first value in window for pitch to avoid tuning issues
-                    else if (s == 0)
-                    {
-                        registers[r] = val;
-                    }
-
-                    // Special R13 logic: detect change or trigger across skipping window
-                    if (r == 13 && sourceFrame > 0)
-                    {
-                        var prev = rawData[header.DataOffset + r * header.TotalFrames + sourceFrame - 1];
-                        if (val != prev || sourceFrame % 50 == 0) r13TriggeredInWindow = true;
-                    }
+                    registers[reg] = val;
+                    if (reg == 13) r13WasWritten = true;
+                }
+            }
+            else if (cmd == 0x61)
+            {
+                int wait = BinaryPrimitives.ReadInt16LittleEndian(rawData[offset..(offset + 2)]);
+                offset += 2;
+                currentSample += wait;
+            }
+            else if (cmd == 0x62)
+            {
+                currentSample += 735;
+            }
+            else if (cmd == 0x63)
+            {
+                currentSample += 882;
+            }
+            else if ((cmd & 0xF0) == 0x70)
+            {
+                currentSample += (cmd & 0x0F) + 1;
+            }
+            else if (cmd == 0x66)
+            {
+                break;
+            }
+            else if (cmd == 0x67) // Data Block (Metadata/PCM)
+            {
+                offset++; // data type
+                var size = BinaryPrimitives.ReadInt32LittleEndian(rawData[offset..(offset + 4)]);
+                offset += 4 + size;
+            }
+            else if (cmd == 0x68)
+            {
+                offset += 11;
+            }
+            else
+            {
+                // General command skipping to maintain stream alignment
+                switch (cmd)
+                {
+                    case >= 0x30 and <= 0x3F: break;
+                    case >= 0x40 and <= 0x4F: offset++; break;
+                    case >= 0x50 and <= 0x5F:
+                    case >= 0xA0 and <= 0xBF: offset += 2; break;
+                    case >= 0xC0 and <= 0xDF: offset += 3; break;
                 }
             }
 
-            var scaledFrame = ScaleFrame(registers, pitchScale);
-            scaledFrame.CopyTo(interleavedData.AsSpan(f * NumRegisters));
-            r13Writes[f] = r13TriggeredInWindow;
-
-            Array.Clear(registers, 0, registers.Length);
+            while (currentSample >= nextFrameSample && frames.Count < maxFrames)
+            {
+                // Capture current state for this 1/60th (or 1/50th) second frame
+                frames.Add(ScaleFrame(registers, pitchScale));
+                r13Writes.Add(r13WasWritten);
+                r13WasWritten = false;
+                nextFrameSample += samplesPerFrame;
+            }
         }
 
-        return (interleavedData, r13Writes);
+        var steppedFrames = new List<byte>();
+        var steppedR13 = new List<bool>();
+
+        // Implementation of Drum-Aware Peak Detection
+        for (var i = 0; i < frames.Count; i += step)
+        {
+            Array.Clear(workingRegs, 0, NumRegisters);
+            var r13TriggeredInWindow = false;
+
+            // Scan the window (e.g. 2 frames) to protect percussion peaks
+            for (var s = 0; s < step && i + s < frames.Count; s++)
+            {
+                var frameData = frames[i + s];
+                if (r13Writes[i + s]) r13TriggeredInWindow = true;
+
+                for (var r = 0; r < NumRegisters; r++)
+                    // Peak detect volume (R8,9,10) to prevent missing drum attacks
+                    if (step > 1 && r is >= 8 and <= 10)
+                    {
+                        if (frameData[r] > workingRegs[r]) workingRegs[r] = frameData[r];
+                    }
+                    // Capture first frame for pitch/period to maintain tuning
+                    else if (s == 0)
+                    {
+                        workingRegs[r] = frameData[r];
+                    }
+            }
+
+            steppedFrames.AddRange(workingRegs);
+            steppedR13.Add(r13TriggeredInWindow);
+        }
+
+        return (steppedFrames.ToArray(), steppedR13.ToArray());
     }
 
     /// <summary>
@@ -272,8 +368,7 @@ internal static class YmConverter
         var tC = Scale(frame[4], frame[5], 0x0F, pitchScale);
         frame[4] = (byte)(tC & 0xFF);
         frame[5] = (byte)((tC >> 8) & 0x0F);
-        var frame6Raw = frame[6] & 0x1F;
-        frame[6] = (byte)((int)Math.Round(frame6Raw * pitchScale) & 0x1F);
+        frame[6] = (byte)((int)Math.Round((frame[6] & 0x1F) * pitchScale) & 0x1F);
         var e = Scale(frame[11], frame[12], 0xFF, pitchScale);
         frame[11] = (byte)(e & 0xFF);
         frame[12] = (byte)((e >> 8) & 0xFF);
@@ -297,7 +392,7 @@ internal static class YmConverter
         Console.WriteLine("Optimizing pattern size...");
         byte[]? bestData = null;
         int bestSize = 0, bestU = 0, bestS = 0;
-        int[] patternSizes = [16, 32, 48, 64, 80, 96, 128, 160, 192, 256];
+        int[] patternSizes = [16, 32, 48, 64, 80, 96, 128, 160, 192, 255];
         foreach (var size in patternSizes)
             try
             {
@@ -310,9 +405,9 @@ internal static class YmConverter
             {
             }
 
-        return bestData == null
-            ? throw new InvalidOperationException("Could not find a pattern size that fits within 8-bit limits.")
-            : (bestData, bestSize, bestU, bestS);
+        if (bestData == null)
+            throw new InvalidOperationException("Could not find a pattern size that fits within 8-bit limits.");
+        return (bestData, bestSize, bestU, bestS);
     }
 
     private static byte[] CompressWithPatterns(byte[] interleavedData, int totalFrames, int patSize,

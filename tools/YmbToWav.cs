@@ -4,7 +4,7 @@ using System.Buffers.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 
-// BinToWav.cs - Reference-Grade YM2149 .bin to .wav Converter
+// YmbToWav.cs - Reference-Grade YM2149 .ymb to .wav Converter
 // -------------------------------------------------------------
 // Uses a literal C# port of aym-js by Olivier PONCET.
 // https://github.com/ponceto/aym-js
@@ -45,7 +45,7 @@ internal static class BinToWavConverter
         try
         {
             var binData = File.ReadAllBytes(options.InputFile);
-            var incFile = Path.ChangeExtension(options.InputFile, ".yminc");
+            var incFile = Path.ChangeExtension(options.InputFile, ".ymi");
             var playerHz = DetectPlayerHz(incFile);
 
             var renderer = new BinToWavRenderer(binData, playerHz);
@@ -94,7 +94,8 @@ internal class BinToWavRenderer(byte[] data, int playerHz)
     /// </summary>
     public void SaveToWav(string filePath)
     {
-        int patSize = data[0], numPatterns = data[1], seqLen = data[2];
+        int patSize = data[0] == 0 ? 256 : data[0];
+        int numPatterns = data[1], seqLen = data[2];
         var samplesPerFrame = SampleRate / playerHz;
         var totalSamples = (long)seqLen * patSize * samplesPerFrame;
 
