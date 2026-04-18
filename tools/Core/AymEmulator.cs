@@ -40,6 +40,9 @@ public class AymEmulator
     /// </summary>
     public void UpdateRegisters(ReadOnlySpan<byte> r)
     {
+        if (r.Length < 14)
+            throw new ArgumentException("PSG register update requires at least 14 bytes.", nameof(r));
+
         for (var i = 0; i < 14; i++)
         {
             if (_regs[i] == r[i] && i != 13) continue;

@@ -130,9 +130,9 @@ public record YmMusic(List<YmFrame> Frames)
     public static (int y, int x) CalculateDelay(int hz)
     {
         var remaining = Math.Max(0, 1789773.0 / hz - 1800.0);
-        var y = Math.Max(1, (int)Math.Floor(remaining / 1285.0));
-        var x = (int)Math.Min(255, Math.Round((remaining - y * 1285.0) / 5.0));
-        return (y, x);
+        var yRaw = (int)Math.Floor(remaining / 1285.0);
+        var x = (int)Math.Clamp(Math.Round((remaining - yRaw * 1285.0) / 5.0), 0, 255);
+        return (Math.Max(1, yRaw), x);
     }
 
     /// <summary>

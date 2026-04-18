@@ -147,12 +147,16 @@ internal static class Program
     private static VgmHeader ParseHeader(byte[] data)
     {
         if (Encoding.ASCII.GetString(data[..4]) != "Vgm ") throw new InvalidDataException("Not a VGM file.");
+
+        var versionNum = BinaryPrimitives.ReadInt32LittleEndian(data[0x08..0x0C]);
+        var version = $"{versionNum >> 8:X}.{versionNum & 0xFF:X2}";
+
         var rateHz = BinaryPrimitives.ReadInt32LittleEndian(data[0x24..0x28]);
         if (rateHz == 0) rateHz = 60;
         var dataOffsetRel = BinaryPrimitives.ReadInt32LittleEndian(data[0x34..0x38]);
         var dataOffset = dataOffsetRel == 0 ? 0x40 : 0x34 + dataOffsetRel;
         var ayClock = BinaryPrimitives.ReadInt32LittleEndian(data[0x74..0x78]) & 0x3FFFFFFF;
-        return new VgmHeader("1.71", dataOffset, ayClock, rateHz, "Unknown", "Unknown", "Unknown");
+        return new VgmHeader(version, dataOffset, ayClock, rateHz, "Unknown", "Unknown", "Unknown");
     }
 
     /// <summary>
