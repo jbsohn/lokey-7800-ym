@@ -1,7 +1,4 @@
-﻿using System;
-using System.Buffers.Binary;
-using System.IO;
-using System.Linq;
+﻿using System.Buffers.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 using Core;
@@ -94,7 +91,7 @@ internal class BinToWavRenderer(byte[] data, int playerHz)
     /// </summary>
     public void SaveToWav(string filePath)
     {
-        int patSize = data[0] == 0 ? 256 : data[0];
+        var patSize = data[0] == 0 ? 256 : data[0];
         int numPatterns = data[1], seqLen = data[2];
         var samplesPerFrame = SampleRate / playerHz;
         var totalSamples = (long)seqLen * patSize * samplesPerFrame;
