@@ -3,6 +3,7 @@
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Text;
 
 // YM to Atari 7800 YMB Converter (Pattern-Based Delta)
@@ -134,7 +135,8 @@ internal static class YmConverter
     {
         try
         {
-            using var p = Process.Start(new ProcessStartInfo("whereis", toolName)
+            var searchCmd = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "where" : "which";
+            using var p = Process.Start(new ProcessStartInfo(searchCmd, toolName)
                 { RedirectStandardOutput = true, UseShellExecute = false });
             p?.WaitForExit();
             return p?.ExitCode == 0;
@@ -153,12 +155,14 @@ internal static class YmConverter
         var buffer = File.ReadAllBytes(filePath);
         if (buffer.Length > 4 && buffer[0] == 'Y' && buffer[1] == 'M') return buffer;
 
-        using var process = Process.Start(new ProcessStartInfo("7z", $"x -so \"{filePath}\"")
+        var exeName = IsToolInstalled("7z") ? "7z" : "7zz";
+
+        using var process = Process.Start(new ProcessStartInfo(exeName, $"x -so \"{filePath}\"")
         {
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false
-        }) ?? throw new InvalidOperationException("Failed to start '7z'. Ensure 7-Zip is installed.");
+        }) ?? throw new InvalidOperationException($"Failed to start '{exeName}'. Ensure 7-Zip is installed.");
 
         using var ms = new MemoryStream();
         process.StandardOutput.BaseStream.CopyTo(ms);

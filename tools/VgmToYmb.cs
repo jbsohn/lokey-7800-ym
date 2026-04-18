@@ -3,6 +3,8 @@
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 // VGM to Atari 7800 YMB Converter (Pattern-Based Delta)
@@ -137,7 +139,8 @@ internal static class VgmConverter
     {
         try
         {
-            using var p = Process.Start(new ProcessStartInfo("whereis", toolName)
+            var searchCmd = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "where" : "which";
+            using var p = Process.Start(new ProcessStartInfo(searchCmd, toolName)
                 { RedirectStandardOutput = true, UseShellExecute = false });
             p?.WaitForExit();
             return p?.ExitCode == 0;
@@ -156,12 +159,14 @@ internal static class VgmConverter
         var buffer = File.ReadAllBytes(filePath);
         if (buffer.Length > 4 && buffer[0] == 'V' && buffer[1] == 'g' && buffer[2] == 'm') return buffer;
 
-        using var process = Process.Start(new ProcessStartInfo("7z", $"x -so \"{filePath}\"")
+        var exeName = IsToolInstalled("7z") ? "7z" : "7zz";
+
+        using var process = Process.Start(new ProcessStartInfo(exeName, $"x -so \"{filePath}\"")
         {
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false
-        }) ?? throw new InvalidOperationException("Failed to start '7z'.");
+        }) ?? throw new InvalidOperationException($"Failed to start '{exeName}'.");
 
         using var ms = new MemoryStream();
         process.StandardOutput.BaseStream.CopyTo(ms);
