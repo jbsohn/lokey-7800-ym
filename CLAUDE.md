@@ -6,7 +6,8 @@ This document outlines the technical standards, build process, and coding style 
 
 | Command | Purpose |
 |---------|---------|
-| `make a78` | Build ROMs with 128-byte headers (emulators) |
+| `make tools` | Build the .NET conversion tools solution |
+| `make a78` | Build sample ROMs with 128-byte headers (emulators) |
 | `make rom` | Build and sign raw ROM binaries for hardware (.rom) |
 | `make bin` | Build music data fragments only (.ymb) |
 | `make wav` | Generate WAV verification files from .ymb |
@@ -43,10 +44,10 @@ This document outlines the technical standards, build process, and coding style 
 
 ## Music Conversion
 
-Use the provided .NET scripts to convert register captures:
+Use the provided .NET tools to convert register captures:
 
 ```bash
-dotnet script tools/YmToYmb.cs <input.ym> -o <output.ymb> -s <step>
+dotnet run --project tools/YmToYmb/YmToYmb.csproj -- <input.ym> -o <output.ymb> -s <step>
 ```
 - `-s 1`: Full fidelity.
 - `-s 2`: Half-size (recommended for most tracks).
@@ -62,14 +63,14 @@ dotnet script tools/YmToYmb.cs <input.ym> -o <output.ymb> -s <step>
 ## Diagnostics
 
 - **Software Heartbeat**: Background color flashing confirms the 6502 is executing and VBI timing is correct.
-- **WAV Verification**: `dotnet script tools/YmbToWav.cs build/track.ymb output.wav`
+- **WAV Verification**: `dotnet run --project tools/YmbToWav/YmbToWav.csproj -- build/track.ymb output.wav`
 
 ## Project Structure
 
-- `src/`: 6502 assembly source code.
+- `sample-code/`: 6502 assembly sample code and reference player.
 - `docs/`: Technical reference and deep-dive guides.
-- `tools/`: C# conversion and diagnostic scripts.
+- `tools/`: .NET conversion tools and Sigrok diagnostic scripts.
 - `gal/`: Programmable logic (GAL16V8) sources.
 - `pcb/`: tscircuit PCB design files.
-- `YmSamples/`: Original Atari ST music sources.
-- `VgmSamples/`: VGM/VGZ music sources.
+- `ym-samples/`: Original Atari ST music sources.
+- `vgm-samples/`: VGM/VGZ music sources.

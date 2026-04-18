@@ -6,15 +6,15 @@ This document describes the tools used to process and verify music for the Atari
 
 We provide two primary tools for converting register streams into the optimized `.ymb` format.
 
-### `YmToYmb.cs` (Atari ST Captures)
+### `YmToYmb` (Atari ST Captures)
 Converts Atari ST **YM** files (captured from legacy ST trackers). 
 - **Formats**: YM2, YM3, YM4, YM5, and YM6.
-- **Usage**: `dotnet script tools/YmToYmb.cs <input.ym> [options]`
+- **Usage**: `dotnet run --project tools/YmToYmb/YmToYmb.csproj -- <input.ym> [options]`
 
-### `VgmToYmb.cs` (Modern Trackers)
+### `VgmToYmb` (Modern Trackers)
 Converts **VGM/VGZ** command streams. This is the preferred route for new compositions.
 - **Trackers**: [**Furnace Tracker**](https://tildearrow.org/furnace) or [**Arkos Tracker**](https://www.julien-nevo.com/arkostracker/) (dedicated specifically to the AY/YM architecture).
-- **Usage**: `dotnet script tools/VgmToYmb.cs <input.vgm> [options]`
+- **Usage**: `dotnet run --project tools/VgmToYmb/VgmToYmb.csproj -- <input.vgm> [options]`
 
 ---
 
@@ -62,9 +62,9 @@ The tool outputs a `.ymi` file containing constants for the 6502 player:
 
 ## Audio Verification
 
-### `YmbToWav.cs`
+### `YmbToWav`
 A verification tool that renders `.ymb` music data back into standard `.wav` audio. 
 
 - **Accuracy**: Aims to reproduce the YM2149's logarithmic volume curve and hardware envelopes.
 - **Filtering**: Uses downsampling to reduce digital aliasing.
-- **Usage**: `dotnet script tools/YmbToWav.cs build/song.ymb [output.wav]`
+- **Usage**: `dotnet run --project tools/YmbToWav/YmbToWav.csproj -- build/song.ymb [output.wav]`

@@ -30,7 +30,7 @@ make clean
 
 ## Assembler & Toolchain
 
-The source code is currently written for the **DASM** assembler to facilitate rapid prototyping and get the initial hardware working. "Hardware working first" is the current priority.
+The sample code is currently written for the **DASM** assembler to facilitate rapid prototyping and get the initial hardware working. "Hardware working first" is the current priority.
 
 Once the project is stable, we plan to transition to a more robust toolchain:
 - **cc65**: To leverage its powerful macro assembler and flexible linking options.
@@ -40,7 +40,7 @@ Once the project is stable, we plan to transition to a more robust toolchain:
 
 All diagnostic and processing tools in this repository require the **.NET SDK**. They have been verified on **Linux** and **macOS** (Intel and Apple Silicon). 
 
-> **Note on Windows**: These tools are currently **untested** on Windows. While they should run via `dotnet script`, the build environment and shell-based diagnostics have not been verified for that platform yet.
+> **Note on Windows**: These tools are currently **untested** on Windows. While they should run via `dotnet build` or `dotnet run`, the build environment and shell-based diagnostics have not been verified for that platform yet.
 ```
 
 ## GAL Logic Compilation

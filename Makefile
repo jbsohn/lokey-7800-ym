@@ -2,9 +2,9 @@
 
 # Configuration & Directories
 BUILD_DIR     := build
-SRC_DIR       := src
-YM_DIR        := YmSamples
-VGM_DIR       := VgmSamples
+SRC_DIR       := sample-code
+YM_DIR        := ym-samples
+VGM_DIR       := vgm-samples
 PREVIEW_FLAGS := -s 2 -f 5000
 
 # Tools
