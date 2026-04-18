@@ -1,12 +1,12 @@
-# nullable enable
-using System;
+﻿# nullable enable
+namespace Core;
 
 /// <summary>
 ///     Literal C# port of aym-js by Olivier PONCET.
 ///     Synchronized with the js7800 emulator fork.
 ///     https://github.com/ponceto/aym-js
 /// </summary>
-internal class AymEmulator
+public class AymEmulator
 {
     // YM2149 Logarithmic DAC Table
     private static readonly float[] YmDac =

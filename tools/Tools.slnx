@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Projects/">
+    <Project Path="Core/Core.csproj" />
+    <Project Path="VgmToYmb/VgmToYmb.csproj" />
+    <Project Path="YmToYmb/YmToYmb.csproj" />
+    <Project Path="YmbToWav/YmbToWav.csproj" />
+  </Folder>
+  <Folder Name="/Scripts/">
+    <File Path="Scripts/ValidateCartSignals.cs" />
+    <File Path="Scripts/ValidateGalSignals.cs" />
+    <File Path="Scripts/ValidateLatchEnable.cs" />
+    <File Path="Scripts/ValidateYMSignals.cs" />
+  </Folder>
+</Solution>

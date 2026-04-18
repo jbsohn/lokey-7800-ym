@@ -1,36 +1,35 @@
-#!/usr/bin/env dotnet-script
-# nullable enable
-#load "YmCommon.csx"
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
+using Core;
 
-// VGM to Atari 7800 YMB Converter (Pattern-Based Delta)
-// ------------------------------------------------------
-// Optimized binary format for 6502 playback.
-// Performs pitch scaling, delta-masking, and pattern deduplication.
-// Features "Drum-Aware" peak detection for high-fidelity 30Hz conversions.
-// ------------------------------------------------------
+namespace VgmToYmb;
 
-var arguments = Environment.GetCommandLineArgs().Skip(2).ToArray();
-return VgmConverter.Run(arguments);
+internal record VgmHeader(
+    // ReSharper disable once NotAccessedPositionalProperty.Global
+    string Version,
+    int DataOffset,
+    int AyClock,
+    int RateHz,
+    string Title,
+    // ReSharper disable once NotAccessedPositionalProperty.Global
+    string Author,
+    // ReSharper disable once NotAccessedPositionalProperty.Global
+    string Game);
 
-internal record VgmHeader(string Version, int DataOffset, int AyClock, int RateHz, string Title, string Author, string Game);
-
-internal static class VgmConverter
+internal static class Program
 {
     private const double Atari7800Clock = 1.792000;
     private const int VgmSampleRate = 44100;
 
-    /// <summary>
-    ///     Main entry point for the VGM to YMB conversion process.
-    /// </summary>
-    public static int Run(string[] args)
+    public static int Main(string[] args)
     {
-        if (args.Length < 1 || args.Any(a => a is "-h" or "--help")) { PrintUsage(); return 1; }
+        if (args.Length < 1 || args.Any(a => a is "-h" or "--help"))
+        {
+            PrintUsage();
+            return 1;
+        }
 
         var options = ParseArgs(args);
         var outFile = options.OutputFile ?? Path.ChangeExtension(options.InputFile, ".bin");
@@ -50,10 +49,15 @@ internal static class VgmConverter
             var bestData = music.Optimize(options.PatternSize, out var bestSize, out var u, out var s);
 
             var (y, x) = YmMusic.CalculateDelay(effectiveHz);
-            YmMusic.Save(outFile, configFile, options.InputFile, bestData, music.Frames.Count, y, (int)x, u, s, bestSize, effectiveHz);
+            YmMusic.Save(outFile, configFile, options.InputFile, bestData, music.Frames.Count, y, x, u, s, bestSize,
+                effectiveHz);
             return 0;
         }
-        catch (Exception ex) { Console.WriteLine($"Error: {ex.Message}"); return 1; }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            return 1;
+        }
     }
 
     /// <summary>
@@ -82,13 +86,29 @@ internal static class VgmConverter
             if (i + 1 >= args.Length) continue;
             switch (args[i])
             {
-                case "-o": i++; output = args[i]; break;
-                case "-f": i++; max = int.Parse(args[i], CultureInfo.InvariantCulture); break;
-                case "-p": i++; pat = int.Parse(args[i], CultureInfo.InvariantCulture); break;
-                case "-s": i++; step = int.Parse(args[i], CultureInfo.InvariantCulture); break;
-                case "-hz": i++; hz = int.Parse(args[i], CultureInfo.InvariantCulture); break;
+                case "-o":
+                    i++;
+                    output = args[i];
+                    break;
+                case "-f":
+                    i++;
+                    max = int.Parse(args[i], CultureInfo.InvariantCulture);
+                    break;
+                case "-p":
+                    i++;
+                    pat = int.Parse(args[i], CultureInfo.InvariantCulture);
+                    break;
+                case "-s":
+                    i++;
+                    step = int.Parse(args[i], CultureInfo.InvariantCulture);
+                    break;
+                case "-hz":
+                    i++;
+                    hz = int.Parse(args[i], CultureInfo.InvariantCulture);
+                    break;
             }
         }
+
         return new ConversionOptions(input, output, max, pat, step, hz);
     }
 
@@ -97,8 +117,9 @@ internal static class VgmConverter
     /// </summary>
     private static void PrintUsage()
     {
-        Console.WriteLine("Usage: dotnet script VgmToBin.cs <input.vgm/vgz> [options]");
-        Console.WriteLine("Options:\n  -o <file>   Output binary\n  -f <frames> Max frames\n  -p <size>   Pattern size (0=auto)\n  -s <step>   Frame step\n  -hz <val>   Override Hz");
+        Console.WriteLine("Usage: VgmToYmb <input.vgm/vgz> [options]");
+        Console.WriteLine(
+            "Options:\n  -o <file>   Output binary\n  -f <frames> Max frames\n  -p <size>   Pattern size (0=auto)\n  -s <step>   Frame step\n  -hz <val>   Override Hz");
     }
 
     /// <summary>
@@ -110,8 +131,9 @@ internal static class VgmConverter
         if (buffer.Length > 4 && buffer[0] == 'V' && buffer[1] == 'g' && buffer[2] == 'm') return buffer;
 
         var exeName = CommandLineUtils.IsToolInstalled("7z") ? "7z" : "7zz";
-        using var process = Process.Start(new ProcessStartInfo(exeName, $"x -so \"{filePath}\"") { RedirectStandardOutput = true, UseShellExecute = false })
-            ?? throw new InvalidOperationException("Failed to start extraction tool.");
+        using var process = Process.Start(new ProcessStartInfo(exeName, $"x -so \"{filePath}\"")
+        { RedirectStandardOutput = true, UseShellExecute = false })
+                            ?? throw new InvalidOperationException("Failed to start extraction tool.");
 
         using var ms = new MemoryStream();
         process.StandardOutput.BaseStream.CopyTo(ms);
@@ -170,13 +192,15 @@ internal static class VgmConverter
                 nextFrameSample += samplesPerFrame;
             }
         }
+
         return frames;
     }
 
     /// <summary>
     ///     Processes a single VGM command, updating PSG registers or advancing the sample clock.
     /// </summary>
-    private static bool ProcessVgmCommand(byte[] data, ref int offset, byte[] registers, ref int currentSample, ref bool r13WasWritten)
+    private static bool ProcessVgmCommand(byte[] data, ref int offset, byte[] registers, ref int currentSample,
+        ref bool r13WasWritten)
     {
         var cmd = data[offset++];
         if (cmd == 0xA0)
@@ -194,18 +218,36 @@ internal static class VgmConverter
             currentSample += BinaryPrimitives.ReadInt16LittleEndian(data[offset..(offset + 2)]);
             offset += 2;
         }
-        else if (cmd == 0x62) currentSample += 735;
-        else if (cmd == 0x63) currentSample += 882;
-        else if ((cmd & 0xF0) == 0x70) currentSample += (cmd & 0x0F) + 1;
-        else if (cmd == 0x66) return false;
+        else if (cmd == 0x62)
+        {
+            currentSample += 735;
+        }
+        else if (cmd == 0x63)
+        {
+            currentSample += 882;
+        }
+        else if ((cmd & 0xF0) == 0x70)
+        {
+            currentSample += (cmd & 0x0F) + 1;
+        }
+        else if (cmd == 0x66)
+        {
+            return false;
+        }
         else if (cmd == 0x67)
         {
             offset++;
             var size = BinaryPrimitives.ReadInt32LittleEndian(data[offset..(offset + 4)]);
             offset += 4 + size;
         }
-        else if (cmd == 0x68) offset += 11;
-        else SkipUnsupportedVgmCommand(cmd, ref offset);
+        else if (cmd == 0x68)
+        {
+            offset += 11;
+        }
+        else
+        {
+            SkipUnsupportedVgmCommand(cmd, ref offset);
+        }
 
         return true;
     }
@@ -247,10 +289,15 @@ internal static class VgmConverter
                     UpdatePeakVolumes(workingRegs, f);
                     if (s == 0) f.CopyTo(workingRegs, 16);
                 }
-                else f.CopyTo(workingRegs, 16);
+                else
+                {
+                    f.CopyTo(workingRegs, 16);
+                }
             }
+
             steppedFrames.Add(new YmFrame(workingRegs, r13InWindow));
         }
+
         return steppedFrames;
     }
 

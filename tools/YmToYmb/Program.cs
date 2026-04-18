@@ -1,40 +1,27 @@
-#!/usr/bin/env dotnet-script
-# nullable enable
-#load "YmCommon.csx"
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Text;
+using Core;
 
-// YM to Atari 7800 YMB Converter (Pattern-Based Delta)
-// ------------------------------------------------------
-// Optimized binary format for 6502 playback.
-// Performs pitch scaling, delta-masking, and pattern deduplication.
-// Features "Drum-Aware" peak detection for high-fidelity 30Hz conversions.
-// ------------------------------------------------------
-
-var arguments = Environment.GetCommandLineArgs().Skip(2).ToArray();
-return YmConverter.Run(arguments);
+namespace YmToYmb;
 
 /// <summary>
 ///     Represents the header and technical metadata of an Atari ST YM file.
 /// </summary>
 internal record YmHeader(string Signature, int TotalFrames, int ChipClock, int PlayerHz, int DataOffset);
 
-/// <summary>
-///     Orchestrates the extraction, scaling, and compression of Atari ST YM assets.
-/// </summary>
-internal static class YmConverter
+internal static class Program
 {
     private const double Atari7800Clock = 1.792000;
 
-    /// <summary>
-    ///     Main entry point for the YM to YMB conversion process.
-    /// </summary>
-    public static int Run(string[] args)
+    public static int Main(string[] args)
     {
-        if (args.Length < 1 || args.Any(a => a is "-h" or "--help")) { PrintUsage(); return 1; }
+        if (args.Length < 1 || args.Any(a => a is "-h" or "--help"))
+        {
+            PrintUsage();
+            return 1;
+        }
 
         var options = ParseArgs(args);
         var binFile = options.OutputFile ?? Path.ChangeExtension(options.InputFile, ".bin");
@@ -54,10 +41,15 @@ internal static class YmConverter
             var bestData = music.Optimize(options.PatternSize, out var bestSize, out var u, out var s);
 
             var (y, x) = YmMusic.CalculateDelay(effectiveHz);
-            YmMusic.Save(binFile, configFile, options.InputFile, bestData, music.Frames.Count, y, (int)x, u, s, bestSize, effectiveHz);
+            YmMusic.Save(binFile, configFile, options.InputFile, bestData, music.Frames.Count, y, x, u, s, bestSize,
+                effectiveHz);
             return 0;
         }
-        catch (Exception ex) { Console.WriteLine($"Error: {ex.Message}"); return 1; }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+            return 1;
+        }
     }
 
     /// <summary>
@@ -86,13 +78,29 @@ internal static class YmConverter
             if (i + 1 >= args.Length) continue;
             switch (args[i])
             {
-                case "-o": i++; output = args[i]; break;
-                case "-f": i++; max = int.Parse(args[i], CultureInfo.InvariantCulture); break;
-                case "-p": i++; pat = int.Parse(args[i], CultureInfo.InvariantCulture); break;
-                case "-s": i++; step = int.Parse(args[i], CultureInfo.InvariantCulture); break;
-                case "-hz": i++; hz = int.Parse(args[i], CultureInfo.InvariantCulture); break;
+                case "-o":
+                    i++;
+                    output = args[i];
+                    break;
+                case "-f":
+                    i++;
+                    max = int.Parse(args[i], CultureInfo.InvariantCulture);
+                    break;
+                case "-p":
+                    i++;
+                    pat = int.Parse(args[i], CultureInfo.InvariantCulture);
+                    break;
+                case "-s":
+                    i++;
+                    step = int.Parse(args[i], CultureInfo.InvariantCulture);
+                    break;
+                case "-hz":
+                    i++;
+                    hz = int.Parse(args[i], CultureInfo.InvariantCulture);
+                    break;
             }
         }
+
         return new ConversionOptions(input, output, max, pat, step, hz);
     }
 
@@ -101,8 +109,9 @@ internal static class YmConverter
     /// </summary>
     private static void PrintUsage()
     {
-        Console.WriteLine("Usage: dotnet script YmToBin.cs <input.ym> [options]");
-        Console.WriteLine("Options:\n  -o <file>   Output binary\n  -f <frames> Max frames\n  -p <size>   Pattern size (0=auto)\n  -s <step>   Frame step\n  -hz <val>   Override Hz");
+        Console.WriteLine("Usage: YmToYmb <input.ym> [options]");
+        Console.WriteLine(
+            "Options:\n  -o <file>   Output binary\n  -f <frames> Max frames\n  -p <size>   Pattern size (0=auto)\n  -s <step>   Frame step\n  -hz <val>   Override Hz");
     }
 
     /// <summary>
@@ -114,8 +123,9 @@ internal static class YmConverter
         if (buffer.Length > 4 && buffer[0] == 'Y' && buffer[1] == 'M') return buffer;
 
         var exeName = CommandLineUtils.IsToolInstalled("7z") ? "7z" : "7zz";
-        using var process = Process.Start(new ProcessStartInfo(exeName, $"x -so \"{filePath}\"") { RedirectStandardOutput = true, UseShellExecute = false })
-            ?? throw new InvalidOperationException("Failed to start extraction tool.");
+        using var process = Process.Start(new ProcessStartInfo(exeName, $"x -so \"{filePath}\"")
+        { RedirectStandardOutput = true, UseShellExecute = false })
+                            ?? throw new InvalidOperationException("Failed to start extraction tool.");
 
         using var ms = new MemoryStream();
         process.StandardOutput.BaseStream.CopyTo(ms);
@@ -158,7 +168,12 @@ internal static class YmConverter
             skip += 4 + drumLength;
         }
 
-        for (var i = 0; i < 3; i++) { while (data[skip] != 0) skip++; skip++; }
+        for (var i = 0; i < 3; i++)
+        {
+            while (data[skip] != 0) skip++;
+            skip++;
+        }
+
         return new YmHeader(sig, frames, clock, hz, skip);
     }
 
@@ -178,6 +193,7 @@ internal static class YmConverter
             frames.Add(new YmFrame(registers, r13Triggered).Scaled(pitchScale));
             Array.Clear(registers, 0, 16);
         }
+
         return new YmMusic(frames);
     }
 
@@ -209,6 +225,7 @@ internal static class YmConverter
                 }
             }
         }
+
         return r13TriggeredInWindow;
     }
 }
