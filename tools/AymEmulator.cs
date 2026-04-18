@@ -4,10 +4,13 @@ using System;
 /// <summary>
 ///     Literal C# port of aym-js by Olivier PONCET.
 ///     Synchronized with the js7800 emulator fork.
+///     https://github.com/ponceto/aym-js
 /// </summary>
 internal class AymEmulator
 {
-    private static readonly float[] YmDac = {
+    // YM2149 Logarithmic DAC Table
+    private static readonly float[] YmDac =
+    {
         0.0000000f, 0.0000000f, 0.0046540f, 0.0077211f, 0.0109560f, 0.0139620f, 0.0169986f, 0.0200198f,
         0.0243687f, 0.0296941f, 0.0350652f, 0.0403906f, 0.0485389f, 0.0583352f, 0.0680552f, 0.0777752f,
         0.0925154f, 0.1110857f, 0.1297475f, 0.1484855f, 0.1766690f, 0.2115511f, 0.2463874f, 0.2811017f,
@@ -16,17 +19,25 @@ internal class AymEmulator
 
     private readonly EnvelopeGenerator _env = new();
     private readonly NoiseGenerator _noise = new();
-    private readonly double _psgClock, _sampleRate;
+    private readonly double _psgClock;
     private readonly byte[] _regs = new byte[16];
+    private readonly double _sampleRate;
+
     private readonly ToneGenerator[] _tones = { new(), new(), new() };
+    private double _lastVolume;
+    private double _masterClock;
     private double _ticksAccumulator;
 
     public AymEmulator(double clk, double rate)
     {
+        _masterClock = clk;
         _sampleRate = rate;
-        _psgClock = clk / 8.0;
+        _psgClock = clk / 8.0; // PSG internal units run at Master / 8
     }
 
+    /// <summary>
+    ///     Updates the internal register bank. R13 is treated as volatile to trigger envelope resets.
+    /// </summary>
     public void UpdateRegisters(ReadOnlySpan<byte> r)
     {
         for (var i = 0; i < 14; i++)
@@ -40,54 +51,75 @@ internal class AymEmulator
         }
     }
 
+    /// <summary>
+    ///     Renders a single 44.1kHz audio sample. Uses box-filtering to average high-speed PSG ticks.
+    /// </summary>
     public short RenderSample()
     {
-        var step = _psgClock / _sampleRate;
-        _ticksAccumulator += step;
-        while (_ticksAccumulator >= 1.0)
+        _ticksAccumulator += _psgClock / _sampleRate;
+        var ticks = (int)_ticksAccumulator;
+        _ticksAccumulator -= ticks;
+
+        if (ticks > 0)
         {
-            foreach (var t in _tones) t.Clock();
-            _noise.Clock();
-            _env.Clock();
-            _ticksAccumulator -= 1.0;
+            double sum = 0;
+            for (var t = 0; t < ticks; t++)
+            {
+                foreach (var tone in _tones) tone.Clock();
+                _noise.Clock();
+                _env.Clock();
+
+                double mixed = 0;
+                for (var i = 0; i < 3; i++)
+                {
+                    // Mix logic: (ToneEnabled | TonePhase) & (NoiseEnabled | NoisePhase)
+                    var toneHigh = (_regs[7] & (1 << i)) != 0 || _tones[i].Phase != 0;
+                    var noiseHigh = (_regs[7] & (1 << (i + 3))) != 0 || _noise.Phase != 0;
+                    if (toneHigh && noiseHigh)
+                    {
+                        var level = (_regs[8 + i] & 0x10) != 0 ? _env.Level : (_regs[8 + i] & 0x0F) * 2 + 1;
+                        mixed += YmDac[Math.Clamp(level, 0, 31)];
+                    }
+                }
+
+                sum += mixed / 3.0;
+            }
+
+            _lastVolume = sum / ticks;
         }
 
-        double mixed = 0;
-        for (var i = 0; i < 3; i++)
-        {
-            var toneEn = (_regs[7] & (1 << i)) == 0;
-            var noiseEn = (_regs[7] & (1 << (i + 3))) == 0;
-            var chanOut = (toneEn || _tones[i].Phase != 0) && (noiseEn || _noise.Phase != 0);
-            if (chanOut)
-            {
-                var vol = _regs[8 + i] & 0x0F;
-                var envEn = (_regs[8 + i] & 0x10) != 0;
-                mixed += YmDac[envEn ? _env.Level : vol * 2 + 1];
-            }
-        }
-        return (short)(Math.Clamp(mixed / 3.0, -1.0, 1.0) * 16384);
+        // Apply a safe 40% gain and center the waveform
+        var centered = (_lastVolume * 2.0 - 1.0) * 32767.0 * 0.4;
+        return (short)Math.Clamp(centered, -32768, 32767);
     }
 
     private class ToneGenerator
     {
         public int Period, Counter, Phase = 1;
+
         public void Clock()
         {
-            if (++Counter >= (Period == 0 ? 1 : Period)) { Counter = 0; Phase ^= 1; }
+            if (++Counter >= (Period == 0 ? 1 : Period))
+            {
+                Counter = 0;
+                Phase ^= 1;
+            }
         }
     }
 
     private class NoiseGenerator
     {
         public int Period, Counter, Phase = 1, Lfsr = 1;
+
         public void Clock()
         {
             if (++Counter >= (Period == 0 ? 1 : Period))
             {
                 Counter = 0;
-                var b0 = Lfsr & 1;
-                var b3 = (Lfsr >> 3) & 1;
-                Lfsr = (Lfsr >> 1) | ((b0 ^ b3) << 16);
+                // 17-bit XNOR LFSR implementation
+                var bit0 = Lfsr & 1;
+                var bit3 = (Lfsr >> 3) & 1;
+                Lfsr = (Lfsr >> 1) | ((bit0 ^ bit3) << 16);
                 Phase = Lfsr & 1;
             }
         }
@@ -95,27 +127,50 @@ internal class AymEmulator
 
     private class EnvelopeGenerator
     {
-        public int Period, Counter, Shape, Level, Phase;
         private bool _hold;
-        public void Reset(int shape) { Shape = shape; Counter = 0; Level = (shape & 4) != 0 ? 0 : 31; Phase = 0; _hold = false; }
+        public int Period, Counter, Level, Phase, Shape;
+
+        public void Reset(int shape)
+        {
+            Shape = shape;
+            Counter = 0;
+            Phase = 0;
+            _hold = false;
+        }
+
         public void Clock()
         {
             if (_hold) return;
             if (++Counter >= (Period == 0 ? 1 : Period))
             {
                 Counter = 0;
+                // Complex cycle-based shape logic
                 var attack = (Shape & 4) != 0;
-                var alt = (Shape & 2) != 0;
+                var alternate = (Shape & 2) != 0;
                 var hold = (Shape & 1) != 0;
                 var cont = (Shape & 8) != 0;
+
                 if (Phase == 0)
                 {
                     Level = attack ? Level + 1 : Level - 1;
                     if (Level < 0 || Level > 31)
                     {
-                        if (!cont) { Level = 0; _hold = true; }
-                        else if (hold) { Level = alt ^ attack ? 0 : 31; _hold = true; }
-                        else { if (alt) Shape ^= 4; Phase = 0; Level = (Shape & 4) != 0 ? 0 : 31; }
+                        if (!cont)
+                        {
+                            Level = 0;
+                            _hold = true;
+                        }
+                        else if (hold)
+                        {
+                            Level = alternate ^ attack ? 0 : 31;
+                            _hold = true;
+                        }
+                        else
+                        {
+                            if (alternate) Shape ^= 4;
+                            Phase = 0;
+                            Level = (Shape & 4) != 0 ? 0 : 31;
+                        }
                     }
                 }
             }
