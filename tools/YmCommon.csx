@@ -32,6 +32,9 @@ internal record struct YmFrame(
     bool ForceEnvReset = false
 )
 {
+    /// <summary>
+    ///     Constructs a YmFrame from a raw buffer of register values.
+    /// </summary>
     public YmFrame(ReadOnlySpan<byte> data, bool forceReset = false) : this(
         data[0], data[1], data[2], data[3], data[4], data[5], data[6],
         data[7], data[8], data[9], data[10], data[11], data[12], data[13],
@@ -46,6 +49,9 @@ internal record struct YmFrame(
     public ushort ToneC => (ushort)(((PeriodHighC & 0x0F) << 8) | PeriodLowC);
     public ushort EnvPeriod => (ushort)((EnvPeriodHigh << 8) | EnvPeriodLow);
 
+    /// <summary>
+    ///     Scales the frequency-related registers by a ratio to compensate for differences in hardware clock speed.
+    /// </summary>
     public YmFrame Scaled(double ratio)
     {
         var tA = (ushort)Math.Round(ToneA * ratio);
@@ -63,6 +69,9 @@ internal record struct YmFrame(
         };
     }
 
+    /// <summary>
+    ///     Copies the frame's register state into a destination buffer.
+    /// </summary>
     public void CopyTo(Span<byte> destination, int count = 14)
     {
         destination[0] = PeriodLowA; destination[1] = PeriodHighA;
@@ -75,6 +84,9 @@ internal record struct YmFrame(
         if (count > 15) destination[15] = EffectData;
     }
 
+    /// <summary>
+    ///     Calculates a bitmask of registers that have changed since the last frame.
+    /// </summary>
     public ushort GetDeltaMask(YmFrame last, bool isFirstFrame)
     {
         if (isFirstFrame) return 0x3FFF;
@@ -102,6 +114,9 @@ internal record struct YmFrame(
 /// </summary>
 internal record YmMusic(List<YmFrame> Frames)
 {
+    /// <summary>
+    ///     Finds the optimal pattern size for compression by trying multiple candidates.
+    /// </summary>
     public byte[] Optimize(int manualPatSize, out int bestSize, out int u, out int s)
     {
         if (manualPatSize > 0)
@@ -130,12 +145,32 @@ internal record YmMusic(List<YmFrame> Frames)
         return bestData ?? throw new InvalidOperationException("Optimization failed.");
     }
 
+    /// <summary>
+    ///     Compresses the music into a pattern-based format with delta-masking.
+    /// </summary>
     public byte[] Compress(int patSize, out int uniqueCount, out int seqLen)
     {
         var numBlocks = (int)Math.Ceiling((double)Frames.Count / patSize);
         if (numBlocks > 255) throw new InvalidOperationException("Song too long.");
 
         var uniquePatterns = new List<List<YmFrame>>();
+        var sequence = BuildPatternSequence(patSize, numBlocks, uniquePatterns);
+
+        uniqueCount = uniquePatterns.Count;
+        seqLen = sequence.Count;
+
+        var output = new List<byte> { (byte)patSize, (byte)uniqueCount, (byte)seqLen };
+        output.AddRange(sequence.Select(id => (byte)id));
+
+        WriteCompressedPatterns(output, uniquePatterns);
+        return output.ToArray();
+    }
+
+    /// <summary>
+    ///     Identifies unique patterns and builds the sequence table.
+    /// </summary>
+    private List<int> BuildPatternSequence(int patSize, int numBlocks, List<List<YmFrame>> uniquePatterns)
+    {
         var sequence = new List<int>();
         var lookup = new Dictionary<List<YmFrame>, int>(new PatternComparer());
 
@@ -151,13 +186,14 @@ internal record YmMusic(List<YmFrame> Frames)
             }
             sequence.Add(id);
         }
+        return sequence;
+    }
 
-        uniqueCount = uniquePatterns.Count;
-        seqLen = sequence.Count;
-
-        var output = new List<byte> { (byte)patSize, (byte)uniqueCount, (byte)seqLen };
-        output.AddRange(sequence.Select(id => (byte)id));
-
+    /// <summary>
+    ///     Compresses unique patterns and writes them to the output buffer along with an offset table.
+    /// </summary>
+    private static void WriteCompressedPatterns(List<byte> output, List<List<YmFrame>> uniquePatterns)
+    {
         var compressedPatterns = uniquePatterns.Select(p => CompressPattern(p)).ToList();
         var offset = 0;
         foreach (var cp in compressedPatterns)
@@ -166,11 +202,12 @@ internal record YmMusic(List<YmFrame> Frames)
             output.Add((byte)((offset >> 8) & 0xFF));
             offset += cp.Length;
         }
-
         output.AddRange(compressedPatterns.SelectMany(x => x));
-        return output.ToArray();
     }
 
+    /// <summary>
+    ///     Compresses a single pattern using delta-masking for each frame.
+    /// </summary>
     private static byte[] CompressPattern(List<YmFrame> patternFrames)
     {
         var data = new List<byte>();
@@ -190,6 +227,9 @@ internal record YmMusic(List<YmFrame> Frames)
         return data.ToArray();
     }
 
+    /// <summary>
+    ///     Calculates the PHI2-based loop delay values (Y and X) for a target playback frequency.
+    /// </summary>
     public static (int y, int x) CalculateDelay(int hz)
     {
         var remaining = Math.Max(0, 1789773.0 / hz - 1800.0);
@@ -198,6 +238,9 @@ internal record YmMusic(List<YmFrame> Frames)
         return (y, x);
     }
 
+    /// <summary>
+    ///     Saves the compressed binary and the sidecar metadata file.
+    /// </summary>
     public static void Save(string bin, string inc, string src, byte[] data, int frames, int y, int x, int u, int s, int p, int hz)
     {
         File.WriteAllBytes(bin, data);
@@ -219,6 +262,15 @@ internal record YmMusic(List<YmFrame> Frames)
         using var fs = File.Create(filePath);
         using var bw = new BinaryWriter(fs);
 
+        WriteRiffHeader(bw, totalSamples, sampleRate);
+        RenderFramesToWav(bw, emu, samplesPerFrame);
+    }
+
+    /// <summary>
+    ///     Writes the RIFF/WAVE header to the stream.
+    /// </summary>
+    private static void WriteRiffHeader(BinaryWriter bw, long totalSamples, int sampleRate)
+    {
         bw.Write(Encoding.ASCII.GetBytes("RIFF"));
         bw.Write((uint)(36 + totalSamples * 2));
         bw.Write(Encoding.ASCII.GetBytes("WAVE"));
@@ -228,7 +280,13 @@ internal record YmMusic(List<YmFrame> Frames)
         bw.Write((ushort)2); bw.Write((ushort)16);
         bw.Write(Encoding.ASCII.GetBytes("data"));
         bw.Write((uint)(totalSamples * 2));
+    }
 
+    /// <summary>
+    ///     Drives the PSG emulator to render each music frame into raw PCM audio samples.
+    /// </summary>
+    private void RenderFramesToWav(BinaryWriter bw, AymEmulator emu, int samplesPerFrame)
+    {
         var working = new byte[16];
         foreach (var frame in Frames)
         {
@@ -242,7 +300,14 @@ internal record YmMusic(List<YmFrame> Frames)
 
 internal sealed class PatternComparer : IEqualityComparer<List<YmFrame>>
 {
+    /// <summary>
+    ///     Determines if two frame patterns are identical by checking every frame register state.
+    /// </summary>
     public bool Equals(List<YmFrame>? x, List<YmFrame>? y) => x != null && y != null && x.SequenceEqual(y);
+
+    /// <summary>
+    ///     Calculates a combined hash code for a frame pattern.
+    /// </summary>
     public int GetHashCode(List<YmFrame> obj)
     {
         var h = new HashCode();
@@ -253,6 +318,9 @@ internal sealed class PatternComparer : IEqualityComparer<List<YmFrame>>
 
 internal static class CommandLineUtils
 {
+    /// <summary>
+    ///     Checks if a specific tool (like 7z) is available in the system's PATH.
+    /// </summary>
     public static bool IsToolInstalled(string toolName)
     {
         try

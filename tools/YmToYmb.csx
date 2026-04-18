@@ -29,6 +29,9 @@ internal static class YmConverter
 {
     private const double Atari7800Clock = 1.792000;
 
+    /// <summary>
+    ///     Main entry point for the YM to YMB conversion process.
+    /// </summary>
     public static int Run(string[] args)
     {
         if (args.Length < 1 || args.Any(a => a is "-h" or "--help")) { PrintUsage(); return 1; }
@@ -45,25 +48,32 @@ internal static class YmConverter
             var playerHz = options.OverrideHz ?? header.PlayerHz;
             var effectiveHz = playerHz / options.Step;
 
-            Console.WriteLine("---------------------------------------------------------");
-            Console.WriteLine($"Song:   {options.InputFile}");
-            Console.WriteLine($"Format: {header.Signature} | Rate: {effectiveHz} Hz (Step {options.Step})");
-            Console.WriteLine("---------------------------------------------------------");
+            PrintConversionSummary(options.InputFile, header, effectiveHz, options.Step);
 
             var music = DeinterleaveAndScale(rawData, header, options.MaxFrames, options.Step);
             var bestData = music.Optimize(options.PatternSize, out var bestSize, out var u, out var s);
 
             var (y, x) = YmMusic.CalculateDelay(effectiveHz);
-            YmMusic.Save(binFile, configFile, options.InputFile, bestData, music.Frames.Count, y, x, u, s, bestSize, effectiveHz);
+            YmMusic.Save(binFile, configFile, options.InputFile, bestData, music.Frames.Count, y, (int)x, u, s, bestSize, effectiveHz);
             return 0;
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-            return 1;
-        }
+        catch (Exception ex) { Console.WriteLine($"Error: {ex.Message}"); return 1; }
     }
 
+    /// <summary>
+    ///     Prints a summary of the YM file metadata and conversion settings.
+    /// </summary>
+    private static void PrintConversionSummary(string file, YmHeader header, int effectiveHz, int step)
+    {
+        Console.WriteLine("---------------------------------------------------------");
+        Console.WriteLine($"Song:   {file}");
+        Console.WriteLine($"Format: {header.Signature} | Rate: {effectiveHz} Hz (Step {step})");
+        Console.WriteLine("---------------------------------------------------------");
+    }
+
+    /// <summary>
+    ///     Parses command-line arguments into a ConversionOptions record.
+    /// </summary>
     private static ConversionOptions ParseArgs(string[] args)
     {
         var input = args[0];
@@ -86,12 +96,18 @@ internal static class YmConverter
         return new ConversionOptions(input, output, max, pat, step, hz);
     }
 
+    /// <summary>
+    ///     Displays command-line usage information.
+    /// </summary>
     private static void PrintUsage()
     {
         Console.WriteLine("Usage: dotnet script YmToBin.cs <input.ym> [options]");
         Console.WriteLine("Options:\n  -o <file>   Output binary\n  -f <frames> Max frames\n  -p <size>   Pattern size (0=auto)\n  -s <step>   Frame step\n  -hz <val>   Override Hz");
     }
 
+    /// <summary>
+    ///     Reads the YM file into memory, handling lzh decompression if necessary via 7z.
+    /// </summary>
     private static byte[] ExtractRawData(string filePath)
     {
         var buffer = File.ReadAllBytes(filePath);
@@ -107,11 +123,29 @@ internal static class YmConverter
         return ms.ToArray();
     }
 
+    /// <summary>
+    ///     Parses the YM file header to identify the format version and frame count.
+    /// </summary>
     private static YmHeader ParseHeader(ReadOnlySpan<byte> data)
     {
         var sig = Encoding.ASCII.GetString(data[..4]);
-        if (sig is "YM2!" or "YM3!") return new YmHeader(sig, (data.Length - 4) / 14, 2000000, 50, 4);
+        if (sig is "YM2!" or "YM3!") return ParseClassicHeader(sig, data);
+        return ParseModernHeader(sig, data);
+    }
 
+    /// <summary>
+    ///     Parses simple Atari ST YM2/YM3 headers.
+    /// </summary>
+    private static YmHeader ParseClassicHeader(string sig, ReadOnlySpan<byte> data)
+    {
+        return new YmHeader(sig, (data.Length - 4) / 14, 2000000, 50, 4);
+    }
+
+    /// <summary>
+    ///     Parses modern Atari ST YM5/YM6 headers with extended metadata.
+    /// </summary>
+    private static YmHeader ParseModernHeader(string sig, ReadOnlySpan<byte> data)
+    {
         var frames = BinaryPrimitives.ReadInt32BigEndian(data[12..16]);
         var clock = BinaryPrimitives.ReadInt32BigEndian(data[22..26]);
         int hz = BinaryPrimitives.ReadInt16BigEndian(data[26..28]);
@@ -128,38 +162,53 @@ internal static class YmConverter
         return new YmHeader(sig, frames, clock, hz, skip);
     }
 
+    /// <summary>
+    ///     Deinterleaves the YM register data (which is stored per-register rather than per-frame) and scales pitch.
+    /// </summary>
     private static YmMusic DeinterleaveAndScale(byte[] rawData, YmHeader header, int maxFrames, int step)
     {
-        var outputFrames = (Math.Min(header.TotalFrames, maxFrames) + step - 1) / step;
-        var frames = new List<YmFrame>(outputFrames);
+        var outputFramesCount = (Math.Min(header.TotalFrames, maxFrames) + step - 1) / step;
+        var frames = new List<YmFrame>(outputFramesCount);
         var pitchScale = Atari7800Clock / (header.ChipClock / 1000000.0);
         var registers = new byte[16];
 
-        for (var f = 0; f < outputFrames; f++)
+        for (var f = 0; f < outputFramesCount; f++)
         {
-            var r13TriggeredInWindow = false;
-            for (var s = 0; s < step; s++)
-            {
-                var sourceFrame = f * step + s;
-                if (sourceFrame >= header.TotalFrames) break;
-
-                for (var r = 0; r < 16; r++)
-                {
-                    if (r >= 14 && header.Signature != "YM6!") break;
-                    var val = rawData[header.DataOffset + r * header.TotalFrames + sourceFrame];
-                    if (step > 1 && r is >= 8 and <= 10) { if (val > registers[r]) registers[r] = val; }
-                    else if (s == 0) registers[r] = val;
-
-                    if (r == 13 && sourceFrame > 0)
-                    {
-                        var prev = rawData[header.DataOffset + r * header.TotalFrames + sourceFrame - 1];
-                        if (val != prev || sourceFrame % 50 == 0) r13TriggeredInWindow = true;
-                    }
-                }
-            }
-            frames.Add(new YmFrame(registers, r13TriggeredInWindow).Scaled(pitchScale));
+            var r13Triggered = ProcessFrameWindow(rawData, header, f, step, registers);
+            frames.Add(new YmFrame(registers, r13Triggered).Scaled(pitchScale));
             Array.Clear(registers, 0, 16);
         }
         return new YmMusic(frames);
+    }
+
+    /// <summary>
+    ///     Processes a window of input frames to produce a single output frame, applying peak volume detection.
+    /// </summary>
+    private static bool ProcessFrameWindow(byte[] rawData, YmHeader header, int frameIdx, int step, byte[] registers)
+    {
+        var r13TriggeredInWindow = false;
+        for (var s = 0; s < step; s++)
+        {
+            var sourceFrame = frameIdx * step + s;
+            if (sourceFrame >= header.TotalFrames) break;
+
+            for (var r = 0; r < 16; r++)
+            {
+                if (r >= 14 && header.Signature != "YM6!") break;
+                var val = rawData[header.DataOffset + r * header.TotalFrames + sourceFrame];
+
+                if (step > 1 && r is >= 8 and <= 10)
+                    registers[r] = Math.Max(registers[r], val);
+                else if (s == 0)
+                    registers[r] = val;
+
+                if (r == 13 && sourceFrame > 0)
+                {
+                    var prev = rawData[header.DataOffset + r * header.TotalFrames + sourceFrame - 1];
+                    if (val != prev || sourceFrame % 50 == 0) r13TriggeredInWindow = true;
+                }
+            }
+        }
+        return r13TriggeredInWindow;
     }
 }

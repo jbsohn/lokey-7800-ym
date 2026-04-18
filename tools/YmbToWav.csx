@@ -29,6 +29,9 @@ internal static class BinToWavConverter
     /// <summary>
     ///     Entry point for the conversion tool.
     /// </summary>
+    /// <summary>
+    ///     Main entry point for the YMB to WAV rendering tool.
+    /// </summary>
     public static int Run(string[] args)
     {
         if (args.Length < 1 || args.Any(a => a is "-h" or "--help"))
@@ -61,18 +64,24 @@ internal static class BinToWavConverter
         }
     }
 
+    /// <summary>
+    ///     Parses command-line arguments into a WavOptions record.
+    /// </summary>
     private static WavOptions ParseArgs(string[] args)
     {
         return new WavOptions(args[0], args.Length > 1 ? args[1] : Path.ChangeExtension(args[0], ".wav"));
     }
 
+    /// <summary>
+    ///     Displays command-line usage information.
+    /// </summary>
     private static void PrintUsage()
     {
         Console.WriteLine("Usage: dotnet script BinToWav.cs <input.bin> [output.wav]");
     }
 
     /// <summary>
-    ///     Extracts the PLAYER_HZ metadata from the sidecar .yminc file to ensure correct timing.
+    ///     Extracts the PLAYER_HZ metadata from the sidecar .ymi file to ensure correct timing.
     /// </summary>
     private static int DetectPlayerHz(string incFile)
     {
@@ -86,53 +95,71 @@ internal static class BinToWavConverter
 ///     Handles the high-fidelity rendering process by driving the AymEmulator.
 /// </summary>
 internal class BinToWavRenderer(byte[] data, int playerHz)
-{
-    private const int SampleRate = 44100;
-    private const double ClockSpeed = 1792000.0; // Atari 7800 PHI2 Clock
-    private readonly AymEmulator _emu = new(ClockSpeed, SampleRate);
-
-    /// <summary>
-    ///     Renders the entire binary track into a standard 16-bit PCM Mono WAV file.
-    /// </summary>
-    public void SaveToWav(string filePath)
     {
-        int patSize = data[0] == 0 ? 256 : data[0];
-        int numPatterns = data[1], seqLen = data[2];
-        var samplesPerFrame = SampleRate / playerHz;
-        var totalSamples = (long)seqLen * patSize * samplesPerFrame;
+        private const int SampleRate = 44100;
+        private const double ClockSpeed = 1792000.0; // Atari 7800 PHI2 Clock
+        private readonly AymEmulator _emu = new(ClockSpeed, SampleRate);
 
-        using var fs = File.Create(filePath);
-        using var bw = new BinaryWriter(fs);
-
-        // RIFF/WAVE Header
-        bw.Write(Encoding.ASCII.GetBytes("RIFF"));
-        bw.Write((uint)(36 + totalSamples * 2));
-        bw.Write(Encoding.ASCII.GetBytes("WAVE"));
-        bw.Write(Encoding.ASCII.GetBytes("fmt "));
-        bw.Write((uint)16);
-        bw.Write((ushort)1); // Mono
-        bw.Write((ushort)1); // PCM
-        bw.Write((uint)SampleRate);
-        bw.Write((uint)(SampleRate * 2));
-        bw.Write((ushort)2); // 16-bit
-        bw.Write((ushort)16);
-        bw.Write(Encoding.ASCII.GetBytes("data"));
-        bw.Write((uint)(totalSamples * 2));
-
-        var sequence = data.AsSpan(3, seqLen);
-        var offsetTableStart = 3 + seqLen;
-        var offsets = new ushort[numPatterns];
-        for (var i = 0; i < numPatterns; i++)
-            offsets[i] = BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(offsetTableStart + i * 2));
-
-        var patDataStart = offsetTableStart + numPatterns * 2;
-        var regs = new byte[16];
-
-        Console.Error.WriteLine($"js7800 Rendering: {seqLen} patterns...");
-
-        foreach (var patId in sequence)
+        /// <summary>
+        ///     Renders the entire binary track into a standard 16-bit PCM Mono WAV file.
+        /// </summary>
+        public void SaveToWav(string filePath)
         {
-            var musicPtr = patDataStart + offsets[patId];
+            int patSize = data[0] == 0 ? 256 : data[0];
+            int numPatterns = data[1], seqLen = data[2];
+            var samplesPerFrame = SampleRate / playerHz;
+            var totalSamples = (long)seqLen * patSize * samplesPerFrame;
+
+            using var fs = File.Create(filePath);
+            using var bw = new BinaryWriter(fs);
+
+            WriteWavHeader(bw, totalSamples);
+
+            var sequence = data.AsSpan(3, seqLen);
+            var offsetTableStart = 3 + seqLen;
+            var offsets = new ushort[numPatterns];
+            for (var i = 0; i < numPatterns; i++)
+                offsets[i] = BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(offsetTableStart + i * 2));
+
+            var patDataStart = offsetTableStart + numPatterns * 2;
+            var regs = new byte[16];
+
+            Console.Error.WriteLine($"js7800 Rendering: {seqLen} patterns...");
+
+            foreach (var patId in sequence)
+            {
+                var musicPtr = patDataStart + offsets[patId];
+                PlayPattern(bw, patSize, samplesPerFrame, ref musicPtr, regs);
+            }
+
+            Console.Error.WriteLine($"Success! Created {filePath}");
+        }
+
+        /// <summary>
+        ///     Writes the RIFF/WAVE header to the stream.
+        /// </summary>
+        private static void WriteWavHeader(BinaryWriter bw, long totalSamples)
+        {
+            bw.Write(Encoding.ASCII.GetBytes("RIFF"));
+            bw.Write((uint)(36 + totalSamples * 2));
+            bw.Write(Encoding.ASCII.GetBytes("WAVE"));
+            bw.Write(Encoding.ASCII.GetBytes("fmt "));
+            bw.Write((uint)16);
+            bw.Write((ushort)1); // Mono
+            bw.Write((ushort)1); // PCM
+            bw.Write((uint)SampleRate);
+            bw.Write((uint)(SampleRate * 2));
+            bw.Write((ushort)2); // 16-bit
+            bw.Write((ushort)16);
+            bw.Write(Encoding.ASCII.GetBytes("data"));
+            bw.Write((uint)(totalSamples * 2));
+        }
+
+        /// <summary>
+        ///     Plays back a single pattern, updating the emulator and writing samples to the stream.
+        /// </summary>
+        private void PlayPattern(BinaryWriter bw, int patSize, int samplesPerFrame, ref int musicPtr, byte[] regs)
+        {
             for (var f = 0; f < patSize; f++)
             {
                 if (musicPtr + 2 > data.Length) break;
@@ -147,7 +174,4 @@ internal class BinToWavRenderer(byte[] data, int playerHz)
                     bw.Write(_emu.RenderSample());
             }
         }
-
-        Console.Error.WriteLine($"Success! Created {filePath}");
     }
-}
