@@ -1,6 +1,6 @@
 #!/usr/bin/env dotnet-script
 # nullable enable
-#load "YmCommon.cs"
+#load "YmCommon.csx"
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Globalization;
@@ -98,7 +98,7 @@ internal static class YmConverter
         if (buffer.Length > 4 && buffer[0] == 'Y' && buffer[1] == 'M') return buffer;
 
         var exeName = CommandLineUtils.IsToolInstalled("7z") ? "7z" : "7zz";
-        using var process = Process.Start(new ProcessStartInfo(exeName, $"x -so \"{filePath}\"") { RedirectStandardOutput = true, UseShellExecute = false }) 
+        using var process = Process.Start(new ProcessStartInfo(exeName, $"x -so \"{filePath}\"") { RedirectStandardOutput = true, UseShellExecute = false })
             ?? throw new InvalidOperationException("Failed to start extraction tool.");
 
         using var ms = new MemoryStream();

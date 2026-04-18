@@ -221,7 +221,8 @@ internal record YmMusic(List<YmFrame> Frames)
 
         bw.Write(Encoding.ASCII.GetBytes("RIFF"));
         bw.Write((uint)(36 + totalSamples * 2));
-        bw.Write(Encoding.ASCII.GetBytes("WAVEfmt "));
+        bw.Write(Encoding.ASCII.GetBytes("WAVE"));
+        bw.Write(Encoding.ASCII.GetBytes("fmt "));
         bw.Write((uint)16); bw.Write((ushort)1); bw.Write((ushort)1);
         bw.Write((uint)sampleRate); bw.Write((uint)(sampleRate * 2));
         bw.Write((ushort)2); bw.Write((ushort)16);

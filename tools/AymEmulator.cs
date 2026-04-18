@@ -73,8 +73,7 @@ internal class AymEmulator
         public int Period, Counter, Phase = 1;
         public void Clock()
         {
-            Counter++;
-            if (Counter >= (Period == 0 ? 1 : Period)) { Counter = 0; Phase ^= 1; }
+            if (++Counter >= (Period == 0 ? 1 : Period)) { Counter = 0; Phase ^= 1; }
         }
     }
 
@@ -83,8 +82,7 @@ internal class AymEmulator
         public int Period, Counter, Phase = 1, Lfsr = 1;
         public void Clock()
         {
-            Counter++;
-            if (Counter >= (Period == 0 ? 1 : Period))
+            if (++Counter >= (Period == 0 ? 1 : Period))
             {
                 Counter = 0;
                 var b0 = Lfsr & 1;
@@ -103,8 +101,7 @@ internal class AymEmulator
         public void Clock()
         {
             if (_hold) return;
-            Counter++;
-            if (Counter >= (Period == 0 ? 1 : Period))
+            if (++Counter >= (Period == 0 ? 1 : Period))
             {
                 Counter = 0;
                 var attack = (Shape & 4) != 0;

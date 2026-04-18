@@ -8,8 +8,8 @@ VGM_DIR       := VgmSamples
 PREVIEW_FLAGS := -s 2 -f 5000
 
 # Tools
-YM2BIN        := tools/YmToYmb.cs
-VGM2BIN       := tools/VgmToYmb.cs
+YM2BIN        := tools/YmToYmb.csx
+VGM2BIN       := tools/VgmToYmb.csx
 DOTNET        := dotnet script
 DASM          := dasm
 SIGN          := 7800sign
@@ -93,9 +93,9 @@ $(BUILD_DIR)/ym2149_%.rom: $(SRC_DIR)/ym2149_%.asm | $(BUILD_DIR)
 	@$(DASM) $< $(DASM_FLAGS) -Dbuild_with_header=0 -f3 -o$@
 
 # Verification Rules (Music Data -> WAV)
-$(BUILD_DIR)/%.wav: $(BUILD_DIR)/%.ymb tools/YmbToWav.cs | $(BUILD_DIR)
+$(BUILD_DIR)/%.wav: $(BUILD_DIR)/%.ymb tools/YmbToWav.csx | $(BUILD_DIR)
 	@echo "  Generating WAV: $*"
-	@$(DOTNET) tools/YmbToWav.cs $< $@
+	@$(DOTNET) tools/YmbToWav.csx $< $@
 
 # Utilities
 gal: $(BUILD_DIR)

@@ -1,6 +1,6 @@
 #!/usr/bin/env dotnet-script
 # nullable enable
-#load "YmCommon.cs"
+#load "YmCommon.csx"
 #load "AymEmulator.cs"
 using System.Buffers.Binary;
 using System.Text;

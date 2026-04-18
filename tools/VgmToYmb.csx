@@ -1,6 +1,6 @@
 #!/usr/bin/env dotnet-script
 # nullable enable
-#load "YmCommon.cs"
+#load "YmCommon.csx"
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Globalization;
@@ -91,7 +91,7 @@ internal static class VgmConverter
         if (buffer.Length > 4 && buffer[0] == 'V' && buffer[1] == 'g' && buffer[2] == 'm') return buffer;
 
         var exeName = CommandLineUtils.IsToolInstalled("7z") ? "7z" : "7zz";
-        using var process = Process.Start(new ProcessStartInfo(exeName, $"x -so \"{filePath}\"") { RedirectStandardOutput = true, UseShellExecute = false }) 
+        using var process = Process.Start(new ProcessStartInfo(exeName, $"x -so \"{filePath}\"") { RedirectStandardOutput = true, UseShellExecute = false })
             ?? throw new InvalidOperationException("Failed to start extraction tool.");
 
         using var ms = new MemoryStream();
@@ -135,8 +135,10 @@ internal static class VgmConverter
             else if (cmd == 0x66) break;
             else if (cmd == 0x67) { offset++; var size = BinaryPrimitives.ReadInt32LittleEndian(rawData[offset..(offset + 4)]); offset += 4 + size; }
             else if (cmd == 0x68) offset += 11;
-            else {
-                switch (cmd) {
+            else
+            {
+                switch (cmd)
+                {
                     case >= 0x30 and <= 0x3F: break;
                     case >= 0x40 and <= 0x4F: offset++; break;
                     case >= 0x50 and <= 0x5F:
