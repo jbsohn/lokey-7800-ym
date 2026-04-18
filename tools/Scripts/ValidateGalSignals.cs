@@ -1,16 +1,16 @@
-#!/usr/bin/env dotnet-script
+﻿#!/usr/bin/env dotnet-script
 using System;
 using System.Diagnostics;
 
 // Sigrok Capture Script (C# 10 Top-Level Statements)
-// Captures pins 0-3 which correspond to:
-// Pin 0 (D0) = Clock (PHI2)
-// Pin 1 (D1) = R/W
-// Pin 2 (D2) = Halt
-// Pin 3 (D3) = A15
+// Captures pins 0-3 which correspond to GAL pins:
+// Pin 0 (D0) = YM_LE (Pin 15)
+// Pin 1 (D1) = PHI2OUT (Pin 16)
+// Pin 2 (D2) = BC1 (Pin 17)
+// Pin 3 (D3) = BDIR (Pin 18)
 
-Console.WriteLine("Starting Sigrok capture for pins 0-3...");
-Console.WriteLine("Mapping: D0=Clock, D1=R/W, D2=Halt, D3=A15");
+Console.WriteLine("Starting Sigrok capture for GAL pins 15-18...");
+Console.WriteLine("Mapping: D0=YM_LE, D1=PHI2OUT, D2=BC1, D3=BDIR");
 Console.WriteLine("-------------------------------------------------");
 
 var psi = new ProcessStartInfo
@@ -24,8 +24,8 @@ var psi = new ProcessStartInfo
     CreateNoWindow = true
 };
 
-int countClock = 0, countRW = 0, countHalt = 0, countA15 = 0;
-int lastClock = -1, lastRW = -1, lastHalt = -1, lastA15 = -1;
+int countYMLE = 0, countPHI2OUT = 0, countBC1 = 0, countBDIR = 0;
+int lastYMLE = -1, lastPHI2OUT = -1, lastBC1 = -1, lastBDIR = -1;
 int samplesProcessed = 0;
 
 try
@@ -44,15 +44,15 @@ try
             int.TryParse(parts[2], out int d2) &&
             int.TryParse(parts[3], out int d3))
         {
-            if (lastClock != -1 && d0 == 1 && lastClock == 0) countClock++;
-            if (lastRW != -1 && d1 == 1 && lastRW == 0) countRW++;
-            if (lastHalt != -1 && d2 == 1 && lastHalt == 0) countHalt++;
-            if (lastA15 != -1 && d3 == 1 && lastA15 == 0) countA15++;
+            if (lastYMLE != -1 && d0 == 1 && lastYMLE == 0) countYMLE++;
+            if (lastPHI2OUT != -1 && d1 == 1 && lastPHI2OUT == 0) countPHI2OUT++;
+            if (lastBC1 != -1 && d2 == 1 && lastBC1 == 0) countBC1++;
+            if (lastBDIR != -1 && d3 == 1 && lastBDIR == 0) countBDIR++;
 
-            lastClock = d0;
-            lastRW = d1;
-            lastHalt = d2;
-            lastA15 = d3;
+            lastYMLE = d0;
+            lastPHI2OUT = d1;
+            lastBC1 = d2;
+            lastBDIR = d3;
             samplesProcessed++;
         }
     };
@@ -67,10 +67,10 @@ try
     Console.WriteLine($"\nCapture finished with exit code {process.ExitCode}");
     Console.WriteLine($"\n--- Transition Report (Low-to-High Edges) ---");
     Console.WriteLine($"Samples Analyzed: {samplesProcessed:N0}");
-    Console.WriteLine($"Clock (PHI2) : {countClock:N0} transitions");
-    Console.WriteLine($"R/W          : {countRW:N0} transitions");
-    Console.WriteLine($"Halt         : {countHalt:N0} transitions");
-    Console.WriteLine($"A15          : {countA15:N0} transitions");
+    Console.WriteLine($"YM_LE   (Pin 15) : {countYMLE:N0} transitions");
+    Console.WriteLine($"PHI2OUT (Pin 16) : {countPHI2OUT:N0} transitions");
+    Console.WriteLine($"BC1     (Pin 17) : {countBC1:N0} transitions");
+    Console.WriteLine($"BDIR    (Pin 18) : {countBDIR:N0} transitions");
 }
 catch (Exception ex)
 {

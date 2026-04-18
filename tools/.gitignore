@@ -1,0 +1,25 @@
+# .NET Build Artifacts
+[Bb]in/
+[Oo]bj/
+
+# User-specific files
+*.user
+*.userosscache
+*.sln.docstates
+
+# IDE folders
+.vs/
+.idea/
+.vscode/
+
+# Project specific
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.patch
+*.diff
+
+# NuGet
+project.lock.json
+project.assets.json
