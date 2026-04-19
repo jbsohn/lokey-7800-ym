@@ -1,0 +1,9 @@
+; Config for ym-samples/ND-Toxygene.ym
+MAX_FRAMES   = 13250
+PLAYER_HZ    = 50
+YM_DELAY     = 26
+YM_FINE      = 117
+SIZE_A       = 3133
+SIZE_B       = 1631
+SIZE_C       = 40717
+TOTAL_SIZE   = 45487

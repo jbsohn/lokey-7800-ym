@@ -91,6 +91,30 @@ public readonly record struct YmFrame(
     }
 
     /// <summary>
+    ///     Returns the value of a specific register (0-15).
+    /// </summary>
+    public byte GetRegister(int r) => r switch
+    {
+        0 => PeriodLowA,
+        1 => PeriodHighA,
+        2 => PeriodLowB,
+        3 => PeriodHighB,
+        4 => PeriodLowC,
+        5 => PeriodHighC,
+        6 => NoisePeriod,
+        7 => Mixer,
+        8 => VolumeA,
+        9 => VolumeB,
+        10 => VolumeC,
+        11 => EnvPeriodLow,
+        12 => EnvPeriodHigh,
+        13 => EnvShape,
+        14 => EffectType,
+        15 => EffectData,
+        _ => 0
+    };
+
+    /// <summary>
     ///     Calculates a bitmask of registers that have changed since the last frame.
     /// </summary>
     public ushort GetDeltaMask(YmFrame last, bool isFirstFrame)

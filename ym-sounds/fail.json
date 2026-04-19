@@ -1,0 +1,9 @@
+{
+  "name": "Fail",
+  "track": "ChannelA",
+  "commands": [
+    { "type": "set", "pitch": 600, "volume": 15, "mixer": 62 },
+    { "type": "slide", "target_pitch": 1500, "duration": 30 },
+    { "type": "fade", "target_volume": 0, "duration": 10 }
+  ]
+}

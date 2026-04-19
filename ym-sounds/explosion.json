@@ -1,0 +1,9 @@
+{
+  "name": "Explosion",
+  "track": "ChannelCPlusGlobal",
+  "commands": [
+    { "type": "set", "noise": 1, "volume": 15, "mixer": 7 },
+    { "type": "slide", "target_pitch": 31, "duration": 20 },
+    { "type": "fade", "target_volume": 0, "duration": 20 }
+  ]
+}

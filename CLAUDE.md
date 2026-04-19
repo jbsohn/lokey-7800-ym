@@ -74,3 +74,4 @@ dotnet run --project tools/YmToYmb/YmToYmb.csproj -- <input.ym> -o <output.ymb> 
 - `pcb/`: tscircuit PCB design files.
 - `ym-samples/`: Original Atari ST music sources.
 - `vgm-samples/`: VGM/VGZ music sources.
+- `ym-sounds/`: Procedural JSON sound recipes and compiled .yms files.

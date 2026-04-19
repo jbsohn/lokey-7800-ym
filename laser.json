@@ -1,0 +1,10 @@
+{
+  "name": "Laser",
+  "track": "ChannelA",
+  "commands": [
+    { "type": "set", "pitch": 50, "volume": 15, "mixer": 62 },
+    { "type": "slide", "target_pitch": 400, "duration": 10 },
+    { "type": "fade", "target_volume": 0, "duration": 5 },
+    { "type": "wait", "duration": 2 }
+  ]
+}

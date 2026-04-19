@@ -40,7 +40,7 @@ public record YmMusic(List<YmFrame> Frames)
     /// <summary>
     ///     Compresses the music into a pattern-based format with delta-masking.
     /// </summary>
-    private byte[] Compress(int patSize, out int uniqueCount, out int seqLen)
+    public byte[] Compress(int patSize, out int uniqueCount, out int seqLen)
     {
         var numBlocks = (int)Math.Ceiling((double)Frames.Count / patSize);
         if (numBlocks > 255) throw new InvalidOperationException("Song too long.");

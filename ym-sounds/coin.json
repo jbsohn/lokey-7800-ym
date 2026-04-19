@@ -1,0 +1,10 @@
+{
+  "name": "Coin",
+  "track": "ChannelA",
+  "commands": [
+    { "type": "set", "pitch": 150, "volume": 15, "mixer": 62 },
+    { "type": "wait", "duration": 2 },
+    { "type": "set", "pitch": 100, "volume": 12 },
+    { "type": "fade", "target_volume": 0, "duration": 8 }
+  ]
+}

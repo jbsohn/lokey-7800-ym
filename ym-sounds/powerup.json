@@ -1,0 +1,11 @@
+{
+  "name": "PowerUp",
+  "track": "ChannelB",
+  "commands": [
+    { "type": "set", "pitch": 800, "volume": 10, "mixer": 61 },
+    { "type": "slide", "target_pitch": 200, "duration": 5 },
+    { "type": "set", "pitch": 600, "volume": 12 },
+    { "type": "slide", "target_pitch": 100, "duration": 10 },
+    { "type": "fade", "target_volume": 0, "duration": 5 }
+  ]
+}

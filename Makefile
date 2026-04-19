@@ -110,4 +110,4 @@ gal: $(BUILD_DIR)
 
 clean:
 	@rm -rf $(BUILD_DIR)
-	@rm -f src/*.wav samples/*.wav
+	@rm -f src/*.wav ym-sounds/*.wav

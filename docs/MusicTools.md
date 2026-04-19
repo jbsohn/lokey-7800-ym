@@ -16,47 +16,66 @@ Converts **VGM/VGZ** command streams. This is the preferred route for new compos
 - **Trackers**: [**Furnace Tracker**](https://tildearrow.org/furnace) or [**Arkos Tracker**](https://www.julien-nevo.com/arkostracker/) (dedicated specifically to the AY/YM architecture).
 - **Usage**: `dotnet run --project tools/VgmToYmb/VgmToYmb.csproj -- <input.vgm> [options]`
 
+### `YmsCompile` (Procedural Sound Design)
+The preferred way to create sound effects. Compiles a human-readable **JSON Recipe** into a surgical 14-register bitstream.
+- **Workflow**: Create a `.json` recipe, compile to `.yms`, and verify with `YmsToWav`.
+- **Usage**: `dotnet run --project tools/YmsCompile/YmsCompile.csproj -- <recipe.json> [options]`
+
+---
+
+## Procedural Sound Recipes (.json)
+
+A recipe allows you to define a sound mathematically. Example:
+
+```json
+{
+  "name": "Laser",
+  "track": "ChannelA",
+  "commands": [
+    { "type": "set", "pitch": 50, "volume": 15 },
+    { "type": "slide", "target_pitch": 400, "duration": 10 },
+    { "type": "fade", "target_volume": 0, "duration": 5 }
+  ]
+}
+```
+
 ---
 
 ## Core Processing Theory
 
-### 1. Pitch Scaling (The Clock Problem)
+### 1. Unified Stream Architecture
+To keep the 6502 replayer as simple as possible, both music and sound effects use the same **14-register interleaved bitmask** format. 
+*   **Music**: Uses a pattern/sequence container for ROM efficiency.
+*   **SFX**: A flat, non-repeating stream for surgical events.
+
+### 2. Pitch Scaling (The Clock Problem)
 The Atari ST's YM2149 chip is clocked at **2.0 MHz**, while the Atari 7800's PHI2 clock (which drives the YM chip in this project) is **~1.79 MHz** (NTSC).
-*   **Without Scaling:** Notes would sound roughly **2 semitones flat**.
 *   **The Solution:** The tools calculate a `pitchScale` ratio ($1.79 / 2.0 = 0.895$). Frequency and noise registers are multiplied by this ratio to help the music stay in tune on the 7800.
 
-### 2. Delta Masking
-Instead of storing all 14 YM registers for every frame (14 bytes/frame), we use **Delta Masking**:
-*   A **16-bit bitmask** precedes every frame.
-*   Each bit represents one of the 14 registers.
+### 3. Delta Masking
+Every frame is preceded by a **16-bit bitmask**:
+*   Each bit represents one of the 14 registers (0-13).
 *   If a bit is `1`, the register value follows the mask.
-*   If a bit is `0`, the register hasn't changed since the previous frame.
+*   If a bit is `0`, the register hasn't changed.
 *   **Result**: Silent or repetitive frames take only 2 bytes (the mask) instead of 14.
 
-### 3. Pattern Deduplication
-To fit songs into a 32KB ROM, the data is sliced into fixed-size **Patterns**.
-*   **Deduplication**: The tool identifies identical patterns and stores the data once.
-*   **Optimization**: The tool automatically tests multiple pattern sizes to find the best compression ratio.
+### 4. Pattern Deduplication (Music Only)
+Music is sliced into fixed-size **Patterns** and compressed.
+*   **Deduplication**: Identical patterns are stored once.
+*   **Optimization**: The tool automatically tests multiple pattern sizes (16 to 255) to find the best compression ratio.
 
 ---
 
 ## Binary Format Specification (.ymb)
 
-The generated `.ymb` file is structured for fast reading by a 6502 assembly routine. For more details, see the **[YMB Format Technical Specification](YmbFormat.md)**.
-
 | Size | Description |
 | :--- | :--- |
-| 1 byte | **Pattern Size** (number of frames per block, Max 255) |
-| 1 byte | **Unique Pattern Count** (Max 255) |
-| 1 byte | **Sequence Length** (Max 255) |
-| N bytes | **Sequence Table**: A list of unique pattern IDs to play in order. |
-| M*2 bytes| **Offset Table**: 16-bit relative pointers to the start of each unique pattern. |
-| Variable | **Pattern Data**: The delta-masked frames: `[2-byte Mask][Changed Bytes...]` |
-
-## Assembly Configuration (.ymi)
-The tool outputs a `.ymi` file containing constants for the 6502 player:
-*   `YM_DELAY` & `YM_FINE`: Constants for a delay loop to maintain correct playback speed.
-*   `MAX_FRAMES`, `SEQ_LEN`, etc.: Metadata to help the assembly code navigate the binary data.
+| 1 byte | **Pattern Size** (frames per block) |
+| 1 byte | **Unique Pattern Count** |
+| 1 byte | **Sequence Length** |
+| N bytes | **Sequence Table**: List of unique pattern IDs. |
+| M*2 bytes| **Offset Table**: 16-bit relative pointers to pattern data. |
+| Variable | **Pattern Data**: Delta-masked updates: `[2-byte Mask][Changed Bytes...]` |
 
 ---
 

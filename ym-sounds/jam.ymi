@@ -1,0 +1,9 @@
+; Config for vgm-samples/AY-3-8910_Jam.vgm
+MAX_FRAMES   = 5378
+PLAYER_HZ    = 50
+YM_DELAY     = 26
+YM_FINE      = 117
+SIZE_A       = 1675
+SIZE_B       = 2039
+SIZE_C       = 8178
+TOTAL_SIZE   = 11898

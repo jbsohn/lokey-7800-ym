@@ -11,4 +11,7 @@
     <File Path="Scripts/ValidateLatchEnable.cs" />
     <File Path="Scripts/ValidateYMSignals.cs" />
   </Folder>
+  <Project Path="YmsCompile/YmsCompile.csproj" />
+  <Project Path="YmsToWav/YmsToWav.csproj" />
+  <Project Path="YmTestDrive/YmTestDrive.csproj" />
 </Solution>
