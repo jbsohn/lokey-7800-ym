@@ -39,7 +39,9 @@ all: tools a78
 # Build the tools solution into the bin directory using Native AOT
 tools:
 	@mkdir -p $(BIN_DIR)
-	dotnet publish tools/Tools.slnx -o $(BIN_DIR) --configuration Release
+	dotnet publish tools/VgmToYmb/VgmToYmb.csproj -o $(BIN_DIR) --configuration Release
+	dotnet publish tools/YmToYmb/YmToYmb.csproj -o $(BIN_DIR) --configuration Release
+	dotnet publish tools/YmbToWav/YmbToWav.csproj -o $(BIN_DIR) --configuration Release
 
 $(YM2BIN) $(VGM2BIN) $(WAVTOOL):
 	@$(MAKE) tools
