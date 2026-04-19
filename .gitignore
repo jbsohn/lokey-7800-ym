@@ -2,6 +2,7 @@
 *.bin
 *.yminc
 build/
+bin/
 .vscode
 .idea
 *.chp
