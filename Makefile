@@ -2,16 +2,16 @@
 
 # Configuration & Directories
 BUILD_DIR     := build
+BIN_DIR       := bin
 SRC_DIR       := sample-code
 YM_DIR        := ym-samples
 VGM_DIR       := vgm-samples
 PREVIEW_FLAGS := -s 2 -f 5000
 
 # Tools
-YM2BIN        := tools/YmToYmb/YmToYmb.csproj
-VGM2BIN       := tools/VgmToYmb/VgmToYmb.csproj
-WAVTOOL       := tools/YmbToWav/YmbToWav.csproj
-DOTNET_RUN    := dotnet run --project
+YM2BIN        := $(BIN_DIR)/ymtoymb
+VGM2BIN       := $(BIN_DIR)/vgmtoymb
+WAVTOOL       := $(BIN_DIR)/ymbtowav
 DASM          := dasm
 SIGN          := 7800sign
 DASM_FLAGS    := -I$(SRC_DIR) -I$(BUILD_DIR)
@@ -34,11 +34,17 @@ FIXED_ROMS     := $(foreach f,$(FIXED_BASE),$(BUILD_DIR)/$(f).rom)
 # Core Targets
 .PHONY: all help clean gal rom a78 bin wav tools
 
-all: a78
+all: tools a78
 
-# Build the tools solution
+# Build the tools solution into the bin directory using Native AOT
 tools:
-	dotnet build tools/Tools.slnx
+	@mkdir -p $(BIN_DIR)
+	dotnet publish tools/VgmToYmb/VgmToYmb.csproj -o $(BIN_DIR) --configuration Release
+	dotnet publish tools/YmToYmb/YmToYmb.csproj -o $(BIN_DIR) --configuration Release
+	dotnet publish tools/YmbToWav/YmbToWav.csproj -o $(BIN_DIR) --configuration Release
+
+$(YM2BIN) $(VGM2BIN) $(WAVTOOL):
+	@$(MAKE) tools
 
 rom: $(BUILD_DIR) $(MUSIC_ROMS) $(FIXED_ROMS)
 	@for f in $(BUILD_DIR)/*.rom; do \
@@ -67,16 +73,16 @@ $(BUILD_DIR):
 # Conversion Rules (Source -> Music Data)
 
 $(BUILD_DIR)/%.ymb: $(YM_DIR)/%.ym $(YM2BIN) | $(BUILD_DIR)
-	$(DOTNET_RUN) $(YM2BIN) -- $< -o $@ $(PREVIEW_FLAGS)
+	$(YM2BIN) $< -o $@ $(PREVIEW_FLAGS)
 
 $(BUILD_DIR)/%.ymb: $(YM_DIR)/%.YM $(YM2BIN) | $(BUILD_DIR)
-	$(DOTNET_RUN) $(YM2BIN) -- $< -o $@ $(PREVIEW_FLAGS)
+	$(YM2BIN) $< -o $@ $(PREVIEW_FLAGS)
 
 $(BUILD_DIR)/%.ymb: $(VGM_DIR)/%.vgm $(VGM2BIN) | $(BUILD_DIR)
-	$(DOTNET_RUN) $(VGM2BIN) -- $< -o $@ $(PREVIEW_FLAGS)
+	$(VGM2BIN) $< -o $@ $(PREVIEW_FLAGS)
 
 $(BUILD_DIR)/%.ymb: $(VGM_DIR)/%.vgz $(VGM2BIN) | $(BUILD_DIR)
-	$(DOTNET_RUN) $(VGM2BIN) -- $< -o $@ $(PREVIEW_FLAGS)
+	$(VGM2BIN) $< -o $@ $(PREVIEW_FLAGS)
 
 # Assembly Rules (Logic + Music Data -> ROM)
 
@@ -101,7 +107,7 @@ $(BUILD_DIR)/ym2149_%.rom: $(SRC_DIR)/ym2149_%.asm | $(BUILD_DIR)
 # Verification Rules (Music Data -> WAV)
 $(BUILD_DIR)/%.wav: $(BUILD_DIR)/%.ymb $(WAVTOOL) | $(BUILD_DIR)
 	@echo "  Generating WAV: $*"
-	@$(DOTNET_RUN) $(WAVTOOL) -- $< $@
+	@$(WAVTOOL) $< $@
 
 # Utilities
 gal: $(BUILD_DIR)
@@ -110,4 +116,9 @@ gal: $(BUILD_DIR)
 
 clean:
 	@rm -rf $(BUILD_DIR)
+<<<<<<< HEAD
 	@rm -f src/*.wav ym-sounds/*.wav
+=======
+	@rm -rf $(BIN_DIR)
+	@rm -f src/*.wav samples/*.wav
+>>>>>>> main

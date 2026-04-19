@@ -12,7 +12,7 @@ The **Atari 7800** acts as the **Consumer** of these assets. By bridging the har
 
 * **Working Prototype**: We have a hand-built cartridge prototype that has been verified to work.
 * **PCB Effort**: We are working on a PCB design using a code-to-PCB workflow (**tscircuit**).
-* **Conversion Tools**: The project includes tools to convert Atari ST **YM** and multi-platform **VGM** files into a format for the 7800.
+* **Conversion Tools**: The project includes experimental C# tools to convert Atari ST **YM** and multi-platform **VGM** files into an optimized format for the 7800. These are used for early testing to minimize data size for limited cartridge space.
 * **SDK Progress**: We are working toward a set of tools and drivers to help others add YM music to their 7800 projects.
 * **Custom Emulation**: For testing without hardware, we use forks of **a7800** and **js7800** that implement this specific memory mapping. *If this project gains momentum, we hope these changes might eventually be useful to the official upstream projects.*
 

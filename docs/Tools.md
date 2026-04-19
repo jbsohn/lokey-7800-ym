@@ -2,6 +2,9 @@
 
 This document describes the tools used to validate physical signals and timing for the Atari 7800 YM2149 bridge. All tools require the **.NET SDK**.
 
+> [!IMPORTANT]
+> These C# tools are **experimental** and primarily intended for **early testing** of the YM on Atari 7800 cartridges.
+
 For music conversion (`YmToYmb`) and audio verification (`YmbToWav`), please see the **[Music Tools Documentation](MusicTools.md)**.
 
 ## Hardware Signal Diagnostics

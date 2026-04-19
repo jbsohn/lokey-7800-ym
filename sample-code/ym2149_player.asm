@@ -10,6 +10,7 @@
 ay_addr    = $4000
 ay_data    = $4001
 background = $0020 
+mstat      = $0028
 
 ; Zero Page
 music_ptr  = $80 
@@ -21,6 +22,9 @@ pat_table  = $88
 pat_base   = $8a 
 seq_base   = $8c 
 pat_size   = $8e 
+music_acc  = $8f ; 2 bytes
+music_delta = $91 ; 2 bytes
+v_frame    = $93 ; 2 bytes
 
 ; SFX State
 sfx_ptr    = $90 ; word
@@ -80,6 +84,7 @@ p_1:    dex
 
 main_loop:
         jsr sync_vbi
+<<<<<<< HEAD
         
         ; 1. Always process music (Music advances even during SFX)
         jsr play_music_frame
@@ -97,7 +102,21 @@ main_loop:
         sta sfx_active
         
 .no_sfx:
+=======
+>>>>>>> main
         jsr update_visuals
+        
+        ; 16-bit Fractional Music Step (Converts 60Hz frame to PLAYER_HZ)
+        clc
+        lda music_acc
+        adc music_delta
+        sta music_acc
+        lda music_acc+1
+        adc music_delta+1
+        sta music_acc+1
+        bcc .skip
+        jsr play_frame
+.skip:
         jmp main_loop
 
 ; ---------------------------------------------------------
@@ -105,6 +124,7 @@ main_loop:
 ; ---------------------------------------------------------
 
 sync_vbi:
+<<<<<<< HEAD
         ldy #YM_DELAY
 .d1:    ldx #$00
 .d2:    dex
@@ -116,12 +136,49 @@ sync_vbi:
 .d3:    dex
         bne .d3
 .done:
+=======
+        ; Wait for EXISTING VBlank to end
+.v1:    bit mstat
+        bmi .v1
+        ; Wait for NEW VBlank to start
+.v2:    bit mstat
+        bpl .v2
+        
+        ; Increment 60Hz counter for visuals
+        inc v_frame
+        bne .no_hi
+        inc v_frame+1
+.no_hi:
+>>>>>>> main
         rts
 
 update_visuals:
-        lda frame_cnt
+        ; 1. Stable 0.5-second Color Cycle (32 frames)
+        ; Bit 5 of v_frame changes every 32 frames (0.53s)
+        lda v_frame
+        lsr
+        lsr
+        lsr
+        lsr
+        lsr          ; Bits 5, 6, 7 are now at positions 0, 1, 2
+        and #$07     ; Keep only those 3 bits
+        sta background
+        lda v_frame+1
+        asl
+        asl
+        asl
+        and #$08     ; Bit 0 of high byte (bit 8) moves to position 3
+        ora background
+        
+        ; Scale the 4-bit result into the high nibble for the Hue
         and #$0F
-        ora #$40 
+        asl
+        asl
+        asl
+        asl
+        ora #$08 ; Constant Medium Brightness
+        
+        ; 2. Already synced to VBlank by sync_vbi
         sta background
         rts
 
@@ -134,7 +191,22 @@ init_music:
         sta frame_cnt+1
         sta seq_idx
         sta pat_frames ; Force new pattern fetch
+<<<<<<< HEAD
         sta sfx_active
+=======
+        sta music_acc
+        sta music_acc+1
+        sta v_frame
+        sta v_frame+1
+
+        ; Pre-calculate 16-bit music step: (PLAYER_HZ * 65536) / 60
+        ; We store the fractional 16-bit delta
+music_step = ( (PLAYER_HZ * 65536) / 60 )
+        lda #<music_step
+        sta music_delta
+        lda #>music_step
+        sta music_delta+1
+>>>>>>> main
 
         ; Header: [pat_size][num_patterns][seq_len]
         lda MusicData

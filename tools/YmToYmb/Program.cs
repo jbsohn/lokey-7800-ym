@@ -218,11 +218,9 @@ internal static class Program
                 else if (s == 0)
                     registers[r] = val;
 
-                if (r == 13 && sourceFrame > 0)
-                {
-                    var prev = rawData[header.DataOffset + r * header.TotalFrames + sourceFrame - 1];
-                    if (val != prev || sourceFrame % 50 == 0) r13TriggeredInWindow = true;
-                }
+                if (r != 13 || sourceFrame <= 0) continue;
+                var prev = rawData[header.DataOffset + r * header.TotalFrames + sourceFrame - 1];
+                if (val != prev || sourceFrame % 50 == 0) r13TriggeredInWindow = true;
             }
         }
 
