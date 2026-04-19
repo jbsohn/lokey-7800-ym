@@ -13,11 +13,13 @@ internal static class Program
             Console.WriteLine("Options:");
             Console.WriteLine("  -o <file>   Output file (.yms or .asm)");
             Console.WriteLine("  -asm        Output as DASM assembly");
+            Console.WriteLine("  -surgical   Use surgical 8-bit mask (per-track)");
             return 1;
         }
 
         var input = args[0];
         var asm = args.Contains("-asm");
+        var surgical = args.Contains("-surgical");
         string? output = null;
 
         for (int i = 0; i < args.Length; i++)
@@ -45,17 +47,18 @@ internal static class Program
 
             if (asm)
             {
-                File.WriteAllText(output, sound.ToAssembly(simple: true));
+                File.WriteAllText(output, sound.ToAssembly(simple: !surgical));
                 Console.WriteLine($"Compiled assembly to {output}");
             }
             else
             {
-                var serialized = sound.SerializeSimple();
-                // Add two null bytes as an end sentinel for the 16-bit mask player
-                var final = new byte[serialized.Length + 2];
+                var serialized = surgical ? sound.Serialize() : sound.SerializeSimple();
+                // Add end sentinel: 16-bit 0 for legacy, 8-bit 0 for surgical
+                var sentinelSize = surgical ? 1 : 2;
+                var final = new byte[serialized.Length + sentinelSize];
                 Array.Copy(serialized, 0, final, 0, serialized.Length);
                 File.WriteAllBytes(output, final);
-                Console.WriteLine($"Compiled {final.Length} bytes to {output} (Legacy Format)");
+                Console.WriteLine($"Compiled {final.Length} bytes to {output} ({(surgical ? "Surgical" : "Legacy")} Format)");
             }
 
             return 0;

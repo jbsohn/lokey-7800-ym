@@ -13,13 +13,27 @@ internal static class Program
     {
         if (args.Length < 1 || args.Any(a => a is "-h" or "--help"))
         {
-            Console.WriteLine("Usage: YmsToWav <input.yms> [output.wav] [hz]");
+            Console.WriteLine("Usage: YmsToWav <input.yms> [options]");
+            Console.WriteLine("Options:");
+            Console.WriteLine("  -o <file>   Output file (.wav)");
+            Console.WriteLine("  -hz <num>   Playback rate (default 50)");
             return 1;
         }
 
         var input = args[0];
-        var output = args.Length > 1 ? args[1] : Path.ChangeExtension(input, ".wav");
-        var hz = args.Length > 2 ? int.Parse(args[2]) : 50;
+        string? output = null;
+        var hz = 50;
+
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (args[i] == "-o" && i + 1 < args.Length) output = args[i + 1];
+            if (args[i] == "-hz" && i + 1 < args.Length) hz = int.Parse(args[i + 1]);
+        }
+
+        if (output == null)
+        {
+            output = Path.ChangeExtension(input, ".wav");
+        }
 
         try
         {

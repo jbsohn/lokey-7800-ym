@@ -52,6 +52,8 @@ tmp_tcb        = $A7 ; word pointer
 tmp_ptr        = $A9 ; word
 tmp_val        = $AB ; word
 
+        include "AY-3-8910_Jam.ymi"
+
         ifnconst build_with_header
 build_with_header SET 1
         endif
@@ -62,9 +64,7 @@ build_with_header SET 1
         endif
 
 MusicData:
-        ; Placeholder for music binary
-        ; In a real build, this would be incbin'd
-        ds.b 6, 0
+        incbin "AY-3-8910_Jam.ymb"
 
 reset:
         sei
@@ -152,9 +152,15 @@ play_frame:
 update_sfx_track_A:
         ldy #0
         lda (trA_sfx_ptr),y
-        beq .end_sfx        ; $00 = end of SFX
         sta tmp_mask
         iny
+        lda (trA_sfx_ptr),y
+        sta tmp_mask+1
+        iny
+        
+        ; If both masks are 0, end of SFX
+        ora tmp_mask
+        beq .end_sfx
         
         ; Bit 0 -> Reg 0
         lsr tmp_mask
@@ -172,8 +178,16 @@ update_sfx_track_A:
         lda (trA_sfx_ptr),y
         sta ay_data
         iny
-.s1:    ; Bit 2 -> Reg 8
-        lsr tmp_mask
+.s1:    ; Skip bits 2-7 (Regs 2-7)
+        lsr tmp_mask ; bit 2
+        lsr tmp_mask ; bit 3
+        lsr tmp_mask ; bit 4
+        lsr tmp_mask ; bit 5
+        lsr tmp_mask ; bit 6
+        lsr tmp_mask ; bit 7
+
+        ; Bit 8 -> Reg 8
+        lsr tmp_mask+1
         bcc .s8
         lda #8
         sta ay_addr
@@ -195,19 +209,26 @@ update_sfx_track_A:
         sta trA_sfx_active
         rts
 
+mstat = $0028
+
 sync_vbi:
-        ; Wait logic (50Hz or 60Hz)
+        ; Wait for EXISTING VBlank to end
+.v1:    bit mstat
+        bmi .v1
+        ; Wait for NEW VBlank to start
+.v2:    bit mstat
+        bpl .v2
         rts
 
 ; -------------------------
 ; Data Section
 ; -------------------------
 Laser_SFX:
-        ; Compiled from laser.json (Legacy 16-bit Mask Format)
-        ; Frame 0: Mask $0007 (Regs 0, 1, 8), Data $32, $00, $0F
-        dc.b $07, $00, $32, $00, $0F
-        ; Frame 1: Mask $0001 (Reg 0), Data $56
-        dc.b $01, $00, $56
+        ; Compiled from laser.json (Unified 16-bit Mask Format)
+        ; Frame 0: Mask $0103 (Regs 0, 1, 8), Data $32, $00, $0F
+        dc.b $03, $01, $32, $00, $0F
+        ; Frame 1: Mask $0001 (Reg 0), Data $55
+        dc.b $01, $00, $55
         ; End Sentinel (2 null bytes)
         dc.b $00, $00
 

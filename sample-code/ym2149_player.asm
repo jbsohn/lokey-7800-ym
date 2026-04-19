@@ -4,7 +4,6 @@
 ; YM2149 MVP Player for Atari 7800
 ; ---------------------------------------------------------
 ; Simple, high-precision delay-based player for the 60Hz MVP.
-; Supports optional SFX interrupt.
 ; ---------------------------------------------------------
 
 ay_addr    = $4000
@@ -26,15 +25,10 @@ music_acc  = $8f ; 2 bytes
 music_delta = $91 ; 2 bytes
 v_frame    = $93 ; 2 bytes
 
-; SFX State
-sfx_ptr    = $90 ; word
-sfx_active = $92 ; byte (0=Music, 1=SFX)
-
-tmp_ptr    = $94 ; word
-
 ; Constants
 NUM_REGS   = 14
 
+        ; These are injected via -D from the Makefile
         include MUSIC_INC
 
         ifnconst build_with_header
@@ -84,26 +78,6 @@ p_1:    dex
 
 main_loop:
         jsr sync_vbi
-<<<<<<< HEAD
-        
-        ; 1. Always process music (Music advances even during SFX)
-        jsr play_music_frame
-        
-        ; 2. If SFX is active, process it (Overwrites music writes)
-        lda sfx_active
-        beq .no_sfx
-        
-        lda #<sfx_ptr
-        sta tmp_ptr
-        jsr play_frame_core
-        bcs .no_sfx        ; Carry Set = SFX still playing
-        
-        lda #0             ; Carry Clear = SFX ended
-        sta sfx_active
-        
-.no_sfx:
-=======
->>>>>>> main
         jsr update_visuals
         
         ; 16-bit Fractional Music Step (Converts 60Hz frame to PLAYER_HZ)
@@ -124,19 +98,6 @@ main_loop:
 ; ---------------------------------------------------------
 
 sync_vbi:
-<<<<<<< HEAD
-        ldy #YM_DELAY
-.d1:    ldx #$00
-.d2:    dex
-        bne .d2
-        dey
-        bne .d1
-        ldx #YM_FINE
-        beq .done
-.d3:    dex
-        bne .d3
-.done:
-=======
         ; Wait for EXISTING VBlank to end
 .v1:    bit mstat
         bmi .v1
@@ -149,7 +110,6 @@ sync_vbi:
         bne .no_hi
         inc v_frame+1
 .no_hi:
->>>>>>> main
         rts
 
 update_visuals:
@@ -191,9 +151,6 @@ init_music:
         sta frame_cnt+1
         sta seq_idx
         sta pat_frames ; Force new pattern fetch
-<<<<<<< HEAD
-        sta sfx_active
-=======
         sta music_acc
         sta music_acc+1
         sta v_frame
@@ -206,7 +163,6 @@ music_step = ( (PLAYER_HZ * 65536) / 60 )
         sta music_delta
         lda #>music_step
         sta music_delta+1
->>>>>>> main
 
         ; Header: [pat_size][num_patterns][seq_len]
         lda MusicData
@@ -248,32 +204,38 @@ music_step = ( (PLAYER_HZ * 65536) / 60 )
         rts
 
 ; ---------------------------------------------------------
-; Play a single music frame
+; Play a single compressed frame
 ; ---------------------------------------------------------
-play_music_frame:
-        ; Check End
+play_frame:
+        ; Check if we reached the end of the song
         lda frame_cnt+1
         cmp #>MAX_FRAMES
         bne .check_pattern
         lda frame_cnt
         cmp #<MAX_FRAMES
         bcc .check_pattern
+        
         jsr init_music
 
 .check_pattern:
         lda pat_frames
         bne .do_play
         
+        ; Fetch next pattern from sequence (Strict 8-bit)
         ldy seq_idx
         lda (seq_base),y
         inc seq_idx
-        asl
+        
+        ; Calculate offset in pat_table
+        asl ; index * 2
         tay
         lda (pat_table),y
         sta music_ptr
         iny
         lda (pat_table),y
         sta music_ptr+1
+        
+        ; Add pat_base to music_ptr
         clc
         lda music_ptr
         adc pat_base
@@ -281,99 +243,72 @@ play_music_frame:
         lda music_ptr+1
         adc pat_base+1
         sta music_ptr+1
+        
         lda pat_size
         sta pat_frames
 
 .do_play:
         dec pat_frames
-        lda #<music_ptr
-        sta tmp_ptr
-        jsr play_frame_core
-        inc frame_cnt
-        bne .p_done
-        inc frame_cnt+1
-.p_done:
-        rts
 
-; Core routine that processes a bitmask packet at (tmp_ptr)
-; tmp_ptr is a pointer to the ZP pointer (music_ptr or sfx_ptr)
-; Returns Carry Clear if stream ended (for SFX)
-tmp_ptr_ptr = $A4 ; Helper
-play_frame_core:
-        ldx tmp_ptr
-        stx tmp_ptr_ptr
-        lda #0
-        sta tmp_ptr_ptr+1
-        
+        ; 1. Read Mask (2 bytes)
         ldy #0
-        lda (tmp_ptr_ptr),y ; Low ptr
-        sta tmp_ptr
-        iny
-        lda (tmp_ptr_ptr),y ; High ptr
-        sta tmp_ptr+1
-        
-        ldy #0
-        lda (tmp_ptr),y
+        lda (music_ptr),y
         sta tmp_mask
         iny
-        lda (tmp_ptr),y
+        lda (music_ptr),y
         sta tmp_mask+1
         
-        ; If both masks are 0, end of stream
-        ora tmp_mask
-        beq .stream_end
-        
+        ; Advance pointer past mask
         clc
-        lda tmp_ptr
+        lda music_ptr
         adc #2
-        sta tmp_ptr
-        lda tmp_ptr+1
+        sta music_ptr
+        lda music_ptr+1
         adc #0
-        sta tmp_ptr+1
+        sta music_ptr+1
 
-        ldx #0
+        ldx #0 ; Current Register Index
 .reg_loop:
+        ; Check bit in mask
         cpx #8
         bcc .low_byte
+        
+        ; High Byte (Reg 8-13)
         txa
         sec
         sbc #8
-        tay
+        tay ; Y = bit index 0-5
         lda bit_table,y
         and tmp_mask+1
         beq .next_reg
         jmp .update_reg
+
 .low_byte:
         txa
-        tay
+        tay ; Y = bit index 0-7
         lda bit_table,y
         and tmp_mask
         beq .next_reg
+
 .update_reg:
         stx ay_addr
         ldy #0
-        lda (tmp_ptr),y
+        lda (music_ptr),y
         sta ay_data
-        inc tmp_ptr
+        
+        inc music_ptr
         bne .next_reg
-        inc tmp_ptr+1
+        inc music_ptr+1
+
 .next_reg:
         inx
         cpx #NUM_REGS
         bne .reg_loop
-        
-        ; Save back the updated pointer
-        ldy #0
-        lda tmp_ptr
-        sta (tmp_ptr_ptr),y
-        iny
-        lda tmp_ptr+1
-        sta (tmp_ptr_ptr),y
-        sec ; Still active
-        rts
 
-.stream_end:
-        clc ; Ended
+        inc frame_cnt
+        bne .p_done
+        inc frame_cnt+1
+.p_done:
         rts
 
 bit_table:
