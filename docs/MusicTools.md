@@ -2,6 +2,9 @@
 
 This document describes the tools used to process and verify music for the Atari 7800 YM2149 bridge. All tools require the **.NET SDK**.
 
+> [!IMPORTANT]
+> These C# tools are **experimental** and primarily intended for **early testing** of the YM on Atari 7800 cartridges. A core goal is to minimize data size for limited ROM space.
+
 ## Music Conversion
 
 We provide two primary tools for converting register streams into the optimized `.ymb` format.

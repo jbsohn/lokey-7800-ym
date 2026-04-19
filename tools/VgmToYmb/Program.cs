@@ -132,7 +132,7 @@ internal static class Program
 
         var exeName = CommandLineUtils.IsToolInstalled("7z") ? "7z" : "7zz";
         using var process = Process.Start(new ProcessStartInfo(exeName, $"x -so \"{filePath}\"")
-        { RedirectStandardOutput = true, UseShellExecute = false })
+                                { RedirectStandardOutput = true, UseShellExecute = false })
                             ?? throw new InvalidOperationException("Failed to start extraction tool.");
 
         using var ms = new MemoryStream();
@@ -211,11 +211,9 @@ internal static class Program
         {
             var reg = data[offset++];
             var val = data[offset++];
-            if (reg < 16)
-            {
-                registers[reg] = val;
-                if (reg == 13) r13WasWritten = true;
-            }
+            if (reg >= 16) return true;
+            registers[reg] = val;
+            if (reg == 13) r13WasWritten = true;
         }
         else if (cmd == 0x61)
         {
