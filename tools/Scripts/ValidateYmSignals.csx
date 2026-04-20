@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env dotnet-script
+#!/usr/bin/env dotnet-script
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

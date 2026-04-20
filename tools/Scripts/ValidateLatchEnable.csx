@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env dotnet-script
+#!/usr/bin/env dotnet-script
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -89,10 +89,12 @@ try
             samplesProcessed++;
         }
     };
+    process.ErrorDataReceived += (s, e) => { if (e.Data != null) Console.WriteLine($"[error] {e.Data}"); };
 
     Console.WriteLine("Capturing for 2.5 seconds at 2MHz...");
     process.Start();
     process.BeginOutputReadLine();
+    process.BeginErrorReadLine();
     process.WaitForExit();
 
     Console.WriteLine($"\n--- Latch Timing Report ---");

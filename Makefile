@@ -111,8 +111,9 @@ $(BUILD_DIR)/%.wav: $(BUILD_DIR)/%.ymb $(WAVTOOL) | $(BUILD_DIR)
 
 # Utilities
 gal: $(BUILD_DIR)
+	@echo "Building GAL JED files from .pld sources..."
 	@galette gal/rom.pld && galette gal/rom_ym.pld
-	@mv *.jed $(BUILD_DIR)/ 2>/dev/null || true
+	@mv gal/*.jed $(BUILD_DIR)/ 2>/dev/null || true
 
 clean:
 	@rm -rf $(BUILD_DIR)
