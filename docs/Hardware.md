@@ -9,11 +9,25 @@ The YM2149 sound card is mapped to the **$4000–$7FFF** range (16 KB).
 This mapping follows the historical precedent set by classic Atari 7800 games like **Ballblazer** and **Commando**, which mapped the **POKEY** sound chip to $4000. By mirroring this 16 KB "Sound Area," we ensure high compatibility with existing hardware designs.
 
 ### Write-Only Mirroring
-The current GAL logic is gated by the `!RW` (Read/Write) line. This means the YM2149 is a "write-only" device at $4000. This allows other devices (like ROM or RAM) to reside at the same memory addresses for **read** operations without bus contention.
+The current logic implementation is gated by the `!RW` (Read/Write) line. This means the YM2149 is a "write-only" device at $4000. This allows other devices (like ROM or RAM) to reside at the same memory addresses for **read** operations without bus contention.
+
+## BOM Cost Estimation (Per Unit)
+
+The Lokey-YM is designed for high performance at a hobbyist-friendly price point.
+
+| Component | Estimated Cost | Notes |
+| :--- | :--- | :--- |
+| **YM2149 / AY-3-8910 Clone** | $2.00 | Targeted price for bulk/clones |
+| **ATF16V8B (Logic)** | $0.85 | Modern replacement for legacy GAL16V8 |
+| **27C256 (32KB EPROM)** | $1.50 | Standard game ROM |
+| **74HCT373 (Octal Latch)** | $0.40 | Address latching |
+| **LM358 (Op-Amp)** | $0.10 | Active audio amplification |
+| **Passives (R/C)** | $0.15 | Reset circuit and audio stage |
+| **Total (Excl. PCB)** | **~$5.00** | |
 
 ## Hardware Wiring
 
-### 1. GAL16V8 Pinout (`rom_ym.pld`)
+### 1. ATF16V8B Pinout (`rom_ym.pld`)
 
 | Pin | Signal | Source |
 | :--- | :--- | :--- |
@@ -38,16 +52,16 @@ The current GAL logic is gated by the `!RW` (Read/Write) line. This means the YM
 | 2 | Q0 | YM Pin 37 (DA0) | - |
 | 3 | D0 | 7800 Data Bus D0 | Pin 11 (O0) |
 | 4 | D1 | 7800 Data Bus D1 | Pin 12 (O1) |
-| 11 | LE | GAL Pin 15 (**YM_LE**) | - |
+| 11 | LE | Logic Pin 15 (**YM_LE**) | - |
 | 19 | Q7 | YM Pin 30 (DA7) | - |
 
 ### 3. YM2149 / AY-3-8910 Connections
 
 | YM Pin | Signal | Connection |
 | :--- | :--- | :--- |
-| 22 | CLOCK | **PHI2OUT (GAL Pin 16)** |
-| 27 | BDIR | GAL Pin 18 |
-| 29 | BC1 | GAL Pin 17 |
+| 22 | CLOCK | **PHI2OUT (Logic Pin 16)** |
+| 27 | BDIR | Logic Pin 18 |
+| 29 | BC1 | Logic Pin 17 |
 | 30–37 | DA7–DA0 | 74HCT373 Q7–Q0 |
 
 ## Hardware Pinout Reference
@@ -93,7 +107,7 @@ From [AtariHQ](https://atarihq.com/danb/7800cart/a7800cart.shtml):
 | **6** | A4 (7800 Cart Pin 22) | **23** | A11 (7800 Cart Pin 10) |
 | **7** | A3 (7800 Cart Pin 23) | **22** | !OE (Output Enable - Ground) |
 | **8** | A2 (7800 Cart Pin 24) | **21** | A10 (7800 Cart Pin 9) |
-| **9** | A1 (7800 Cart Pin 25) | **20** | !CE (Chip Enable - GAL Pin 19) |
+| **9** | A1 (7800 Cart Pin 25) | **20** | !CE (Chip Enable - Logic Pin 19) |
 | **10** | A0 (7800 Cart Pin 26) | **19** | Q7 (Data D7 - Latch Pin 18) |
 | **11** | Q0 (Data D0 - Latch Pin 3) | **18** | Q6 (Data D6 - Latch Pin 17) |
 | **12** | Q1 (Data D1 - Latch Pin 4) | **17** | Q5 (Data D5 - Latch Pin 14) |
@@ -127,4 +141,22 @@ From [AtariHQ](https://atarihq.com/danb/7800cart/a7800cart.shtml):
 
 **Note:** On the YM2149, Pin 26 (**SEL**) acts as an internal clock divider. When tied **Low**, the master clock is divided by 2. When tied **High**, the clock is used as-is. On the original AY-3-8910, this pin is part of the bus control logic.
 
+### LM358 Audio Stage ("Lokey" Active Shunt)
 
+The audio stage uses an LM358 op-amp in a non-standard **Active Shunt** configuration to provide high-character, saturated sound for the Atari 7800.
+
+| Pin | Signal | Connection |
+| :--- | :--- | :--- |
+| **1** | OUT1 | **Feedback Node** (Short to Pin 2) |
+| **2** | IN1_NEG | **Feedback Node** (Short to Pin 1) |
+| **3** | IN1_POS | **Ground** |
+| **4** | GND | **Ground Plane** |
+| **8** | VCC | **+5V** |
+
+> **Musician's Note on Op-Amps:** While this circuit is pin-compatible with higher-end op-amps like the **SN07 / TL072**, real-world testing on the Atari 7800 showed that the humble **LM358** actually produced a more desirable "retro" tone. The LM358's performance on the single 5V rail adds a slight warmth and grit that perfectly complements the YM2149 PSG. *Of course, that’s just my opinion; I could be completely wrong about this, and potentially everything else in life, but my ears seem happy!*
+
+**Audio Path Details:**
+*   **Mixing**: YM2149 Channels A, B, and C each go through a **1kΩ resistor** to a single meeting point.
+*   **The Shunt Bridge**: A **4.7kΩ resistor** connects the meeting point to Ground.
+*   **The Op-Amp Bridge**: A **4.7kΩ resistor** connects the meeting point to the **Positive (+)** leg of a **10µF electrolytic capacitor**. The **Negative (-)** leg of that capacitor connects to the Op-Amp **Feedback Node** (Pin 1/2).
+*   **Output**: The final mixed audio meets the Atari 7800 **Pin 18 (Exaudio)** input.

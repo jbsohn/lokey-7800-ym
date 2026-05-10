@@ -32,7 +32,7 @@ FIXED_A78S     := $(foreach f,$(FIXED_BASE),$(BUILD_DIR)/$(f).a78)
 FIXED_ROMS     := $(foreach f,$(FIXED_BASE),$(BUILD_DIR)/$(f).rom)
 
 # Core Targets
-.PHONY: all help clean gal rom a78 bin wav tools
+.PHONY: all help clean logic rom a78 bin wav tools
 
 all: tools a78
 
@@ -62,6 +62,7 @@ help:
 	@echo "Atari 7800 YM2149 SDK"
 	@echo "Targets:"
 	@echo "  make tools  - Build the .NET music conversion tools"
+	@echo "  make logic  - Build the ATF16V8B logic files (.jed)"
 	@echo "  make a78    - Build full library of preview ROMs (emulator format)"
 	@echo "  make rom    - Build and sign raw ROMs for hardware (.rom)"
 	@echo "  make wav    - Generate verification .wav files for all tracks"
@@ -110,8 +111,8 @@ $(BUILD_DIR)/%.wav: $(BUILD_DIR)/%.ymb $(WAVTOOL) | $(BUILD_DIR)
 	@$(WAVTOOL) $< $@
 
 # Utilities
-gal: $(BUILD_DIR)
-	@echo "Building GAL JED files from .pld sources..."
+logic: $(BUILD_DIR)
+	@echo "Building ATF16V8B JED files from .pld sources..."
 	@galette gal/rom.pld && galette gal/rom_ym.pld
 	@mv gal/*.jed $(BUILD_DIR)/ 2>/dev/null || true
 

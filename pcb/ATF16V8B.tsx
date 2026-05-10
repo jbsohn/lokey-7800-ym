@@ -1,6 +1,6 @@
 import { type ChipProps } from "tscircuit";
 
-export const GAL16V8 = (props: ChipProps) => (
+export const ATF16V8B = (props: ChipProps) => (
   <chip
     {...props}
     footprint="dip20_w300mil"
