@@ -21,8 +21,9 @@ This document defines specialized subagents for the Lokey 7800 YM project. These
 
 ### Instructions
 - Use the `tscircuit` React components in `pcb/`.
+- **Source of Truth**: Always ensure the PCB design matches the specifications in `docs/Hardware.md`. This is the authoritative reference for pinouts and logic.
 - Ensure all components (74HCT373, YM2149, 27C256) are correctly decoupled.
-- Follow the pinout for the Atari 7800 Edge Connector as defined in `pcb/Atari7800EdgeConnector.tsx`.
+- Follow the pinout for the Atari 7800 Edge Connector as defined in `pcb/Atari7800EdgeConnector.tsx` (which must match `docs/Hardware.md`).
 - Keep the board size within standard cartridge dimensions.
 - Use the skills in `pcb/.claude/skills/tscircuit/` for best practices.
 

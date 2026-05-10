@@ -30,6 +30,7 @@
 - **Testing**: Use `YmbToWav` to verify that bitmask compression is lossless.
 
 ### PCB Design (tscircuit)
+- **Source of Truth**: `docs/Hardware.md` is the authoritative source for hardware pinouts, memory maps, and signal logic. The `pcb/` project and all related code must always match what is defined in the hardware documentation.
 - **Workflow**: Code-driven React components in `pcb/*.tsx`.
 - **Standards**: 6 mil trace/space for signals, 16 mil for power.
 - **Components**: Prefer standard DIP packages for hobbyist ease-of-assembly.
