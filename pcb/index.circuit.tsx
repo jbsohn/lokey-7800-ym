@@ -7,7 +7,6 @@ import { LM358 } from "./LM358";
 
 export default () => (
   <board
-    routingDisabled
     outline={[
       { x: "-32mm", y: "35mm" },    // Top-left
       { x: "32mm", y: "35mm" },     // Top-right
@@ -22,8 +21,9 @@ export default () => (
     <net name="ANALOG_A" />
     <net name="ANALOG_B" />
     <net name="ANALOG_C" />
-    <net name="AUDIO_FINAL" />
-    <net name="OPAMP_OUT" />
+    <net name="SUM_NODE" />
+    <net name="CAP_PLUS" />
+    <net name="OPAMP_FB" />
     <net name="RESET_DELAYED" />
 
     {/* Ground Plane & Basic Net Configuration */}
@@ -61,7 +61,7 @@ export default () => (
         RW: "net.RW",
         HALT: "net.HALT",
         PHI2: "net.PHI2",
-        Exaudio: "net.AUDIO_FINAL",
+        Exaudio: "net.SUM_NODE",
       }}
     />
 
@@ -71,6 +71,7 @@ export default () => (
         schX={8} schY={4}
         connections={{
           VCC: "net.VCC",
+          VPP: "net.VCC",
           GND: "net.GND",
           OE: "net.GND",
           CE: "net.ROM_CE",
@@ -193,38 +194,34 @@ export default () => (
 
       {/* --- Audio Out Section (LM358 "Lokey" Active Shunt) --- */}
       <group name="Audio_Out_Group" pcbX="32mm" pcbY="0mm" pcbRotation={0}>
-        {/* Passive Mixing directly onto the final bus */}
-        <resistor name="R1" resistance="1k" footprint="axial" pcbX="-4mm" pcbY="-6mm" connections={{ pin1: "net.ANALOG_A", pin2: "net.AUDIO_FINAL" }} />
-        <resistor name="R2" resistance="1k" footprint="axial" pcbX="-4mm" pcbY="-3mm" connections={{ pin1: "net.ANALOG_B", pin2: "net.AUDIO_FINAL" }} />
-        <resistor name="R3" resistance="1k" footprint="axial" pcbX="-4mm" pcbY="0mm" connections={{ pin1: "net.ANALOG_C", pin2: "net.AUDIO_FINAL" }} />
-        
-        {/* LM358 Active Shunt Stage */}
+        {/* Passive Mixing SUM Node (meeting point of the 1k resistors) */}
+        <resistor name="R1" resistance="1k" footprint="axial" pcbX="-4mm" pcbY="-6mm" connections={{ pin1: "net.ANALOG_A", pin2: "net.SUM_NODE" }} />
+        <resistor name="R2" resistance="1k" footprint="axial" pcbX="-4mm" pcbY="-3mm" connections={{ pin1: "net.ANALOG_B", pin2: "net.SUM_NODE" }} />
+        <resistor name="R3" resistance="1k" footprint="axial" pcbX="0mm" pcbY="0mm" connections={{ pin1: "net.ANALOG_C", pin2: "net.SUM_NODE" }} />
+
+        {/* --- The Active Shunt (LM358) --- */}
         <LM358
            name="U5"
            pcbX="10mm" pcbY="0mm"
            connections={{
              VCC: "net.VCC",
              GND: "net.GND",
-             IN1_POS: "net.GND",       // Pin 3: Grounded
-             IN1_NEG: "net.OPAMP_OUT",  // Pin 2: Feedback point
-             OUT1: "net.OPAMP_OUT",     // Pin 1: Shorted to Pin 2
+             IN1_POS: "net.GND",        // Pin 3: Tied to Ground
+             IN1_NEG: "net.OPAMP_FB",   // Pin 2: Feedback node (shorted to Pin 1)
+             OUT1: "net.OPAMP_FB",      // Pin 1: Shorted to Pin 2 (Feedback node)
            }}
            />
-           <capacitor
-           name="C6"
-           capacitance="0.1uF"
-           footprint="axial"
-           pcbX="10mm" pcbY="14.2mm"
-           schX={26} schY={-2}
-           connections={{ pin1: "net.VCC", pin2: "net.GND" }}
-           />
-        {/* The "Grit" Resistor - Pull-down for the feedback node */}
-        <resistor name="R_GRIT" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="-3mm" connections={{ pin1: "net.OPAMP_OUT", pin2: "net.GND" }} />
 
-        {/* The "Coupling" Resistor - In series with the cap */}
-        <resistor name="R_COUPLE" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="3mm" connections={{ pin1: "net.OPAMP_OUT", pin2: "net.CAP_PLUS" }} />
+        {/* 4.7k Resistor between Pins 2 and 3 (Feedback node to GND) */}
+        <resistor name="R_GRIT1" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="-6mm" connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
 
-        {/* Coupling Capacitor (Active Shunt bridge to Final Bus) */}
+        {/* 4.7k Resistor between Pins 4 and 1 (GND to feedback node) */}
+        <resistor name="R_GRIT2" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="-3mm" connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
+
+        {/* 4.7k Resistor between Pin 1 and Capacitor (+) */}
+        <resistor name="R_FEEDBACK" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="3mm" connections={{ pin1: "net.OPAMP_FB", pin2: "net.CAP_PLUS" }} />
+
+        {/* Capacitor C5: Positive to Resistor, Negative to SUM_NODE */}
         <capacitor
           name="C5"
           capacitance="10uF"
@@ -232,9 +229,18 @@ export default () => (
           polarized
           pcbX="25mm" pcbY="4mm"
           connections={{
-            pin1: "net.CAP_PLUS",     // Positive (+) connects to Resistor
-            pin2: "net.AUDIO_FINAL",  // Negative (-) connects to Final Mix / Pin 18
+            pin1: "net.CAP_PLUS",     // Positive (+) to Resistor
+            pin2: "net.SUM_NODE",     // Negative (-) to Sum Node
           }}
+        />
+
+        <capacitor
+          name="C6"
+          capacitance="0.1uF"
+          footprint="axial"
+          pcbX="10mm" pcbY="14.2mm"
+          schX={26} schY={-2}
+          connections={{ pin1: "net.VCC", pin2: "net.GND" }}
         />
       </group>
     </group>

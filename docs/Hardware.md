@@ -132,18 +132,16 @@ From [AtariHQ](https://atarihq.com/danb/7800cart/a7800cart.shtml):
 | **12** | IOB1 | **29** | BC1 (Bus Control 1) |
 | **13** | IOB0 | **28** | BC2 (Bus Control 2) |
 | **14** | IOA7 | **27** | BDIR (Bus Direction) |
-| **15** | IOA6 | **26** | SEL (YM2149 Clock Div Select) |
+| **15** | IOA6 | **26** | N.C. |
 | **16** | IOA5 | **25** | A8 (Address 8 - Tie High) |
 | **17** | IOA4 | **24** | !A9 (Address 9 - Tie Low) |
 | **18** | IOA3 | **23** | !RESET (Reset - Tie High) |
 | **19** | IOA2 | **22** | CLOCK (Master Clock Input) |
 | **20** | IOA1 | **21** | IOA0 |
 
-**Note:** On the YM2149, Pin 26 (**SEL**) acts as an internal clock divider. When tied **Low**, the master clock is divided by 2. When tied **High**, the clock is used as-is. On the original AY-3-8910, this pin is part of the bus control logic.
-
 ### LM358 Audio Stage ("Lokey" Active Shunt)
 
-The audio stage uses an LM358 op-amp in a non-standard **Active Shunt** configuration to provide high-character, saturated sound for the Atari 7800.
+The audio stage uses an LM358 op-amp in a parallel **Active Shunt** configuration. Unlike a standard buffer or amplifier, the audio signal **bypasses** the op-amp silicon for maximum transparency, while the op-amp acts as an active, non-linear load on the mixing node to provide the signature "retro" character.
 
 | Pin | Signal | Connection |
 | :--- | :--- | :--- |
@@ -153,10 +151,13 @@ The audio stage uses an LM358 op-amp in a non-standard **Active Shunt** configur
 | **4** | GND | **Ground Plane** |
 | **8** | VCC | **+5V** |
 
-> **Musician's Note on Op-Amps:** While this circuit is pin-compatible with higher-end op-amps like the **SN07 / TL072**, real-world testing on the Atari 7800 showed that the humble **LM358** actually produced a more desirable "retro" tone. The LM358's performance on the single 5V rail adds a slight warmth and grit that perfectly complements the YM2149 PSG. *Of course, that’s just my opinion; I could be completely wrong about this, and potentially everything else in life, but my ears seem happy!*
+> **Musician's Note on Op-Amps:** While this circuit is pin-compatible with higher-end op-amps like the **SN07 / TL072**, real-world testing on the Atari 7800 showed that the humble **LM358** actually produced a more desirable "retro" tone. The LM358's performance on the single 5V rail adds a slight warmth and grit that perfectly complements the YM2149 PSG. This configuration ensures the audio remains "pure" by avoiding the op-amp's internal slew-rate limiting, while still benefiting from its reactive loading.
 
 **Audio Path Details:**
-*   **Mixing**: YM2149 Channels A, B, and C each go through a **1kΩ resistor** to a single meeting point.
-*   **The Shunt Bridge**: A **4.7kΩ resistor** connects the meeting point to Ground.
-*   **The Op-Amp Bridge**: A **4.7kΩ resistor** connects the meeting point to the **Positive (+)** leg of a **10µF electrolytic capacitor**. The **Negative (-)** leg of that capacitor connects to the Op-Amp **Feedback Node** (Pin 1/2).
-*   **Output**: The final mixed audio meets the Atari 7800 **Pin 18 (Exaudio)** input.
+*   **Mixing**: YM2149 Channels A, B, and C each go through a **1kΩ resistor** to a single **Summing Node**.
+*   **Direct Output**: The **Summing Node** is wired directly to the Atari 7800 **Pin 18 (Exaudio)** input.
+*   **The Active Shunt**: The LM358 Op-Amp is wired as a Ground-follower — Pin 3 grounded, Pins 1 & 2 shorted together to form a **Feedback Node**.
+*   **Shunt Loads**: Two **4.7kΩ resistors** connect the **Feedback Node** to Ground (one between Pins 2 and 3, one between Pins 4 and 1).
+*   **Reactive Feedback**: A **4.7kΩ resistor** connects the **Feedback Node** (Pin 1) to the **Positive (+) terminal** of a **10µF electrolytic capacitor**. The **Negative (-) terminal** of the capacitor connects back to the **Summing Node** (and therefore also to Exaudio).
+
+
