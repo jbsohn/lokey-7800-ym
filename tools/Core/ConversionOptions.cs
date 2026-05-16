@@ -39,8 +39,8 @@ public record struct ConversionOptions(
 
     public static void PrintUsage(string name, string inputSpec)
     {
-        Console.WriteLine($"Usage: {name} <{inputSpec}> [options]");
-        Console.WriteLine(
+        Console.Error.WriteLine($"Usage: {name} <{inputSpec}> [options]");
+        Console.Error.WriteLine(
             "Options:\n  -o <file>   Output binary\n  -f <frames> Max frames\n  -p <size>   Pattern size (0=auto)\n  -s <step>   Frame step\n  -hz <val>   Override Hz");
     }
 }

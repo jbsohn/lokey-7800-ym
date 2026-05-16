@@ -32,8 +32,8 @@ internal class Program
     {
         if (args.Length < 2)
         {
-            Console.WriteLine("Usage: a78gen <input.bin> <config.json> -o <output.a78>");
-            return;
+            Console.Error.WriteLine("Usage: a78gen <input.bin> <config.json> -o <output.a78>");
+            Environment.Exit(1);
         }
 
         string inputPath = args[0];
@@ -45,8 +45,17 @@ internal class Program
             if (args[i] == "-o" && i + 1 < args.Length) outputPath = args[++i];
         }
 
-        if (!File.Exists(inputPath)) return;
-        if (!File.Exists(configPath)) return;
+        if (!File.Exists(inputPath))
+        {
+            Console.Error.WriteLine($"Error: Input binary '{inputPath}' not found.");
+            Environment.Exit(1);
+        }
+
+        if (!File.Exists(configPath))
+        {
+            Console.Error.WriteLine($"Error: Configuration file '{configPath}' not found.");
+            Environment.Exit(1);
+        }
 
         var json = File.ReadAllText(configPath);
         var config = JsonSerializer.Deserialize(json, SourceGenerationContext.Default.A78Config) ?? new A78Config();
