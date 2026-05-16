@@ -188,13 +188,20 @@ modeac  = $3 ; 320a or 320c
 .macro screen ck, dma, cw, bc, km, mode
     lda #((ck * $80) | (dma * $20) | (cw * $10) | (bc * 8) | (km * 4) | mode) & $FF
     sta CTRL
+    .ifdef sctrl
+    sta sctrl
+    .endif
 .endmacro
 
 .macro dppload adr
     lda #<(adr)
     sta DPPL
+    .ifdef sdppl
     sta sdppl
+    .endif
     lda #>(adr)
     sta DPPH
+    .ifdef sdpph
     sta sdpph
+    .endif
 .endmacro

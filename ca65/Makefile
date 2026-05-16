@@ -95,7 +95,8 @@ $(BUILD_DIR)/%-data.o: $(BUILD_DIR)/%.ymi $(BUILD_DIR)/%.ymb | $(BUILD_DIR)
 	@echo "  Assembling Data: $*"
 	@echo '.macro export_ymi file' > $(BUILD_DIR)/$*-data.s
 	@echo '  .include file' >> $(BUILD_DIR)/$*-data.s
-	@echo '  .export PATTERN_SIZE, PLAYER_HZ, MAX_FRAMES, YM_DELAY, YM_FINE, NUM_PATTERNS, SEQ_LEN' >> $(BUILD_DIR)/$*-data.s
+	@echo '  STEP = (PLAYER_HZ * 65536) / 60' >> $(BUILD_DIR)/$*-data.s
+	@echo '  .export PATTERN_SIZE, PLAYER_HZ, MAX_FRAMES, YM_DELAY, YM_FINE, NUM_PATTERNS, SEQ_LEN, STEP' >> $(BUILD_DIR)/$*-data.s
 	@echo '.endmacro' >> $(BUILD_DIR)/$*-data.s
 	@echo 'export_ymi "$*.ymi"' >> $(BUILD_DIR)/$*-data.s
 	@echo '.segment "RODATA"' >> $(BUILD_DIR)/$*-data.s

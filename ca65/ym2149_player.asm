@@ -7,8 +7,9 @@
     .include "ymb.inc"
 
 ; Imports from music data object
-.importzp PLAYER_HZ
 .import MusicData
+.import MAX_FRAMES : abs
+.import STEP : abs
 
 .segment "ZEROPAGE"
     player: .res .sizeof(TPlayerState)
@@ -48,6 +49,7 @@ cl_y:
 
 main_loop:
     jsr sync_vbi
+    jsr update_visuals
     
     ; 16-bit Fractional Music Step
     clc
@@ -60,18 +62,6 @@ main_loop:
     bcc skip
     jsr play_frame
 skip:
-
-    ; Visual Feedback
-    inc player + TPlayerState::v_frame
-    lda player + TPlayerState::v_frame
-    lsr
-    lsr
-    lsr
-    lsr
-    and #$0F
-    ora #$02
-    sta BKGRND
-    
     jmp main_loop
 .endproc
 
@@ -85,9 +75,7 @@ cl_p:
     dex
     bpl cl_p
 
-    ; Pre-calculate music delta
-    ; Delta = (PLAYER_HZ * 65536) / 60
-    STEP = (PLAYER_HZ * 65536) / 60
+    ; Use pre-calculated music delta from link-time constant
     lda #<STEP
     sta player + TPlayerState::music_delta
     lda #>STEP
@@ -132,6 +120,16 @@ cl_p:
 .endproc
 
 .proc play_frame
+    lda player + TPlayerState::frame_cnt+1
+    cmp #>MAX_FRAMES
+    bne check_pattern
+    lda player + TPlayerState::frame_cnt
+    cmp #<MAX_FRAMES
+    bcc check_pattern
+    
+    jsr init_music
+
+check_pattern:
     lda player + TPlayerState::pat_frames
     bne do_play
     ldy player + TPlayerState::seq_idx
