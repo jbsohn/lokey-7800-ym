@@ -63,7 +63,7 @@ internal static class Program
     /// </summary>
     private static void PrintUsage()
     {
-        Console.WriteLine("Usage: YmbToWav <input.bin> [output.wav]");
+        Console.Error.WriteLine("Usage: YmbToWav <input.bin> [output.wav]");
     }
 
     /// <summary>
