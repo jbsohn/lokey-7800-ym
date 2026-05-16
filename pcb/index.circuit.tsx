@@ -101,17 +101,17 @@ export default () => (
           connections={{
             VCC: "net.VCC",
             GND: "net.GND",
-            I1: "net.A15",
-            I2: "net.A14",
-            I3: "net.A0",
-            I4: "net.HALT",
-            I5: "net.RW",
-            I6: "net.PHI2",
-            O1: "net.ROM_CE",
-            O2: "net.BDIR",
-            O3: "net.BC1",
-            O4: "net.PHI2OUT",
-            O5: "net.YM_LE",
+            A15: "net.A15",
+            A14: "net.A14",
+            A0: "net.A0",
+            HALT: "net.HALT",
+            RW: "net.RW",
+            PHI2: "net.PHI2",
+            ROM_CE: "net.ROM_CE",
+            BDIR: "net.BDIR",
+            BC1: "net.BC1",
+            PHI2OUT: "net.PHI2OUT",
+            YM_LE: "net.YM_LE",
           }}
         />
         <capacitor

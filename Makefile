@@ -119,4 +119,4 @@ logic: $(BUILD_DIR)
 clean:
 	@rm -rf $(BUILD_DIR)
 	@rm -rf $(BIN_DIR)
-	@rm -f src/*.wav samples/*.wav
+	@rm -f $(BUILD_DIR)/*.wav $(YM_DIR)/*.wav $(VGM_DIR)/*.wav

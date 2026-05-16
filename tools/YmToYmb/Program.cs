@@ -159,7 +159,9 @@ internal static class Program
             for (var r = 0; r < 16; r++)
             {
                 if (r >= 14 && header.Signature != "YM6!") break;
-                var val = rawData[header.DataOffset + r * header.TotalFrames + sourceFrame];
+                var idx = header.DataOffset + r * header.TotalFrames + sourceFrame;
+                if (idx >= rawData.Length) break;
+                var val = rawData[idx];
 
                 if (step > 1 && r is >= 8 and <= 10)
                     registers[r] = Math.Max(registers[r], val);
@@ -167,7 +169,8 @@ internal static class Program
                     registers[r] = val;
 
                 if (r != 13 || sourceFrame <= 0) continue;
-                var prev = rawData[header.DataOffset + r * header.TotalFrames + sourceFrame - 1];
+                var prevIdx = header.DataOffset + r * header.TotalFrames + sourceFrame - 1;
+                var prev = prevIdx < rawData.Length ? rawData[prevIdx] : (byte)0;
                 if (val != prev || sourceFrame % 50 == 0) r13TriggeredInWindow = true;
             }
         }
