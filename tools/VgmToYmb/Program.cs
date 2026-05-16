@@ -1,6 +1,5 @@
 ﻿using System.Buffers.Binary;
 using System.Diagnostics;
-using System.Globalization;
 using System.Text;
 using Core;
 
@@ -20,18 +19,18 @@ internal record VgmHeader(
 
 internal static class Program
 {
-    private const double Atari7800Clock = 1.792000;
+    private const double Atari7800Clock = 1.789773;
     private const int VgmSampleRate = 44100;
 
     public static int Main(string[] args)
     {
         if (args.Length < 1 || args.Any(a => a is "-h" or "--help"))
         {
-            PrintUsage();
+            ConversionOptions.PrintUsage("VgmToYmb", "input.vgm/vgz");
             return 1;
         }
 
-        var options = ParseArgs(args);
+        var options = ConversionOptions.ParseArgs(args);
         var outFile = options.OutputFile ?? Path.ChangeExtension(options.InputFile, ".bin");
         var configFile = Path.ChangeExtension(outFile, ".ymi");
 
@@ -69,57 +68,6 @@ internal static class Program
         Console.WriteLine($"Song:   {header.Title}");
         Console.WriteLine($"Clock:  {header.AyClock / 1000000.0:F3} MHz | Rate: {effectiveHz} Hz");
         Console.WriteLine("---------------------------------------------------------");
-    }
-
-    /// <summary>
-    ///     Parses command-line arguments into a ConversionOptions record.
-    /// </summary>
-    private static ConversionOptions ParseArgs(string[] args)
-    {
-        var input = args[0];
-        string? output = null;
-        int max = ushort.MaxValue, pat = 0, step = 1;
-        int? hz = null;
-
-        for (var i = 0; i < args.Length; i++)
-        {
-            if (i + 1 >= args.Length) continue;
-            switch (args[i])
-            {
-                case "-o":
-                    i++;
-                    output = args[i];
-                    break;
-                case "-f":
-                    i++;
-                    max = int.Parse(args[i], CultureInfo.InvariantCulture);
-                    break;
-                case "-p":
-                    i++;
-                    pat = int.Parse(args[i], CultureInfo.InvariantCulture);
-                    break;
-                case "-s":
-                    i++;
-                    step = int.Parse(args[i], CultureInfo.InvariantCulture);
-                    break;
-                case "-hz":
-                    i++;
-                    hz = int.Parse(args[i], CultureInfo.InvariantCulture);
-                    break;
-            }
-        }
-
-        return new ConversionOptions(input, output, max, pat, step, hz);
-    }
-
-    /// <summary>
-    ///     Displays command-line usage information.
-    /// </summary>
-    private static void PrintUsage()
-    {
-        Console.WriteLine("Usage: VgmToYmb <input.vgm/vgz> [options]");
-        Console.WriteLine(
-            "Options:\n  -o <file>   Output binary\n  -f <frames> Max frames\n  -p <size>   Pattern size (0=auto)\n  -s <step>   Frame step\n  -hz <val>   Override Hz");
     }
 
     /// <summary>

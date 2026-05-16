@@ -4,7 +4,14 @@
 
 The **Lokey 7800 YM** project is an experiment in providing a low-cost (~$2 USD) bridge between the Atari 7800 and the Atari ST. By using the YM2149 PSG (or modern clones like the **KC89C72**), we aim to bring three-channel sound to the 7800 with Atari ST asset compatibility. Original YM2149 chips are also often available as used or New-Old-Stock (NOS) parts.
 
-The project views the **Atari ST** as a potential **Creation System**. With established trackers (like Protracker ST or Maxymiser), it offers a path for audio production. Modern cross-platform tools like [**Furnace Tracker**](https://tildearrow.org/furnace) and [**Arkos Tracker**](https://www.julien-nevo.com/arkostracker/) (which is dedicated specifically to the AY/YM architecture) can also export VGM data for use with our tools on the 7800.
+### What's in a Name?
+The **Lokey** name is a triple-layered nod to the project's roots:
+*   **POKEY**: A respectful "cousin" to Atari’s legendary sound chip.
+*   **Low-Key**: Reflecting our philosophy of a minimalist, stealthy, and cost-effective design.
+*   **Loki**: Inspired by the Norse god of mischief—bringing a bit of technical "trickery" to the Atari 7800 bus.
+
+The project views the **Atari ST** as a potential **Creation System**.
+ With established trackers (like Protracker ST or Maxymiser), it offers a path for audio production. Modern cross-platform tools like [**Furnace Tracker**](https://tildearrow.org/furnace) and [**Arkos Tracker**](https://www.julien-nevo.com/arkostracker/) (which is dedicated specifically to the AY/YM architecture) can also export VGM data for use with our tools on the 7800.
 
 The **Atari 7800** acts as the **Consumer** of these assets. By bridging the hardware gap, we hope to allow the 7800 to play music from the ST era or new compositions from modern trackers.
 
@@ -37,23 +44,20 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 
 [![ANCOOL1 Stress Test on Atari 7800 Hardware](https://img.youtube.com/vi/LWzkfaaal2E/0.jpg)](https://www.youtube.com/shorts/LWzkfaaal2E)
 
----
-
 ## Documentation
 
-- **[Development Guide](CLAUDE.md)** - Technical standards and build process for developers and AI assistants.
+- **[Development Guide](CLAUDE.md)** - Technical standards and build process for contributors and AI assistants.
+- **[AI Development Agents](AGENTS.md)** - Specialized instructions for AI-assisted development and automation.
 - **[Building & Toolchain](docs/Building.md)** - Compile ROMs and set up the environment.
 * **[File Extension Reference](docs/FileExtensions.md)** - Guide to `.ymb`, `.ymi`, `.rom`, and `.a78` files.
-* **[Hardware & Wiring](docs/Hardware.md)** - Pinouts, memory mapping, and GAL logic.
-
+* **[Hardware & Wiring](docs/Hardware.md)** - Pinouts, memory mapping, and logic chips.
 - **[PCB Design (tscircuit)](docs/PCB.md)** - Code-to-PCB workflow and **[Schematic PDF](docs/schematic.pdf)**.
-
 * **[Emulator Support](docs/Emulation.md)** - Using `a7800` and `js7800` for development.
-
 - **[Diagnostic Tools](docs/Tools.md)** - Hardware signal and timing verification.
 * **[Music Tools](docs/MusicTools.md)** - Theory and usage for `YmToYmb`, `VgmToYmb`, and `YmbToWav`.
 * **[YMB Format](docs/YmbFormat.md)** - Technical specification of the music binary format.
 * **[Musical Credits](docs/Musicians.md)** - Honoring the original composers.
+* **[Crazy Future Ideas](docs/FutureIdeas.md)** - Roadmap for hardware/software expansions.
 
 ---
 
@@ -72,10 +76,11 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 ## Acknowledgements & Credits
 
 * **Karri Kaksonen (karrika)**: For the excellent [Otaku-flash](https://github.com/karrika/Otaku-flash) project. We have integrated the **Stable Alpha** Atari 7800 cartridge footprints, symbols, and professional design rules from this MIT-licensed repository.
-* **Simon Frankau ([galette](https://github.com/simon-frankau/galette))**: For the open-source **galette** GAL assembler. It provides a modern, cross-platform toolchain that saved us from the Windows VM nightmare of WinCUPL.
+* **Simon Frankau ([galette](https://github.com/simon-frankau/galette))**: For the open-source **galette** logic assembler. It provides a modern, cross-platform toolchain for compiling ATF16V8B logic, saving us from the legacy Windows tools.
 * **Dan Boris (AtariHQ)**: For the indispensable [7800 Cartridge Technical Specifications](https://atarihq.com/danb/7800cart/a7800cart.shtml) and reference diagrams that made this hardware mapping possible.
 * **Olivier PONCET (aym-js)**: For the high-fidelity [aym-js](https://github.com/ponceto/aym-js) YM2149 emulator core. Our `BinToWav` tool uses a literal C# port of this logic to ensure high-accuracy verification of music assets.
 - **Arnaud Carré (Leonard/OXG)**: For the excellent [StSound](https://github.com/arnaud-carre/StSound) project. The melodic assets used for hardware testing were sourced via this project's research.
+* **Eagle & Ecernosoft**: For the insightful ideas and technical tips provided on the forums, including the Pokey800 mapping recommendation and the inspiration for the "Active Shunt" audio stage design.
 - **Original Musicians & Composers**: For the timeless tracks used as benchmarks for this project. See **[Musical Credits](docs/Musicians.md)** for a full list of artists.
 
 - **The Atari Community**: We are grateful to the dedicated fans keeping the 16-bit and 8-bit flames alive through archival and homebrew development.

@@ -30,8 +30,8 @@ reset:
         ; -------------------------
         ; YM2149 Initial "Crush"
         ; -------------------------
-        ; Sweep all 16 registers (0-15)
-        ldx #15
+        ; Sweep all 14 registers (0-13)
+        ldx #13
 init_loop:
         txa             ; Reg index -> A
         ldy #0          ; Default 0

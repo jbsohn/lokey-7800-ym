@@ -90,7 +90,7 @@ vbi_tick:
         inc vbi_work_div
         lda vbi_work_div
         cmp #vbi_work_every
-        bcc vbi_done
+        bmi vbi_done
         lda #$00
         sta vbi_work_div
 

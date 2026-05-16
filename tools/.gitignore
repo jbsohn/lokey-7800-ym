@@ -19,6 +19,7 @@
 *.sln.docstates
 *.patch
 *.diff
+*.lscache
 
 # NuGet
 project.lock.json

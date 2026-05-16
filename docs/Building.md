@@ -28,14 +28,6 @@ To clean generated artifacts:
 make clean
 ```
 
-## Assembler & Toolchain
-
-The sample code is currently written for the **DASM** assembler to facilitate rapid prototyping and get the initial hardware working. "Hardware working first" is the current priority.
-
-Once the project is stable, we plan to transition to a more robust toolchain:
-- **cc65**: To leverage its powerful macro assembler and flexible linking options.
-- **MADS**: Widely considered one of the best Atari assemblers available.
-
 ## Tool Requirements
 
 All diagnostic and processing tools in this repository require the **.NET SDK**. They have been verified on **Linux** and **macOS** (Intel and Apple Silicon). 
@@ -43,14 +35,14 @@ All diagnostic and processing tools in this repository require the **.NET SDK**.
 > **Note on Windows**: These tools are currently **untested** on Windows. While they should run via `dotnet build` or `dotnet run`, the build environment and shell-based diagnostics have not been verified for that platform yet.
 ```
 
-## GAL Logic Compilation
+## Logic Compilation (ATF16V8B)
 
-This project uses [galette](https://github.com/simon-frankau/galette), an open-source GAL assembler. This allows for a cross-platform toolchain without requiring legacy Windows tools. Original WinCUPL sources are preserved in `gal/wincupl/` as a reference.
+This project uses [galette](https://github.com/simon-frankau/galette), an open-source logic assembler. This allows for a cross-platform toolchain without requiring legacy Windows tools. Original WinCUPL sources are preserved in `gal/wincupl/` as a reference.
 
-To compile the GAL logic into JEDEC files:
+To compile the ATF16V8B logic into JEDEC files:
 
 ```bash
-make gal
+make logic
 ```
 
 ## Signing for Real 7800 Hardware
@@ -79,4 +71,3 @@ Example DASM source:
     .word reset
     .word reset
 ```
-

@@ -15,3 +15,4 @@ bin/
 *.sim
 .testing/
 .DS_Store
+.tscircuit

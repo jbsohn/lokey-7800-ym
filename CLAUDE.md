@@ -1,69 +1,46 @@
-# Development Guide
-
-This document outlines the technical standards, build process, and coding style for the Lokey 7800 YM project. It is intended for both human contributors and AI assistants.
+# CLAUDE.md
 
 ## Build Commands
 
-| Command | Purpose |
-|---------|---------|
-| `make tools` | Build the .NET conversion tools solution |
-| `make a78` | Build sample ROMs with 128-byte headers (emulators) |
-| `make rom` | Build and sign raw ROM binaries for hardware (.rom) |
-| `make bin` | Build music data fragments only (.ymb) |
-| `make wav` | Generate WAV verification files from .ymb |
-| `make gal` | Build JEDEC files from `gal/*.pld` sources |
-| `make clean` | Remove `build/` and generated artifacts |
+- Build tools, ROMs, and `.a78` files: `make all`
+- Build only .NET tools: `make tools`
+- Build only logic ROMs and signed binaries: `make rom`
+- Build only emulator-ready `.a78` files: `make a78`
+- Build JEDEC files from `gal/*.pld` sources: `make logic`
+- Generate verification WAV files: `make wav`
+- Run specific tool: `dotnet run --project tools/<ToolName>/<ToolName>.csproj -- <args>`
+- Clean all build artifacts: `make clean`
 
-## Style & Coding Guidelines
+## Code Style & Standards
 
-### 6502 Assembly (ca65)
-- **Architecture**: 32KB Linear ROM (starting at `$8000`).
-- **Syntax**: Standard ca65 format.
-- **Naming**: Use `snake_case` for labels and subroutines. 
-- **Registers**: Prefix YM2149 registers with `AY_` (e.g., `AY_ADDR = $4000`).
-- **Footer**: Vectors MUST be at `$FFFA-$FFFF` (VECTORS segment).
+### 6502 Assembly (DASM)
 
-```asm
-.segment "VECTORS"
-    .word reset      ; NMI
-    .word reset      ; RESET
-    .word reset      ; IRQ
-```
+- **Formatting**: 8-space indentation for instructions, 0-space for labels.
+- **Naming**: `snake_case` for labels and variables.
+- **Vectors**: All ROMs must include standard Atari 7800 vectors at the end.
+- **Memory Map**:
+  - YM2149 Address Register: `$4000`
+  - YM2149 Data Register: `$4001`
+  - ROM Start: `$8000` (for 32KB images)
 
-### File Extensions
-- **.rom**: Signed Hardware ROM image.
-- **.a78**: Emulator ROM image (with 128-byte header).
-- **.ymb**: Compressed Music Binary data.
-- **.ymi**: YM Information/Metadata sidecar.
+### C# / .NET
 
-### PCB Design
-- **Tool**: [tscircuit](https://tscircuit.com)
-- **Source**: React-based circuit code in `pcb/index.circuit.tsx`.
+- **Version**: .NET 10.0+
+- **Style**: Standard C# conventions (PascalCase for classes/methods, camelCase for local variables).
+- **Architecture**: Core logic resides in `tools/Core/`, utilized by CLI wrappers.
+- **Performance**: Use `ReadOnlySpan<byte>` for binary parsing where possible.
+- **Testing**: Use `YmbToWav` to verify that bitmask compression is lossless.
 
-## Music Conversion
+### PCB Design (tscircuit)
 
-Use the provided .NET tools to convert register captures:
-
-```bash
-dotnet run --project tools/YmToYmb/YmToYmb.csproj -- <input.ym> -o <output.ymb> -s <step>
-```
-- `-s 1`: Full fidelity.
-- `-s 2`: Half-size (recommended for most tracks).
-
-## Hardware Memory Map
-
-| Address | Device |
-|---------|--------|
-| `$4000` | YM2149 Address Latch (write-only) |
-| `$4001` | YM2149 Data Write (write-only) |
-| `$8000-$FFFF` | 32KB ROM |
-
-## Diagnostics
-
-- **Software Heartbeat**: Background color flashing confirms the 6502 is executing and VBI timing is correct.
-- **WAV Verification**: `dotnet run --project tools/YmbToWav/YmbToWav.csproj -- build/track.ymb output.wav`
+- **Source of Truth**: `docs/Hardware.md` is the authoritative source for hardware pinouts, memory maps, and signal logic. The `pcb/` project and all related code must always match what is defined in the hardware documentation.
+- **Workflow**: Code-driven React components in `pcb/*.tsx`.
+- **Standards**: 6 mil trace/space for signals, 16 mil for power.
+- **Components**: Prefer standard DIP packages for hobbyist ease-of-assembly.
 
 ## Project Structure
+
+<<<<<<< HEAD
 
 - `ca65/`: 6502 assembly sample code and reference player (ca65).
 - `sample-code/`: Original DASM assembly samples.
@@ -73,3 +50,13 @@ dotnet run --project tools/YmToYmb/YmToYmb.csproj -- <input.ym> -o <output.ymb> 
 - `pcb/`: tscircuit PCB design files.
 - `ym-samples/`: Original Atari ST music sources.
 - `vgm-samples/`: VGM/VGZ music sources.
+=======
+- `tools/`: .NET 10.0 source for conversion and diagnostic tools.
+- `docs/`: Technical specifications, wiring diagrams, and hardware guides.
+- `gal/`: Programmable logic (ATF16V8B) sources.
+- `sample-code/`: DASM 6502 assembly for drivers and test ROMs.
+- `ym-samples/` / `vgm-samples/`: Benchmark audio assets.
+- `pcb/`: React-based PCB design using tscircuit.
+- `build/`: Generated artifacts (ROMs, JEDs, WAVs).
+
+>>>>>>> main

@@ -17,10 +17,10 @@ Validates physical signals coming off the edge connector.
 - **Usage**: Run from the project root.
 - **Target Signals**: Analyzes `PHI2`, `R/W`, `HALT`, and `A15` for stable transitions.
 
-### `tools/Scripts/ValidateGalSignals.cs` & `tools/Scripts/ValidateLatchEnable.cs`
+### `tools/Scripts/ValidateLogicSignals.cs` & `tools/Scripts/ValidateLatchEnable.cs`
 Advanced timing diagnostics used to detect mid-cycle address bus noise or "shattered" pulses.
 - **Timing Check**: Ensures `YM_LE`, `BDIR`, and `BC1` only trigger when the `PHI2` clock is stable.
-- **BC1 Monitor**: Confirms the GAL correctly identifies register selection (A0=0) vs. data writes.
+- **BC1 Monitor**: Confirms the logic equations correctly identify register selection (A0=0) vs. data writes.
 
 ### `tools/Scripts/ValidateYMSignals.cs`
 Specifically monitors the input pins of the YM2149 to ensure the 74HCT373 latch is correctly delivering the data bus payload during the write window.

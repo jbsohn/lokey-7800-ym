@@ -1,12 +1,12 @@
 # PCB Design Workflow (tscircuit)
 
-Unlike traditional hardware projects, this project uses a **Code-to-PCB** workflow. The "Source of Truth" for the schematic is the React-based circuit code found in `pcb/index.circuit.tsx`.
+Unlike traditional hardware projects, this project uses a **Code-to-PCB** workflow. While the authoritative "Source of Truth" for hardware specifications is `docs/Hardware.md`, the implementation is managed via React-based circuit code in `pcb/index.circuit.tsx`.
 
 We leverage **tscircuit**, a TypeScript framework that allows us to define electronic components and layouts using React.
 
 ## Generated Schematic
 
-> **NOTE:** This PDF is a generated preview intended for visual reference. Always refer to `pcb/index.circuit.tsx` for the authoritative design.
+> **NOTE:** This PDF is a generated preview intended for visual reference. Always ensure that `pcb/index.circuit.tsx` matches the technical specifications in `docs/Hardware.md`.
 
 [Atari 7800 YM2149 Cartridge Schematic](schematic.pdf)
 

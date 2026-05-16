@@ -154,7 +154,7 @@ public record YmMusic(List<YmFrame> Frames)
     public void SaveWav(string filePath, int hz)
     {
         const int sampleRate = 44100;
-        const double clock = 1792000.0;
+            const double clock = 1789773.0;
         var emu = new AymEmulator(clock, sampleRate);
         var samplesPerFrame = sampleRate / hz;
         var totalSamples = (long)Frames.Count * samplesPerFrame;
