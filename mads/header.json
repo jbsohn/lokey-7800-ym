@@ -1,0 +1,14 @@
+{
+    "version": 4,
+    "title": "YM2149 TEST ROM",
+    "cart_type": 0,
+    "controller_1": 1,
+    "controller_2": 1,
+    "tv_type": 0,
+    "save_device": 0,
+    "slot_passthrough": 0,
+    "mapper": 0,
+    "mapper_opts": 0,
+    "audio": 16384,
+    "interrupt": 0
+}
