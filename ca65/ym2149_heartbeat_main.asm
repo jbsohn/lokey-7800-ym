@@ -41,7 +41,7 @@ delay_x:
     txs
 
     ; Clear YM
-    ldx #15
+    ldx #13
 init_loop:
     stx AY_ADDR
     lda #0

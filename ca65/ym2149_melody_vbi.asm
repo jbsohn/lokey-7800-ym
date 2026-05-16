@@ -50,12 +50,8 @@ cl_y:
     sta vbi_work_div
 
 main_loop:
-v1: bit MSTAT
-    bmi v1
-v2: bit MSTAT
-    bpl v2
-    
     jsr Tick
+    jsr delay_fallback
     jmp main_loop
 .endproc
 
@@ -87,11 +83,12 @@ v2: bit MSTAT
 n_ok:
     stx note_index
 
+    ldy note_index
     ldx #0
-    lda note_table_lo,x
+    lda note_table_lo,y
     jsr WriteYM
     ldx #1
-    lda note_table_hi,x
+    lda note_table_hi,y
     jsr WriteYM
     ldx #8
     lda #$0F
@@ -106,6 +103,18 @@ vbi_done:
 .proc WriteYM
     stx AY_ADDR
     sta AY_DATA
+    rts
+.endproc
+
+.proc delay_fallback
+    ldy #$12
+df_1:
+    ldx #$00
+df_2:
+    dex
+    bne df_2
+    dey
+    bne df_1
     rts
 .endproc
 

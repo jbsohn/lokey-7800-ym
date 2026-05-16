@@ -213,6 +213,38 @@ v1: bit MSTAT
     bmi v1     ; Wait for CURRENT vblank to end
 v2: bit MSTAT
     bpl v2     ; Wait for NEXT vblank to start
+
+    inc player + TPlayerState::v_frame
+    bne no_hi
+    inc player + TPlayerState::v_frame+1
+no_hi:
+    rts
+.endproc
+
+.proc update_visuals
+    lda player + TPlayerState::v_frame
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    and #$07
+    sta BKGRND
+    
+    lda player + TPlayerState::v_frame+1
+    asl
+    asl
+    asl
+    and #$08
+    ora BKGRND
+    
+    and #$0F
+    asl
+    asl
+    asl
+    asl
+    ora #$08
+    sta BKGRND
     rts
 .endproc
 
