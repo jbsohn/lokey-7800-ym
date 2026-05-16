@@ -40,8 +40,6 @@
 
 ## Project Structure
 
-<<<<<<< HEAD
-
 - `ca65/`: 6502 assembly sample code and reference player (ca65).
 - `sample-code/`: Original DASM assembly samples.
 - `docs/`: Technical reference and deep-dive guides.
@@ -50,13 +48,3 @@
 - `pcb/`: tscircuit PCB design files.
 - `ym-samples/`: Original Atari ST music sources.
 - `vgm-samples/`: VGM/VGZ music sources.
-=======
-- `tools/`: .NET 10.0 source for conversion and diagnostic tools.
-- `docs/`: Technical specifications, wiring diagrams, and hardware guides.
-- `gal/`: Programmable logic (ATF16V8B) sources.
-- `sample-code/`: DASM 6502 assembly for drivers and test ROMs.
-- `ym-samples/` / `vgm-samples/`: Benchmark audio assets.
-- `pcb/`: React-based PCB design using tscircuit.
-- `build/`: Generated artifacts (ROMs, JEDs, WAVs).
-
->>>>>>> main
