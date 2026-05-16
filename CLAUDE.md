@@ -16,17 +16,15 @@ This document outlines the technical standards, build process, and coding style 
 
 ## Style & Coding Guidelines
 
-### 6502 Assembly (DASM)
+### 6502 Assembly (ca65)
 - **Architecture**: 32KB Linear ROM (starting at `$8000`).
-- **Indentation**: Standard DASM format (Label in col 1, Opcode in col 10+).
+- **Syntax**: Standard ca65 format.
 - **Naming**: Use `snake_case` for labels and subroutines. 
-- **Registers**: Prefix YM2149 registers with `ay_` (e.g., `ay_addr = $4000`).
-- **Footer**: Vectors MUST be at `$FFFA-$FFFF`. Signature bytes at `$FFF8-$FFF9`.
+- **Registers**: Prefix YM2149 registers with `AY_` (e.g., `AY_ADDR = $4000`).
+- **Footer**: Vectors MUST be at `$FFFA-$FFFF` (VECTORS segment).
 
 ```asm
-    org $fff8
-    .byte $ff, $83    ; $83 for 32KB at $8000
-    org $fffa
+.segment "VECTORS"
     .word reset      ; NMI
     .word reset      ; RESET
     .word reset      ; IRQ
@@ -67,7 +65,8 @@ dotnet run --project tools/YmToYmb/YmToYmb.csproj -- <input.ym> -o <output.ymb> 
 
 ## Project Structure
 
-- `sample-code/`: 6502 assembly sample code and reference player.
+- `ca65/`: 6502 assembly sample code and reference player (ca65).
+- `sample-code/`: Original DASM assembly samples.
 - `docs/`: Technical reference and deep-dive guides.
 - `tools/`: .NET conversion tools and Sigrok diagnostic scripts.
 - `gal/`: Programmable logic (GAL16V8) sources.
