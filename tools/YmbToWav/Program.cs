@@ -83,7 +83,7 @@ internal static class Program
 internal class BinToWavRenderer(byte[] data, int playerHz)
 {
     private const int SampleRate = 44100;
-    private const double ClockSpeed = 1792000.0; // Atari 7800 PHI2 Clock
+    private const double ClockSpeed = 1789773.0; // Atari 7800 PHI2 Clock
     private readonly AymEmulator _emu = new(ClockSpeed, SampleRate);
 
     /// <summary>
