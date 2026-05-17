@@ -74,6 +74,21 @@ Stick to the standard 6502 instruction set.
 *   ❌ **Don't use:** `mva`, `adw`, `#if`, `#while` (MADS specific macros)
 *   ✅ **Do use:** `lda`, `sta`, `cmp`, `bne`
 
+## 8. Naming Conventions
+To balance readability and clarity, we use a naming convention based on **Usage**:
+
+### **`UPPER_CASE`**: Hardware & Settings
+Use all-caps for fixed platform features or "set-and-forget" configuration values.
+*   **Hardware Registers**: `MSTAT`, `BKGRND`, `AY_ADDR` (Fixed by the Atari/YM hardware)
+*   **Build Settings**: `NTSC_HZ`, `PLAYER_HZ`, `PLAYER_ZP_BASE` (Configured in the Makefile/Source)
+*   **Offsets/Math**: `TPLAYER_STATE_SIZE`, `MUSIC_STEP` (Fixed calculations)
+
+### **`snake_case`**: Logic & Storage
+Use lowercase for the "living" parts of the code—things you jump to, store data in, or read data from.
+*   **RAM Variables**: `music_ptr`, `frame_cnt`, `v_frame` (Storage locations that change)
+*   **Code Labels**: `main_loop`, `play_frame`, `init_music` (Entry points for instructions)
+*   **Data Labels**: `music_data`, `bit_table` (Binary data in ROM)
+
 ## Summary: A Universal Template
 ```assembly
 ; ============================================================

@@ -136,11 +136,11 @@ $(BUILD_DIR)/%.bin: $(SRC_DIR)/player.asm $(BUILD_DIR)/%.ymb $(BUILD_DIR)/%.ymi 
 	@mkdir -p $(BUILD_DIR)/$*_inc
 ifeq ($(ASSEMBLER),mads)
 	@echo ' icl "$*.ymi"' > $(BUILD_DIR)/$*_inc/music_bin.inc
-	@echo 'MusicData: ins "$*.ymb"' >> $(BUILD_DIR)/$*_inc/music_bin.inc
+	@echo 'music_data: ins "$*.ymb"' >> $(BUILD_DIR)/$*_inc/music_bin.inc
 	@$(ASM_CMD) $< $(ASM_FLAGS) -i:$(BUILD_DIR)/$*_inc $(ASM_OUT)$@
 else
 	@echo ' include "$*.ymi"' > $(BUILD_DIR)/$*_inc/music_bin.inc
-	@echo 'MusicData: incbin "$*.ymb"' >> $(BUILD_DIR)/$*_inc/music_bin.inc
+	@echo 'music_data: incbin "$*.ymb"' >> $(BUILD_DIR)/$*_inc/music_bin.inc
 	@$(ASM_CMD) $< $(ASM_FLAGS) -I$(BUILD_DIR)/$*_inc $(ASM_OUT)$@
 endif
 	@rm -rf $(BUILD_DIR)/$*_inc

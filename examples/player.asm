@@ -18,18 +18,18 @@
 
 PLAYER_ZP_BASE = $80
 
-music_ptr   = PLAYER_ZP_BASE + TPlayerState_music_ptr 
-frame_cnt   = PLAYER_ZP_BASE + TPlayerState_frame_cnt 
-pat_frames  = PLAYER_ZP_BASE + TPlayerState_pat_frames 
-seq_idx     = PLAYER_ZP_BASE + TPlayerState_seq_idx 
-tmp_mask    = PLAYER_ZP_BASE + TPlayerState_tmp_mask 
-pat_table   = PLAYER_ZP_BASE + TPlayerState_pat_table 
-pat_base    = PLAYER_ZP_BASE + TPlayerState_pat_base 
-seq_base    = PLAYER_ZP_BASE + TPlayerState_seq_base 
-pat_size    = PLAYER_ZP_BASE + TPlayerState_pat_size 
-music_acc   = PLAYER_ZP_BASE + TPlayerState_music_acc ; 2 bytes
-music_delta = PLAYER_ZP_BASE + TPlayerState_music_delta ; 2 bytes
-v_frame     = PLAYER_ZP_BASE + TPlayerState_v_frame ; 2 bytes
+music_ptr   = PLAYER_ZP_BASE + TPLAYER_STATE_MUSIC_PTR 
+frame_cnt   = PLAYER_ZP_BASE + TPLAYER_STATE_FRAME_CNT 
+pat_frames  = PLAYER_ZP_BASE + TPLAYER_STATE_PAT_FRAMES 
+seq_idx     = PLAYER_ZP_BASE + TPLAYER_STATE_SEQ_IDX 
+tmp_mask    = PLAYER_ZP_BASE + TPLAYER_STATE_TMP_MASK 
+pat_table   = PLAYER_ZP_BASE + TPLAYER_STATE_PAT_TABLE 
+pat_base    = PLAYER_ZP_BASE + TPLAYER_STATE_PAT_BASE 
+seq_base    = PLAYER_ZP_BASE + TPLAYER_STATE_SEQ_BASE 
+pat_size    = PLAYER_ZP_BASE + TPLAYER_STATE_PAT_SIZE 
+music_acc   = PLAYER_ZP_BASE + TPLAYER_STATE_MUSIC_ACC ; 2 bytes
+music_delta = PLAYER_ZP_BASE + TPLAYER_STATE_MUSIC_DELTA ; 2 bytes
+v_frame     = PLAYER_ZP_BASE + TPLAYER_STATE_V_FRAME ; 2 bytes
 
     .if MADS
         icl "music_bin.inc"
@@ -127,35 +127,35 @@ init_music:
         sta v_frame
         sta v_frame+1
 
-music_step = ( (PLAYER_HZ * 65536) / NTSC_HZ )
+MUSIC_STEP = ( (PLAYER_HZ * 65536) / NTSC_HZ )
 
-        lda #<music_step
+        lda #<MUSIC_STEP
         sta music_delta
-        lda #>music_step
+        lda #>MUSIC_STEP
         sta music_delta+1
 
-        lda MusicData + TMusicHeader_pat_size
+        lda music_data + TMUSIC_HEADER_PAT_SIZE
         sta pat_size
 
         clc
-        lda #<MusicData
-        adc #TMusicHeader_SIZE
+        lda #<music_data
+        adc #TMUSIC_HEADER_SIZE
         sta seq_base
-        lda #>MusicData
+        lda #>music_data
         adc #0
         sta seq_base+1
 
         clc
         lda seq_base
-        ldy #TMusicHeader_seq_len
-        adc MusicData,y
+        ldy #TMUSIC_HEADER_SEQ_LEN
+        adc music_data,y
         sta pat_table
         lda seq_base+1
         adc #0
         sta pat_table+1
 
-        ldy #TMusicHeader_num_patterns
-        lda MusicData,y
+        ldy #TMUSIC_HEADER_NUM_PATTERNS
+        lda music_data,y
         asl
         tay
         lda #0

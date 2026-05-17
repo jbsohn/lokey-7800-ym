@@ -1,5 +1,5 @@
 ; ============================================================
-; ym2149.inc -- YM2149 PSG EQUATES (Universal)
+; ym2149.inc -- YM2149 PSG
 ; Compatible with DASM and MADS
 ; ============================================================
 
@@ -10,3 +10,4 @@ AY_DATA     = $4001
 
 ; --- Constants ---
 NUM_REGS    = 14
+AY_MIXER    = 7

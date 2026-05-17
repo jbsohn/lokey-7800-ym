@@ -16,7 +16,9 @@
 ### 6502 Assembly (DASM)
 
 - **Formatting**: 8-space indentation for instructions, 0-space for labels.
-- **Naming**: `snake_case` for labels and variables.
+- **Naming**: 
+  - `UPPER_CASE` for constants, offsets, and hardware registers (e.g., `MSTAT`, `NUM_REGS`).
+  - `snake_case` for labels, RAM variables, and code (e.g., `play_frame`, `music_ptr`).
 - **Vectors**: All ROMs must include standard Atari 7800 vectors at the end.
 - **Memory Map**:
   - YM2149 Address Register: `$4000`

@@ -1,12 +1,9 @@
-; *************************************************
-; *                                               *
-; *   stella.inc -- 2600 GAME SYSTEM EQUATES      *
-; *   Compatible with DASM and MADS               *
-; *                                               *
-; *************************************************
+; ============================================================
+; stella.inc -- Atari 2600
+; Compatible with DASM and MADS
+; ============================================================
 
 ; --- STELLA (TIA) REGISTER ADDRESSES ---
-
 VSYNC       = $00
 VBLANK      = $01
 WSYNC       = $02

@@ -59,12 +59,12 @@ reset:
     txs
 
     ; Clear YM using a loop and our new procedure
-    ldx #13
+    ldx #NUM_REGS-1
 init_loop:
     txa
     ldy #0
-    cpx #7
-    #if .byte @ == #7
+    cpx #AY_MIXER
+    #if .byte @ == #AY_MIXER
         ldy #$ff
     #end
     jsr WriteYM
@@ -82,7 +82,7 @@ main_loop:
         bpl v2
 
     ; 3. CLEAN FUNCTION-STYLE CALLS:
-    WriteYM #7, #%00111110
+    WriteYM #AY_MIXER, #%00111110
     WriteYM #8, #15
 
     ; Beat 1: Gold

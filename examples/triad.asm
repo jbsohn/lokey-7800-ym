@@ -23,11 +23,11 @@ reset:
         ; -------------------------
         ; YM2149 Initial "Crush"
         ; -------------------------
-        ldx #13
+        ldx #NUM_REGS-1
 init_loop:
         txa
         ldy #0
-        cpx #7
+        cpx #AY_MIXER
         bne skip_init_mixer
         ldy #$ff
 skip_init_mixer:
@@ -43,7 +43,7 @@ v1:     bit MSTAT
 v2:     bit MSTAT
         bpl v2
 
-        lda #7
+        lda #AY_MIXER
         ldy #%00111110
         jsr write_ay
         lda #8

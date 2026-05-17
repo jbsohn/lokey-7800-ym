@@ -1,9 +1,7 @@
-; *************************************************
-; *                                               *
-; *   maria.inc -- MARIA EQUATES (Universal)      *
-; *   Compatible with DASM and MADS               *
-; *                                               *
-; *************************************************
+; ============================================================
+; maria.inc -- Atari 7800
+; Compatible with DASM and MADS
+; ============================================================
 
 ; --- TIA Registers ---
 TIA         = $00
@@ -80,6 +78,3 @@ PAUSE       = 8
 RAM1        = $1800
 RAM2        = $2100
 RAM3        = $2200
-
-; --- Helper Macros (Optional) ---
-; Note: These are defined separately for each assembler if needed.
