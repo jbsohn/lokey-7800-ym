@@ -14,8 +14,6 @@
       org $8000
     .endif
 
-background = $0020
-
 reset:
         sei
         cld
@@ -40,17 +38,10 @@ skip_init_mixer:
         jsr sound_delay
 
 main_loop:
-    .if MADS
 v1:     bit MSTAT
         bmi v1
 v2:     bit MSTAT
         bpl v2
-    .else
-v1:     bit $0028
-        bmi v1
-v2:     bit $0028
-        bpl v2
-    .endif
 
         lda #7
         ldy #%00111110
@@ -67,7 +58,7 @@ v2:     bit $0028
         jsr write_ay
         
         lda #$1A
-        sta background
+        sta BKGRND
         jsr sound_delay
         
         lda #0
@@ -78,7 +69,7 @@ v2:     bit $0028
         jsr write_ay
         
         lda #$4A
-        sta background
+        sta BKGRND
         jsr sound_delay
 
         lda #0
@@ -89,7 +80,7 @@ v2:     bit $0028
         jsr write_ay
         
         lda #$BA
-        sta background
+        sta BKGRND
         jsr sound_delay
         
         jmp main_loop

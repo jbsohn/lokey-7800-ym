@@ -49,7 +49,7 @@ The SDK supports a dual-assembler workflow via the root `Makefile`.
 All commands output to the `build/` directory:
 - **`.a78`**: Packed ROM with a 128-byte header for emulators (a7800, js7800).
   > [!NOTE]
-  > The `A78Gen` tool used for header generation is a **work in progress**. Future updates will provide improved mapping for complex cartridge header types and bank-switching configurations.
+  > The `a78gen` tool used for header generation is a **work in progress**. Future updates will provide improved mapping for complex cartridge header types and bank-switching configurations.
 - **`.rom`**: Raw 32,768-byte binary image, signed for hardware.
 
 

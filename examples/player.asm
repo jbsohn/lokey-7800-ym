@@ -16,24 +16,28 @@
       org $8000
     .endif
 
-music_ptr   = $80 
-frame_cnt   = $82 
-pat_frames  = $84 
-seq_idx     = $85 
-tmp_mask    = $86 
-pat_table   = $88 
-pat_base    = $8a 
-seq_base    = $8c 
-pat_size    = $8e 
-music_acc   = $8f ; 2 bytes
-music_delta = $91 ; 2 bytes
-v_frame     = $93 ; 2 bytes
+PLAYER_ZP_BASE = $80
+
+music_ptr   = PLAYER_ZP_BASE + TPlayerState_music_ptr 
+frame_cnt   = PLAYER_ZP_BASE + TPlayerState_frame_cnt 
+pat_frames  = PLAYER_ZP_BASE + TPlayerState_pat_frames 
+seq_idx     = PLAYER_ZP_BASE + TPlayerState_seq_idx 
+tmp_mask    = PLAYER_ZP_BASE + TPlayerState_tmp_mask 
+pat_table   = PLAYER_ZP_BASE + TPlayerState_pat_table 
+pat_base    = PLAYER_ZP_BASE + TPlayerState_pat_base 
+seq_base    = PLAYER_ZP_BASE + TPlayerState_seq_base 
+pat_size    = PLAYER_ZP_BASE + TPlayerState_pat_size 
+music_acc   = PLAYER_ZP_BASE + TPlayerState_music_acc ; 2 bytes
+music_delta = PLAYER_ZP_BASE + TPlayerState_music_delta ; 2 bytes
+v_frame     = PLAYER_ZP_BASE + TPlayerState_v_frame ; 2 bytes
 
     .if MADS
         icl "music_bin.inc"
     .else
         include "music_bin.inc"
     .endif
+
+NTSC_HZ = 60
 
 reset:
         sei
@@ -75,17 +79,10 @@ _skip:
         jmp main_loop
 
 sync_vbi:
-    .if MADS
 v1:     bit MSTAT
         bmi v1
 v2:     bit MSTAT
         bpl v2
-    .else
-v1:     bit $0028
-        bmi v1
-v2:     bit $0028
-        bpl v2
-    .endif
         
         inc v_frame
         bne _no_hi
@@ -101,13 +98,14 @@ update_visuals:
         lsr
         lsr
         and #$07
-        sta BKGRND
+        sta tmp_mask ; Temporary storage for first part of color calculation
+
         lda v_frame+1
         asl
         asl
         asl
         and #$08
-        ora BKGRND
+        ora tmp_mask
         
         and #$0F
         asl
@@ -129,19 +127,19 @@ init_music:
         sta v_frame
         sta v_frame+1
 
-music_step = ( (PLAYER_HZ * 65536) / 60 )
+music_step = ( (PLAYER_HZ * 65536) / NTSC_HZ )
 
         lda #<music_step
         sta music_delta
         lda #>music_step
         sta music_delta+1
 
-        lda MusicData
+        lda MusicData + TMusicHeader_pat_size
         sta pat_size
 
         clc
         lda #<MusicData
-        adc #3
+        adc #TMusicHeader_SIZE
         sta seq_base
         lda #>MusicData
         adc #0
@@ -149,13 +147,15 @@ music_step = ( (PLAYER_HZ * 65536) / 60 )
 
         clc
         lda seq_base
-        adc MusicData+2
+        ldy #TMusicHeader_seq_len
+        adc MusicData,y
         sta pat_table
         lda seq_base+1
         adc #0
         sta pat_table+1
 
-        lda MusicData+1
+        ldy #TMusicHeader_num_patterns
+        lda MusicData,y
         asl
         tay
         lda #0
@@ -227,40 +227,46 @@ _do_play:
         sta music_ptr+1
 
         ldx #0
-_reg_loop:
-        cpx #8
-        bcc _low_byte
-        
-        txa
-        sec
-        sbc #8
-        tay
-        lda bit_table,y
-        and tmp_mask+1
-        beq _next_reg
-        jmp _update_reg
-
-_low_byte:
-        txa
-        tay
-        lda bit_table,y
+_reg_loop_low:
+        lda bit_table,x
         and tmp_mask
-        beq _next_reg
-
-_update_reg:
+        beq _next_reg_low
+        
         stx AY_ADDR
         ldy #0
         lda (music_ptr),y
         sta AY_DATA
         
         inc music_ptr
-        bne _next_reg
+        bne _next_reg_low
         inc music_ptr+1
 
-_next_reg:
+_next_reg_low:
+        inx
+        cpx #8
+        bne _reg_loop_low
+
+_reg_loop_high:
+        txa
+        and #$07
+        tay
+        lda bit_table,y
+        and tmp_mask+1
+        beq _next_reg_high
+
+        stx AY_ADDR
+        ldy #0
+        lda (music_ptr),y
+        sta AY_DATA
+        
+        inc music_ptr
+        bne _next_reg_high
+        inc music_ptr+1
+
+_next_reg_high:
         inx
         cpx #NUM_REGS
-        bne _reg_loop
+        bne _reg_loop_high
 
         inc frame_cnt
         bne _p_done

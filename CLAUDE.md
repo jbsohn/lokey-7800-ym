@@ -29,7 +29,7 @@
 - **Style**: Standard C# conventions (PascalCase for classes/methods, camelCase for local variables).
 - **Architecture**: Core logic resides in `tools/Core/`, utilized by CLI wrappers.
 - **Performance**: Use `ReadOnlySpan<byte>` for binary parsing where possible.
-- **Testing**: Use `YmbToWav` to verify that bitmask compression is lossless.
+- **Testing**: Use `ymbtowav` to verify that bitmask compression is lossless.
 
 ### PCB Design (tscircuit)
 

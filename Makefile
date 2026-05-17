@@ -16,7 +16,7 @@ PREVIEW_FLAGS := -s 2 -f 5000
 YM2BIN        := $(BIN_DIR)/ymtoymb
 VGM2BIN       := $(BIN_DIR)/vgmtoymb
 WAVTOOL       := $(BIN_DIR)/ymbtowav
-A78GEN        := $(BIN_DIR)/A78Gen
+A78GEN        := $(BIN_DIR)/a78gen
 SIGN          := 7800sign
 
 # --- Assembler Setup ---
@@ -112,16 +112,16 @@ $(BUILD_DIR):
 
 # --- Conversion Rules ---
 
-$(BUILD_DIR)/%.ymb: $(YM_DIR)/%.ym $(YM2BIN) | $(BUILD_DIR)
+$(BUILD_DIR)/%.ymb $(BUILD_DIR)/%.ymi: $(YM_DIR)/%.ym $(YM2BIN) | $(BUILD_DIR)
 	@$(YM2BIN) $< -o $@ $(PREVIEW_FLAGS)
 
-$(BUILD_DIR)/%.ymb: $(YM_DIR)/%.YM $(YM2BIN) | $(BUILD_DIR)
+$(BUILD_DIR)/%.ymb $(BUILD_DIR)/%.ymi: $(YM_DIR)/%.YM $(YM2BIN) | $(BUILD_DIR)
 	@$(YM2BIN) $< -o $@ $(PREVIEW_FLAGS)
 
-$(BUILD_DIR)/%.ymb: $(VGM_DIR)/%.vgm $(VGM2BIN) | $(BUILD_DIR)
+$(BUILD_DIR)/%.ymb $(BUILD_DIR)/%.ymi: $(VGM_DIR)/%.vgm $(VGM2BIN) | $(BUILD_DIR)
 	@$(VGM2BIN) $< -o $@ $(PREVIEW_FLAGS)
 
-$(BUILD_DIR)/%.ymb: $(VGM_DIR)/%.vgz $(VGM2BIN) | $(BUILD_DIR)
+$(BUILD_DIR)/%.ymb $(BUILD_DIR)/%.ymi: $(VGM_DIR)/%.vgz $(VGM2BIN) | $(BUILD_DIR)
 	@$(VGM2BIN) $< -o $@ $(PREVIEW_FLAGS)
 
 # --- Assembly Rules ---
@@ -131,17 +131,19 @@ $(BUILD_DIR)/%.a78: $(BUILD_DIR)/%.bin header.json $(A78GEN)
 	@$(A78GEN) $< header.json -o $@
 
 # Music Player (Uses universal source)
-$(BUILD_DIR)/%.bin: $(SRC_DIR)/player.asm $(BUILD_DIR)/%.ymb | $(BUILD_DIR)
+$(BUILD_DIR)/%.bin: $(SRC_DIR)/player.asm $(BUILD_DIR)/%.ymb $(BUILD_DIR)/%.ymi | $(BUILD_DIR)
 	@echo "  Assembling Player ROM [$(ASSEMBLER)]: $*"
+	@mkdir -p $(BUILD_DIR)/$*_inc
 ifeq ($(ASSEMBLER),mads)
-	@echo ' icl "$*.ymi"' > $(BUILD_DIR)/music_bin.inc
-	@echo 'MusicData: ins "$*.ymb"' >> $(BUILD_DIR)/music_bin.inc
+	@echo ' icl "$*.ymi"' > $(BUILD_DIR)/$*_inc/music_bin.inc
+	@echo 'MusicData: ins "$*.ymb"' >> $(BUILD_DIR)/$*_inc/music_bin.inc
+	@$(ASM_CMD) $< $(ASM_FLAGS) -i:$(BUILD_DIR)/$*_inc $(ASM_OUT)$@
 else
-	@echo ' include "$*.ymi"' > $(BUILD_DIR)/music_bin.inc
-	@echo 'MusicData: incbin "$*.ymb"' >> $(BUILD_DIR)/music_bin.inc
+	@echo ' include "$*.ymi"' > $(BUILD_DIR)/$*_inc/music_bin.inc
+	@echo 'MusicData: incbin "$*.ymb"' >> $(BUILD_DIR)/$*_inc/music_bin.inc
+	@$(ASM_CMD) $< $(ASM_FLAGS) -I$(BUILD_DIR)/$*_inc $(ASM_OUT)$@
 endif
-	@$(ASM_CMD) $< $(ASM_FLAGS) $(ASM_OUT)$@
-	@rm $(BUILD_DIR)/music_bin.inc
+	@rm -rf $(BUILD_DIR)/$*_inc
 
 # Generic Demo rule
 $(BUILD_DIR)/%.bin: $(SRC_DIR)/%.asm | $(BUILD_DIR)
