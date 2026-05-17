@@ -25,6 +25,17 @@ The Lokey-YM is designed for high performance at a hobbyist-friendly price point
 | **Passives (R/C)** | $0.15 | Reset circuit and audio stage |
 | **Total (Excl. PCB)** | **~$5.00** | |
 
+## Logic Compilation (ATF16V8B / GAL16V8)
+
+The cartridge uses a programmable logic device (typically an **ATF16V8B** or legacy **GAL16V8**) to handle the address decoding and bus control logic.
+
+This project uses [**galette**](https://github.com/simon-frankau/galette), an open-source logic assembler. This allows for a modern, cross-platform toolchain without requiring legacy Windows-only tools. Original WinCUPL sources are preserved in `gal/wincupl/` as a reference.
+
+To compile the logic into JEDEC files (for use with a device programmer):
+```bash
+make logic
+```
+
 ## Hardware Wiring
 
 ### 1. ATF16V8B Pinout (`rom_ym.pld`)
@@ -159,5 +170,3 @@ The audio stage uses an LM358 op-amp in a parallel **Active Shunt** configuratio
 *   **The Active Shunt**: The LM358 Op-Amp is wired as a Ground-follower — Pin 3 grounded, Pins 1 & 2 shorted together to form a **Feedback Node**.
 *   **Shunt Loads**: Two **4.7kΩ resistors** connect the **Feedback Node** to Ground (one between Pins 2 and 3, one between Pins 4 and 1).
 *   **Reactive Feedback**: A **4.7kΩ resistor** connects the **Feedback Node** (Pin 1) to the **Positive (+) terminal** of a **10µF electrolytic capacitor**. The **Negative (-) terminal** of the capacitor connects back to the **Summing Node** (and therefore also to Exaudio).
-
-

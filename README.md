@@ -48,7 +48,7 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 
 - **[Development Guide](CLAUDE.md)** - Technical standards and build process for contributors and AI assistants.
 - **[AI Development Agents](AGENTS.md)** - Specialized instructions for AI-assisted development and automation.
-- **[Building & Toolchain](docs/Building.md)** - Compile ROMs and set up the environment.
+- **[SDK Samples & Building](docs/Samples.md)** - Compile ROMs and set up the environment.
 * **[File Extension Reference](docs/FileExtensions.md)** - Guide to `.ymb`, `.ymi`, `.rom`, and `.a78` files.
 * **[Hardware & Wiring](docs/Hardware.md)** - Pinouts, memory mapping, and logic chips.
 - **[PCB Design (tscircuit)](docs/PCB.md)** - Code-to-PCB workflow and **[Schematic PDF](docs/schematic.pdf)**.
@@ -66,12 +66,13 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 * **Hardware**: Uses **YM2149 PSG** mapped to `$4000-$7FFF`.
 * **Compression**: Multi-stage **Pattern-Based Delta Masking** for maximum ROM efficiency.
 * **Timing**: Automatic **Pitch Scaling** (1.79MHz vs 2.0MHz) ensures tracks stay in tune.
-* **Diagnostics**: Built-in **Software Heartbeat** visualizer for bare-metal debugging.
+* **Diagnostics**: Built-in **Software Triad** visualizer for bare-metal debugging.
 
 ## Future Plans
 
 * Support for complex bank-switching (beyond 32KB).
 * High-speed diagnostic logging via YM I/O ports.
+* **Work in Progress**: Enhancing `A78Gen` to better map advanced header types for modern emulator features.
 
 ## Acknowledgements & Credits
 

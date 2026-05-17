@@ -22,5 +22,9 @@ Advanced timing diagnostics used to detect mid-cycle address bus noise or "shatt
 - **Timing Check**: Ensures `YM_LE`, `BDIR`, and `BC1` only trigger when the `PHI2` clock is stable.
 - **BC1 Monitor**: Confirms the logic equations correctly identify register selection (A0=0) vs. data writes.
 
-### `tools/Scripts/ValidateYMSignals.cs`
-Specifically monitors the input pins of the YM2149 to ensure the 74HCT373 latch is correctly delivering the data bus payload during the write window.
+## ROM Packaging Tools
+
+### `tools/A78Gen/Program.cs`
+Generates a 128-byte A78 header and packages a raw binary for emulator use.
+- **Status**: **Work in Progress**.
+- **Planned Improvements**: Advanced mapping for varied cartridge header types and better support for hardware bank-switching.

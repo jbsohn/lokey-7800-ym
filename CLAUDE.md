@@ -16,7 +16,9 @@
 ### 6502 Assembly (DASM)
 
 - **Formatting**: 8-space indentation for instructions, 0-space for labels.
-- **Naming**: `snake_case` for labels and variables.
+- **Naming**: 
+  - `UPPER_CASE` for constants, offsets, and hardware registers (e.g., `MSTAT`, `NUM_REGS`).
+  - `snake_case` for labels, RAM variables, and code (e.g., `play_frame`, `music_ptr`).
 - **Vectors**: All ROMs must include standard Atari 7800 vectors at the end.
 - **Memory Map**:
   - YM2149 Address Register: `$4000`
@@ -29,7 +31,7 @@
 - **Style**: Standard C# conventions (PascalCase for classes/methods, camelCase for local variables).
 - **Architecture**: Core logic resides in `tools/Core/`, utilized by CLI wrappers.
 - **Performance**: Use `ReadOnlySpan<byte>` for binary parsing where possible.
-- **Testing**: Use `YmbToWav` to verify that bitmask compression is lossless.
+- **Testing**: Use `ymbtowav` to verify that bitmask compression is lossless.
 
 ### PCB Design (tscircuit)
 
@@ -41,7 +43,7 @@
 ## Project Structure
 
 - `ca65/`: 6502 assembly sample code and reference player (ca65).
-- `sample-code/`: Original DASM assembly samples.
+- `examples/`: Original DASM assembly samples.
 - `docs/`: Technical reference and deep-dive guides.
 - `tools/`: .NET conversion tools and Sigrok diagnostic scripts.
 - `gal/`: Programmable logic (GAL16V8) sources.
