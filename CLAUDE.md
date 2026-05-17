@@ -41,7 +41,7 @@
 ## Project Structure
 
 - `ca65/`: 6502 assembly sample code and reference player (ca65).
-- `sample-code/`: Original DASM assembly samples.
+- `examples/`: Original DASM assembly samples.
 - `docs/`: Technical reference and deep-dive guides.
 - `tools/`: .NET conversion tools and Sigrok diagnostic scripts.
 - `gal/`: Programmable logic (GAL16V8) sources.
