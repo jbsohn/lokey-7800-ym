@@ -8,12 +8,13 @@ import { LM358 } from "./LM358";
 export default () => (
   <board
     outline={[
-      { x: "-32mm", y: "35mm" },    // Top-left
-      { x: "32mm", y: "35mm" },     // Top-right
+      { x: "-32mm", y: "45mm" },    // Top-left
+      { x: "32mm", y: "45mm" },     // Top-right
       { x: "32mm", y: "-10mm" },    // Transition-right (Wide part)
       ...ATARI_7800_CONNECTOR_OUTLINE,
       { x: "-32mm", y: "-10mm" },   // Transition-left (Wide part)
     ]}
+    routingDisabled={true}
   >
     {/* Explicit Nets */}
     <net name="VCC" />
@@ -66,10 +67,13 @@ export default () => (
       }}
     />
 
-    <group name="ROM_Group" pcbX="0mm" pcbY="-10mm" pcbRotation={270}>
+    <group
+      name="Rom Group"
+      pcbX="0mm" pcbY="-12mm">
       <ROM_27C256
         name="U1"
         schX={2} schY={-8}
+        pcbRotation={270}
         connections={{
           VCC: "net.VCC",
           VPP: "net.VCC",
@@ -87,172 +91,170 @@ export default () => (
         name="C1"
         capacitance="0.1uF"
         footprint="axial"
-        pcbX="0mm" pcbY="21mm"
+        pcbX="20mm" pcbY="0mm"
         schX={4} schY={-12}
+        pcbRotation={270}
         connections={{ pin1: "net.VCC", pin2: "net.GND" }}
       />
     </group>
 
-    <group name="Logic_Group" pcbX="0mm" pcbY="8mm" pcbRotation={270}>
-      <group name="GAL_Group" pcbX="0mm" pcbY="-14mm">
-        <ATF16V8B
-          name="U2"
-          pcbX="0mm" pcbY="0mm"
-          schX={-2} schY={4}
-          connections={{
-            VCC: "net.VCC",
-            GND: "net.GND",
-            A15: "net.A15",
-            A14: "net.A14",
-            A0: "net.A0",
-            HALT: "net.HALT",
-            RW: "net.RW",
-            PHI2: "net.PHI2",
-            ROM_CE: "net.ROM_CE",
-            BDIR: "net.BDIR",
-            BC1: "net.BC1",
-            PHI2OUT: "net.PHI2OUT",
-            YM_LE: "net.YM_LE",
-          }}
-        />
-        <capacitor
-          name="C2"
-          capacitance="0.1uF"
-          footprint="axial"
-          pcbX="0mm" pcbY="14.2mm"
-          schX={0} schY={8}
-          connections={{ pin1: "net.VCC", pin2: "net.GND" }}
-        />
-      </group>
-
-      <group name="Latch_Group" pcbX="0mm" pcbY="14mm">
-        <Latch74HCT373
-          name="U3"
-          pcbX="0mm" pcbY="0mm"
-          schX={6} schY={4}
-          connections={{
-            VCC: "net.VCC",
-            GND: "net.GND",
-            OE: "net.GND",
-            LE: "net.YM_LE",
-            D0: "net.D0",
-            D1: "net.D1",
-            D2: "net.D2",
-            D3: "net.D3",
-            D4: "net.D4",
-            D5: "net.D5",
-            D6: "net.D6",
-            D7: "net.D7",
-            Q0: "net.DA0",
-            Q1: "net.DA1",
-            Q2: "net.DA2",
-            Q3: "net.DA3",
-            Q4: "net.DA4",
-            Q5: "net.DA5",
-            Q6: "net.DA6",
-            Q7: "net.DA7",
-          }}
-        />
-        <capacitor
-          name="C3"
-          capacitance="0.1uF"
-          footprint="axial"
-          pcbX="0mm" pcbY="14.2mm"
-          schX={8} schY={8}
-          connections={{ pin1: "net.VCC", pin2: "net.GND" }}
-        />
-      </group>
+    <group name="GAL Group"
+      pcbX="-16mm" pcbY="4mm">
+      <ATF16V8B
+        name="U2"
+        schX={-2} schY={4}
+        pcbRotation={270}
+        connections={{
+          VCC: "net.VCC",
+          GND: "net.GND",
+          A15: "net.A15",
+          A14: "net.A14",
+          A0: "net.A0",
+          HALT: "net.HALT",
+          RW: "net.RW",
+          PHI2: "net.PHI2",
+          ROM_CE: "net.ROM_CE",
+          BDIR: "net.BDIR",
+          BC1: "net.BC1",
+          PHI2OUT: "net.PHI2OUT",
+          YM_LE: "net.YM_LE",
+        }}
+      />
+      <capacitor
+        name="C2"
+        capacitance="0.1uF"
+        footprint="axial"
+        schX={0} schY={8}
+        pcbX="14mm" pcbY="0mm"
+        pcbRotation={270}
+        connections={{ pin1: "net.VCC", pin2: "net.GND" }}
+      />
     </group>
 
-    {/* --- Sound System (PSG and Analog Output) --- */}
-    <group name="Sound_System_Group" pcbX="-4mm" pcbY="25mm">
-      <group name="PSG_Group" pcbX="0mm" pcbY="0mm" pcbRotation={270}>
-        <YM2149
-          name="U4"
-          schX={16} schY={0}
-          connections={{
-            VCC: "net.VCC",
-            BC2: "net.VCC",
-            GND: "net.GND",
-            DA0: "net.DA0", DA1: "net.DA1", DA2: "net.DA2", DA3: "net.DA3",
-            DA4: "net.DA4", DA5: "net.DA5", DA6: "net.DA6", DA7: "net.DA7",
-            CLK: "net.PHI2OUT",
-            BDIR: "net.BDIR",
-            BC1: "net.BC1",
-            RESET: "net.RESET_DELAYED",
-            A8: "net.VCC",
-            A9: "net.GND",
-            ANALOG_A: "net.ANALOG_A",
-            ANALOG_B: "net.ANALOG_B",
-            ANALOG_C: "net.ANALOG_C",
-          }}
-        />
-        {/* RC Reset Circuit */}
-        <resistor name="R_RESET" resistance="4.7k" footprint="axial" schX={12} schY={9} connections={{ pin1: "net.VCC", pin2: "net.RESET_DELAYED" }} />
-        <capacitor name="C_RESET" capacitance="10uF" footprint="axial" polarized schX={14} schY={9} connections={{ pin1: "net.RESET_DELAYED", pin2: "net.GND" }} />
-        <capacitor name="C4" capacitance="0.1uF" footprint="axial" schX={18} schY={8} connections={{ pin1: "net.VCC", pin2: "net.GND" }} />
-      </group>
-
-      {/* --- Audio Out Section (LM358 "Lokey" Active Shunt) --- */}
-      <group name="Audio_Out_Group" pcbX="32mm" pcbY="0mm" pcbRotation={0}>
-        {/* Passive Mixing SUM Node (meeting point of the 1k resistors) */}
-        <resistor name="R1" resistance="1k" footprint="axial" pcbX="-4mm" pcbY="-6mm" schX={24} schY={4} connections={{ pin1: "net.ANALOG_A", pin2: "net.SUM_NODE" }} />
-        <resistor name="R2" resistance="1k" footprint="axial" pcbX="-4mm" pcbY="-3mm" schX={24} schY={2} connections={{ pin1: "net.ANALOG_B", pin2: "net.SUM_NODE" }} />
-        <resistor name="R3" resistance="1k" footprint="axial" pcbX="0mm" pcbY="0mm" schX={24} schY={0} connections={{ pin1: "net.ANALOG_C", pin2: "net.SUM_NODE" }} />
-
-        {/* --- The Active Shunt (LM358) --- */}
-        <LM358
-           name="U5"
-           pcbX="10mm" pcbY="0mm"
-           schX={28} schY={2}
-           connections={{
-             VCC: "net.VCC",
-             GND: "net.GND",
-             IN1_POS: "net.GND",        // Pin 3: Tied to Ground
-             IN1_NEG: "net.OPAMP_FB",   // Pin 2: Feedback node (shorted to Pin 1)
-             OUT1: "net.OPAMP_FB",      // Pin 1: Shorted to Pin 2 (Feedback node)
-             IN2_POS: "net.GND",        // Pin 5: Unused section - input tied to GND
-             IN2_NEG: "net.U5_UNUSED_FB", // Pin 6: Unused section - shorted to output
-             OUT2: "net.U5_UNUSED_FB",  // Pin 7: Unity-gain follower (output = GND)
-           }}
-           />
-
-        {/* 4.7k Resistor between Pins 2 and 3 (Feedback node to GND) */}
-        <resistor name="R_GRIT1" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="-6mm" schX={32} schY={4} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
-
-        {/* 4.7k Resistor between Pins 4 and 1 (GND to feedback node) */}
-        <resistor name="R_GRIT2" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="-3mm" schX={32} schY={2} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
-
-        {/* 4.7k Resistor between Pin 1 and Capacitor (+) */}
-        <resistor name="R_FEEDBACK" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="3mm" schX={32} schY={-2} connections={{ pin1: "net.OPAMP_FB", pin2: "net.CAP_PLUS" }} />
-
-        {/* Capacitor C5: Positive to Resistor, Negative to SUM_NODE */}
-        <capacitor
-          name="C5"
-          capacitance="10uF"
-          footprint="axial"
-          polarized
-          pcbX="25mm" pcbY="4mm"
-          schX={36} schY={1}
-          connections={{
-            pin1: "net.CAP_PLUS",     // Positive (+) to Resistor
-            pin2: "net.SUM_NODE",     // Negative (-) to Sum Node
-          }}
-        />
-
-        <capacitor
-          name="C6"
-          capacitance="0.1uF"
-          footprint="axial"
-          pcbX="10mm" pcbY="14.2mm"
-          schX={30} schY={-2}
-          connections={{ pin1: "net.VCC", pin2: "net.GND" }}
-        />
-      </group>
+    <group name="Latch Group"
+      pcbX="14mm" pcbY="4mm">
+      <Latch74HCT373
+        name="U3"
+        schX={6} schY={4}
+        pcbRotation={270}
+        connections={{
+          VCC: "net.VCC",
+          GND: "net.GND",
+          OE: "net.GND",
+          LE: "net.YM_LE",
+          D0: "net.D0",
+          D1: "net.D1",
+          D2: "net.D2",
+          D3: "net.D3",
+          D4: "net.D4",
+          D5: "net.D5",
+          D6: "net.D6",
+          D7: "net.D7",
+          Q0: "net.DA0",
+          Q1: "net.DA1",
+          Q2: "net.DA2",
+          Q3: "net.DA3",
+          Q4: "net.DA4",
+          Q5: "net.DA5",
+          Q6: "net.DA6",
+          Q7: "net.DA7",
+        }}
+      />
+      <capacitor
+        name="C3"
+        capacitance="0.1uF"
+        footprint="axial"
+        schX={8} schY={8}
+        pcbX="14mm" pcbY="0mm"
+        pcbRotation={270}
+        connections={{ pin1: "net.VCC", pin2: "net.GND" }}
+      />
     </group>
 
-    {/* Board Labels */}
-    <silkscreentext text="7800 YM" pcbX="25mm" pcbY="10mm" fontSize="3mm" />
-    <silkscreentext text="v1.0" pcbX="25mm" pcbY="5mm" fontSize="1.5mm" />
+    <group
+      name="YM_Group"
+      pcbX="0mm" pcbY="22mm">
+      <YM2149
+        name="U4"
+        schX={16} schY={0}
+        pcbRotation={270}
+        connections={{
+          VCC: "net.VCC",
+          BC2: "net.VCC",
+          GND: "net.GND",
+          DA0: "net.DA0", DA1: "net.DA1", DA2: "net.DA2", DA3: "net.DA3",
+          DA4: "net.DA4", DA5: "net.DA5", DA6: "net.DA6", DA7: "net.DA7",
+          CLK: "net.PHI2OUT",
+          BDIR: "net.BDIR",
+          BC1: "net.BC1",
+          RESET: "net.RESET_DELAYED",
+          A8: "net.VCC",
+          A9: "net.GND",
+          ANALOG_A: "net.ANALOG_A",
+          ANALOG_B: "net.ANALOG_B",
+          ANALOG_C: "net.ANALOG_C",
+        }}
+      />
+      <capacitor name="C4"
+        capacitance="0.1uF"
+        footprint="axial"
+        schX={18} schY={8}
+        pcbX="28mm" pcbY="0mm"
+        pcbRotation={270}
+        connections={{
+          pin1: "net.VCC", pin2: "net.GND"
+        }} />
+    </group>
+
+    {/* 
+    <resistor name="R_RESET" resistance="4.7k" footprint="axial" schX={12} schY={9} connections={{ pin1: "net.VCC", pin2: "net.RESET_DELAYED" }} />
+    <capacitor name="C_RESET" capacitance="10uF" footprint="axial" polarized schX={14} schY={9} connections={{ pin1: "net.RESET_DELAYED", pin2: "net.GND" }} />
+    <resistor name="R1" resistance="1k" footprint="axial" pcbX="-4mm" pcbY="-6mm" schX={24} schY={4} connections={{ pin1: "net.ANALOG_A", pin2: "net.SUM_NODE" }} />
+    <resistor name="R2" resistance="1k" footprint="axial" pcbX="-4mm" pcbY="-3mm" schX={24} schY={2} connections={{ pin1: "net.ANALOG_B", pin2: "net.SUM_NODE" }} />
+    <resistor name="R3" resistance="1k" footprint="axial" pcbX="0mm" pcbY="0mm" schX={24} schY={0} connections={{ pin1: "net.ANALOG_C", pin2: "net.SUM_NODE" }} /> */}
+
+    {/* <LM358
+      name="U5"
+      pcbX="10mm" pcbY="0mm"
+      schX={28} schY={2}
+      connections={{
+        VCC: "net.VCC",
+        GND: "net.GND",
+        IN1_POS: "net.GND",        // Pin 3: Tied to Ground
+        IN1_NEG: "net.OPAMP_FB",   // Pin 2: Feedback node (shorted to Pin 1)
+        OUT1: "net.OPAMP_FB",      // Pin 1: Shorted to Pin 2 (Feedback node)
+        IN2_POS: "net.GND",        // Pin 5: Unused section - input tied to GND
+        IN2_NEG: "net.U5_UNUSED_FB", // Pin 6: Unused section - shorted to output
+        OUT2: "net.U5_UNUSED_FB",  // Pin 7: Unity-gain follower (output = GND)
+      }}
+    />
+    <resistor name="R_GRIT1" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="-6mm" schX={32} schY={4} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
+    <resistor name="R_GRIT2" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="-3mm" schX={32} schY={2} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
+    <resistor name="R_FEEDBACK" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="3mm" schX={32} schY={-2} connections={{ pin1: "net.OPAMP_FB", pin2: "net.CAP_PLUS" }} />
+    <capacitor
+      name="C5"
+      capacitance="10uF"
+      footprint="axial"
+      polarized
+      pcbX="25mm" pcbY="4mm"
+      schX={36} schY={1}
+      connections={{
+        pin1: "net.CAP_PLUS",     // Positive (+) to Resistor
+        pin2: "net.SUM_NODE",     // Negative (-) to Sum Node
+      }}
+    />
+    <capacitor
+      name="C6"
+      capacitance="0.1uF"
+      footprint="axial"
+      pcbX="10mm" pcbY="14.2mm"
+      schX={30} schY={-2}
+      connections={{ pin1: "net.VCC", pin2: "net.GND" }}
+    /> */}
+
+    <silkscreentext
+      text="7800 YM v0.1"
+      pcbX="0mm" pcbY="40mm"
+      fontSize="3mm" />
   </board>
 );
