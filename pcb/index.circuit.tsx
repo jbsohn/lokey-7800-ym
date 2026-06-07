@@ -270,7 +270,7 @@ export default () => (
         name="C6"
         capacitance="0.1uF"
         footprint="axial"
-        pcbX="-8mm" pcbY="0mm"
+        pcbX="8mm" pcbY="0mm"
         pcbRotation={270}
         schX={32} schY={-4}
         connections={{ pin1: "net.VCC", pin2: "net.GND" }}
