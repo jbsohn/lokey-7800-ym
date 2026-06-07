@@ -45,6 +45,18 @@ const Atari7800EdgeConnector = (props: ChipProps) => {
         17: "A15", 18: "Exaudio", 19: "A7", 20: "A6", 21: "A5", 22: "A4", 23: "A3", 24: "A2",
         25: "A1", 26: "A0", 27: "D0", 28: "D1", 29: "D2", 30: "GND", 31: "IRQ", 32: "PHI2"
       }}
+      schPinArrangement={{
+        topSide: { pins: ["VCC"], direction: "left-to-right" },
+        bottomSide: { pins: ["GND"], direction: "left-to-right" },
+        rightSide: {
+          pins: [
+            "A15", "A14", "A13", "A12", "A11", "A10", "A9", "A8", "A7", "A6", "A5", "A4", "A3", "A2", "A1", "A0",
+            "D7", "D6", "D5", "D4", "D3", "D2", "D1", "D0",
+            "PHI2", "RW", "HALT", "IRQ", "Exaudio"
+          ],
+          direction: "top-to-bottom"
+        }
+      }}
     >
       <footprint>
         {frontPads.map(pad => (

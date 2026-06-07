@@ -26,5 +26,17 @@ export const Latch74HCT373 = (props: ChipProps) => (
       19: "Q7",
       20: "VCC",
     }}
+    schPinArrangement={{
+      topSide: { pins: ["VCC"], direction: "left-to-right" },
+      bottomSide: { pins: ["GND"], direction: "left-to-right" },
+      leftSide: {
+        pins: ["OE", "LE", "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7"],
+        direction: "top-to-bottom"
+      },
+      rightSide: {
+        pins: ["Q0", "Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7"],
+        direction: "top-to-bottom"
+      }
+    }}
   />
 );

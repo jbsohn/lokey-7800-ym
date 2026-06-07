@@ -26,5 +26,17 @@ export const YM2149 = (props: ChipProps) => (
       38: "ANALOG_C",
       40: "VCC",
     }}
+    schPinArrangement={{
+      topSide: { pins: ["VCC"], direction: "left-to-right" },
+      bottomSide: { pins: ["GND"], direction: "left-to-right" },
+      leftSide: {
+        pins: ["RESET", "CLK", "BDIR", "BC1", "BC2", "A8", "A9", "DA0", "DA1", "DA2", "DA3", "DA4", "DA5", "DA6", "DA7"],
+        direction: "top-to-bottom"
+      },
+      rightSide: {
+        pins: ["ANALOG_A", "ANALOG_B", "ANALOG_C"],
+        direction: "top-to-bottom"
+      }
+    }}
   />
 );

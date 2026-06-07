@@ -26,5 +26,17 @@ export const ATF16V8B = (props: ChipProps) => (
       19: "ROM_CE",
       20: "VCC",
     }}
+    schPinArrangement={{
+      topSide: { pins: ["VCC"], direction: "left-to-right" },
+      bottomSide: { pins: ["GND"], direction: "left-to-right" },
+      leftSide: {
+        pins: ["CLK", "A15", "A14", "A0", "HALT", "RW", "PHI2"],
+        direction: "top-to-bottom"
+      },
+      rightSide: {
+        pins: ["ROM_CE", "YM_LE", "PHI2OUT", "BDIR", "BC1"],
+        direction: "top-to-bottom"
+      }
+    }}
   />
 );

@@ -14,5 +14,17 @@ export const LM358 = (props: ChipProps) => (
       7: "OUT2",
       8: "VCC",
     }}
+    schPinArrangement={{
+      topSide: { pins: ["VCC"], direction: "left-to-right" },
+      bottomSide: { pins: ["GND"], direction: "left-to-right" },
+      leftSide: {
+        pins: ["IN1_POS", "IN1_NEG", "IN2_POS", "IN2_NEG"],
+        direction: "top-to-bottom"
+      },
+      rightSide: {
+        pins: ["OUT1", "OUT2"],
+        direction: "top-to-bottom"
+      }
+    }}
   />
 );
