@@ -124,7 +124,7 @@ export default () => (
         name="C2"
         capacitance="0.1uF"
         footprint="axial"
-        schX={0} schY={8}
+        schX={0} schY={6}
         pcbX="15mm" pcbY="0mm"
         pcbRotation={270}
         connections={{ pin1: "net.VCC", pin2: "net.GND" }}
@@ -198,25 +198,25 @@ export default () => (
       <capacitor name="C4"
         capacitance="0.1uF"
         footprint="axial"
-        schX={18} schY={8}
+        schX={18} schY={5}
         pcbX="28mm" pcbY="0mm"
         pcbRotation={270}
         connections={{
           pin1: "net.VCC", pin2: "net.GND"
         }} />
       <resistor name="R_RESET" resistance="4.7k" footprint="axial"
-        schX={12} schY={9}
+        schX={12} schY={10}
         pcbX="-14mm" pcbY="-11.5mm"
         connections={{ pin1: "net.VCC", pin2: "net.RESET_DELAYED" }} />
       <capacitor
-        name="C_RESET" capacitance="10uF" footprint="axial" polarized schX={14} schY={9}
+        name="C_RESET" capacitance="10uF" footprint="axial" polarized schX={14} schY={7}
         pcbX="-20mm" pcbY="-11.5mm"
         connections={{
           pin1: "net.RESET_DELAYED", pin2: "net.GND"
         }} />
       <resistor name="R1" resistance="1k" footprint="axial"
         pcbX="22mm" pcbY="10.5mm"
-        schX={24} schY={4}
+        schX={24} schY={5}
         connections={{
           pin1: "net.ANALOG_A", pin2: "net.SUM_NODE"
         }} />
@@ -227,7 +227,7 @@ export default () => (
         }} />
       <resistor name="R3" resistance="1k" footprint="axial"
         pcbX="20mm" pcbY="-11.5mm"
-        schX={24} schY={0}
+        schX={24} schY={-1}
         connections={{
           pin1: "net.ANALOG_C", pin2: "net.SUM_NODE"
         }} />
@@ -251,16 +251,16 @@ export default () => (
           OUT2: "net.U5_UNUSED_FB",  // Pin 7: Unity-gain follower (output = GND)
         }}
       />
-      <resistor name="R_GRIT1" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="-3mm" schX={32} schY={4} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
-      <resistor name="R_GRIT2" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="0mm" schX={32} schY={2} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
-      <resistor name="R_FEEDBACK" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="3mm" schX={32} schY={-2} connections={{ pin1: "net.OPAMP_FB", pin2: "net.CAP_PLUS" }} />
+      <resistor name="R_GRIT1" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="-3mm" schX={34} schY={6} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
+      <resistor name="R_GRIT2" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="0mm" schX={34} schY={4} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
+      <resistor name="R_FEEDBACK" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="3mm" schX={34} schY={2} connections={{ pin1: "net.OPAMP_FB", pin2: "net.CAP_PLUS" }} />
       <capacitor
         name="C5"
         capacitance="10uF"
         footprint="axial"
         polarized
         pcbX="25mm" pcbY="4mm"
-        schX={36} schY={1}
+        schX={40} schY={2}
         connections={{
           pin1: "net.CAP_PLUS",     // Positive (+) to Resistor
           pin2: "net.SUM_NODE",     // Negative (-) to Sum Node
@@ -272,7 +272,7 @@ export default () => (
         footprint="axial"
         pcbX="-8mm" pcbY="0mm"
         pcbRotation={270}
-        schX={30} schY={-2}
+        schX={32} schY={-4}
         connections={{ pin1: "net.VCC", pin2: "net.GND" }}
       />
     </group>
