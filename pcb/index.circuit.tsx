@@ -32,6 +32,7 @@ export default () => (
     <copperpour layer="bottom" connectsTo="net.GND" />
     <copperpour layer="top" connectsTo="net.GND" />
 
+
     {/* Dedicated Power Traces for stability (16 mil) */}
     <trace from=".J1 > .VCC" to=".U4 > .VCC" thickness="0.4mm" />
     <trace from=".J1 > .GND" to=".U4 > .GND" thickness="0.4mm" />
@@ -43,6 +44,11 @@ export default () => (
     {/* General Signal Width (6 mil baseline for pad escape) */}
     <trace from=".J1 > .A0" to=".U1 > .A0" thickness="0.15mm" />
     <trace from=".J1 > .D0" to=".U3 > .D0" thickness="0.15mm" />
+
+    {/* Critical edge-routed signals — keep away from connector notches */}
+    <trace from=".J1 > .A13" to=".U1 > .A13" thickness="0.15mm" />
+    <trace from=".J1 > .A14" to=".U1 > .A14" thickness="0.15mm" />
+    <trace from=".J1 > .HALT" to=".U2 > .HALT" thickness="0.15mm" />
 
     {/* --- Components --- */}
 
@@ -204,12 +210,12 @@ export default () => (
         connections={{
           pin1: "net.VCC", pin2: "net.GND"
         }} />
-      <resistor name="R_RESET" resistance="4.7k" footprint="axial"
+      <resistor name="RRESET1" resistance="4.7k" footprint="axial"
         schX={12} schY={10}
         pcbX="-14mm" pcbY="-11.5mm"
         connections={{ pin1: "net.VCC", pin2: "net.RESET_DELAYED" }} />
       <capacitor
-        name="C_RESET" capacitance="10uF" footprint="axial" polarized schX={14} schY={7}
+        name="CRESET1" capacitance="10uF" footprint="axial" polarized schX={14} schY={7}
         pcbX="-20mm" pcbY="-11.5mm"
         connections={{
           pin1: "net.RESET_DELAYED", pin2: "net.GND"
@@ -251,9 +257,9 @@ export default () => (
           OUT2: "net.U5_UNUSED_FB",  // Pin 7: Unity-gain follower (output = GND)
         }}
       />
-      <resistor name="R_GRIT1" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="-3mm" schX={34} schY={6} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
-      <resistor name="R_GRIT2" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="0mm" schX={34} schY={4} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
-      <resistor name="R_FEEDBACK" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="3mm" schX={34} schY={2} connections={{ pin1: "net.OPAMP_FB", pin2: "net.CAP_PLUS" }} />
+      <resistor name="RGRIT1" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="-3mm" schX={34} schY={6} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
+      <resistor name="RGRIT2" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="0mm" schX={34} schY={4} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
+      <resistor name="RFEEDBACK1" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="3mm" schX={34} schY={2} connections={{ pin1: "net.OPAMP_FB", pin2: "net.CAP_PLUS" }} />
       <capacitor
         name="C5"
         capacitance="10uF"
