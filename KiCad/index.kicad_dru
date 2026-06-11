@@ -1,0 +1,13 @@
+(version 1)
+
+# J1 is an Atari 7800 card-edge connector — pads intentionally sit at the board edge.
+(rule "J1_card_edge_clearance"
+  (constraint edge_clearance (min 0mm))
+  (condition "A.Reference == 'J1' || B.Reference == 'J1'")
+)
+
+# HALT, A13, A14 must escape through the narrow connector notch.
+(rule "connector_notch_escape_clearance"
+  (constraint edge_clearance (min 0mm))
+  (condition "A.NetName == 'HALT' || B.NetName == 'HALT' || A.NetName == 'A13' || B.NetName == 'A13' || A.NetName == 'A14' || B.NetName == 'A14'")
+)

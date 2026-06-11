@@ -50,9 +50,28 @@ PRO_A78S       := $(foreach f,$(PRO_BASE),$(BUILD_DIR)/$(f).a78)
 FIXED_ROMS     := $(foreach f,$(FIXED_BASE),$(BUILD_DIR)/$(f).rom)
 
 # --- Core Targets ---
-.PHONY: all help clean logic rom a78 bin wav tools pro
+.PHONY: all help clean logic rom a78 bin wav tools pro pcb schematic
 
 all: tools a78
+
+KICAD_PCB    := KiCad/index.kicad_pcb
+ifeq ($(shell uname -s),Darwin)
+    KICAD_PYTHON ?= /Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
+else
+    KICAD_PYTHON ?= python3
+endif
+
+pcb:
+	@echo "Exporting KiCad PCB from tscircuit..."
+	@cd pcb && npx tsci export -f kicad_pcb index.circuit.tsx -o ../$(KICAD_PCB)
+	@echo "Patching PCB via KiCad pcbnew API..."
+	@$(KICAD_PYTHON) scripts/patch_pcb.py $(KICAD_PCB)
+	@echo "Done. Open KiCad/index.kicad_pcb to review."
+
+schematic:
+	@echo "Exporting schematic SVG from tscircuit..."
+	@mkdir -p $(BUILD_DIR)
+	@cd pcb && npx tsci export -f schematic-svg index.circuit.tsx -o ../docs/schematic.svg
 
 # The 'pro' target specifically builds the MADS-only showcase
 pro:
@@ -100,6 +119,7 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "  make tools  - Build the .NET music conversion tools"
+	@echo "  make pcb    - Export KiCad PCB from tscircuit and patch silkscreen text"
 	@echo "  make logic  - Build the ATF16V8B logic files (.jed)"
 	@echo "  make a78    - Build library of preview ROMs (emulator format)"
 	@echo "  make pro    - Build the MADS 'Pro' showcase demo"

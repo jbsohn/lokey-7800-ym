@@ -8,11 +8,13 @@ import { LM358 } from "./LM358";
 export default () => (
   <board
     outline={[
-      { x: "-32mm", y: "46.25mm" },    // Top-left
-      { x: "32mm", y: "46.25mm" },     // Top-right
-      { x: "32mm", y: "-10mm" },    // Transition-right (Wide part)
+      { x: "-32mm", y: "46.25mm" },   // Top-left
+      { x: "32mm", y: "46.25mm" },    // Top-right
+      { x: "32mm", y: "-9.5mm" },     // Chamfer start — right shoulder corner
+      { x: "31.5mm", y: "-10mm" },    // Chamfer end
       ...ATARI_7800_CONNECTOR_OUTLINE,
-      { x: "-32mm", y: "-10mm" },   // Transition-left (Wide part)
+      { x: "-31.5mm", y: "-10mm" },   // Chamfer end — left shoulder corner
+      { x: "-32mm", y: "-9.5mm" },    // Chamfer start
     ]}
     routingDisabled={true}
   >
@@ -32,6 +34,8 @@ export default () => (
     <copperpour layer="bottom" connectsTo="net.GND" />
     <copperpour layer="top" connectsTo="net.GND" />
 
+    {/* Stitch via to ensure GND zone continuity near right shoulder */}
+    <via pcbX="30mm" pcbY="-8mm" connectsTo="net.GND" />
 
     {/* Dedicated Power Traces for stability (16 mil) */}
     <trace from=".J1 > .VCC" to=".U4 > .VCC" thickness="0.4mm" />
