@@ -8,13 +8,13 @@ import { LM358 } from "./LM358";
 export default () => (
   <board
     outline={[
-      { x: "-32mm", y: "46.25mm" },   // Top-left
-      { x: "32mm", y: "46.25mm" },    // Top-right
-      { x: "32mm", y: "-9.5mm" },     // Chamfer start — right shoulder corner
-      { x: "31.5mm", y: "-10mm" },    // Chamfer end
+      { x: "-32mm", y: "40mm" },      // Top-left
+      { x: "32mm", y: "40mm" },       // Top-right
+      { x: "32mm", y: "-15.75mm" },   // Chamfer start — right shoulder corner
+      { x: "31.5mm", y: "-16.25mm" },  // Chamfer end
       ...ATARI_7800_CONNECTOR_OUTLINE,
-      { x: "-31.5mm", y: "-10mm" },   // Chamfer end — left shoulder corner
-      { x: "-32mm", y: "-9.5mm" },    // Chamfer start
+      { x: "-31.5mm", y: "-16.25mm" }, // Chamfer end — left shoulder corner
+      { x: "-32mm", y: "-15.75mm" },  // Chamfer start
     ]}
     routingDisabled={true}
   >
@@ -35,7 +35,7 @@ export default () => (
     <copperpour layer="top" connectsTo="net.GND" />
 
     {/* Stitch via to ensure GND zone continuity near right shoulder */}
-    <via pcbX="30mm" pcbY="-8mm" connectsTo="net.GND" />
+    <via pcbX="30mm" pcbY="-14.25mm" connectsTo="net.GND" />
 
     {/* Dedicated Power Traces for stability (16 mil) */}
     <trace from=".J1 > .VCC" to=".U4 > .VCC" thickness="0.4mm" />
@@ -59,7 +59,7 @@ export default () => (
     {/* Atari 7800 Edge Connector */}
     <Atari7800EdgeConnector
       name="J1"
-      pcbX="0mm" pcbY="-30.24mm"
+      pcbX="0mm" pcbY="-36.49mm"
       schX={-12} schY={0}
       connections={{
         VCC: "net.VCC",
@@ -79,7 +79,7 @@ export default () => (
 
     <group
       name="Rom"
-      pcbX="0mm" pcbY="-12mm">
+      pcbX="0mm" pcbY="-18.25mm">
       <ROM_27C256
         name="U1"
         schX={2} schY={-8}
@@ -109,7 +109,7 @@ export default () => (
     </group>
 
     <group name="GAL"
-      pcbX="-16mm" pcbY="4mm">
+      pcbX="-16mm" pcbY="-2.25mm">
       <ATF16V8B
         name="U2"
         schX={-2} schY={4}
@@ -142,7 +142,7 @@ export default () => (
     </group>
 
     <group name="Latch"
-      pcbX="14mm" pcbY="4mm">
+      pcbX="14mm" pcbY="-2.25mm">
       <Latch74HCT373
         name="U3"
         schX={6} schY={4}
@@ -183,7 +183,7 @@ export default () => (
 
     <group
       name="YM"
-      pcbX="0mm" pcbY="22mm">
+      pcbX="0mm" pcbY="15.75mm">
       <YM2149
         name="U4"
         schX={16} schY={0}
@@ -245,7 +245,7 @@ export default () => (
 
 
     <group name="Amp"
-      pcbY="40mm" pcbX="0mm">
+      pcbY="33.75mm" pcbX="0mm">
       <LM358
         name="U5"
         schX={28} schY={2}
@@ -289,7 +289,7 @@ export default () => (
 
     <silkscreentext
       text="Lokey 7800 YM v0.1"
-      pcbX="0mm" pcbY="-24mm"
+      pcbX="0mm" pcbY="-30.25mm"
       fontSize="2mm" />
   </board>
 );
