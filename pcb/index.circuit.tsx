@@ -25,8 +25,8 @@ export default () => (
     <net name="ANALOG_B" />
     <net name="ANALOG_C" />
     <net name="SUM_NODE" />
+    <net name="OPAMP_OUT" />
     <net name="CAP_PLUS" />
-    <net name="OPAMP_FB" />
     <net name="RESET_DELAYED" />
     <net name="U5_UNUSED_FB" />
 
@@ -253,17 +253,17 @@ export default () => (
         connections={{
           VCC: "net.VCC",
           GND: "net.GND",
-          IN1_POS: "net.GND",        // Pin 3: Tied to Ground
-          IN1_NEG: "net.OPAMP_FB",   // Pin 2: Feedback node (shorted to Pin 1)
-          OUT1: "net.OPAMP_FB",      // Pin 1: Shorted to Pin 2 (Feedback node)
-          IN2_POS: "net.GND",        // Pin 5: Unused section - input tied to GND
+          IN1_POS: "net.GND",         // Pin 3: Tied to Ground
+          IN1_NEG: "net.SUM_NODE",    // Pin 2: Connected directly to summing node
+          OUT1: "net.OPAMP_OUT",      // Pin 1: Op-amp Output
+          IN2_POS: "net.GND",         // Pin 5: Unused section - input tied to GND
           IN2_NEG: "net.U5_UNUSED_FB", // Pin 6: Unused section - shorted to output
-          OUT2: "net.U5_UNUSED_FB",  // Pin 7: Unity-gain follower (output = GND)
+          OUT2: "net.U5_UNUSED_FB",   // Pin 7: Unity-gain follower (output = GND)
         }}
       />
-      <resistor name="RGRIT1" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="-3mm" schX={34} schY={6} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
-      <resistor name="RGRIT2" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="0mm" schX={34} schY={4} connections={{ pin1: "net.OPAMP_FB", pin2: "net.GND" }} />
-      <resistor name="RFEEDBACK1" resistance="4.7k" footprint="axial" pcbX="18mm" pcbY="3mm" schX={34} schY={2} connections={{ pin1: "net.OPAMP_FB", pin2: "net.CAP_PLUS" }} />
+      <resistor name="RFB" resistance="1k" footprint="axial" pcbX="18mm" pcbY="-3mm" schX={34} schY={6} connections={{ pin1: "net.SUM_NODE", pin2: "net.OPAMP_OUT" }} />
+      <resistor name="RPULL" resistance="1k" footprint="axial" pcbX="18mm" pcbY="3mm" schX={34} schY={2} connections={{ pin1: "net.OPAMP_OUT", pin2: "net.GND" }} />
+      <resistor name="RSERIES" resistance="1k" footprint="axial" pcbX="25mm" pcbY="0mm" schX={34} schY={0} connections={{ pin1: "net.OPAMP_OUT", pin2: "net.CAP_PLUS" }} />
       <capacitor
         name="C5"
         capacitance="10uF"
@@ -272,8 +272,8 @@ export default () => (
         pcbX="25mm" pcbY="4mm"
         schX={40} schY={2}
         connections={{
-          pin1: "net.CAP_PLUS",     // Positive (+) to Resistor
-          pin2: "net.SUM_NODE",     // Negative (-) to Sum Node
+          pin1: "net.CAP_PLUS",     // Positive (+) to Series Resistor
+          pin2: "net.SUM_NODE",     // Negative (-) back to Sum Node / Exaudio
         }}
       />
       <capacitor

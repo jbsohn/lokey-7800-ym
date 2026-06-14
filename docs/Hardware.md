@@ -90,28 +90,30 @@ The components are tied together at a single electrical node connecting straight
 1. **Power-On Reset (POR):** At initial power-up, the capacitor is empty, acting as a temporary short to Ground. This safely forces `/RESET` low while the main system +5V rail stabilizes. The capacitor slowly charges through the `10kΩ` pull-up resistor, releasing the reset line to `HIGH` once voltage conditions match normal operating constraints.
 2. **Manual Hard Reset:** Pressing the normally-open tactile switch instantly discharges the capacitor directly to Ground, forcing a clean software-independent hardware re-initialization of the audio chip registers.
 
-### 5. LM358 Audio Stage ("Lokey" Active Shunt)
+### 5. LM358 Audio Stage (Active-Passive Hybrid Shunt Mixer)
 
-The audio stage uses an LM358 op-amp in a parallel **Active Shunt** configuration. Unlike a standard buffer or amplifier, the audio signal **bypasses** the op-amp silicon for maximum transparency, while the op-amp acts as an active, non-linear load on the mixing node to provide the signature "retro" character.
+The audio stage uses an LM358 op-amp in a parallel **Active-Passive Hybrid Shunt** configuration. This design uses the op-amp's feedback loop and single-supply saturation limits to act as a passive load that prevents console audio clipping, while incorporating an AC shunt network to smooth out high-frequency square wave edges.
 
 | Pin | Signal | Connection |
 | :--- | :--- | :--- |
-| **1** | OUT1 | **Feedback Node** (Short to Pin 2) |
-| **2** | IN1_NEG | **Feedback Node** (Short to Pin 1) |
+| **1** | OUT1 | **Op-amp Output** (Feedback loop to Pin 2) |
+| **2** | IN1_NEG | **Summing Node** (Connected directly to audio line) |
 | **3** | IN1_POS | **Ground** |
 | **4** | GND | **Ground Plane** |
+| **5** | IN2_POS | **Ground** (Unused channel stability) |
+| **6** | IN2_NEG | **OUT2** (Pin 7) (Unused channel stability) |
+| **7** | OUT2 | **IN2_NEG** (Pin 6) (Unused channel stability) |
 | **8** | VCC | **+5V** |
 
-> **Note:** Pins 5–7 (second op-amp channel) are left unconnected.
+> **Note:** The unused second channel (Pins 5–7) is configured as a unity-gain buffer tied to ground to prevent oscillation and thermal instability.
 
-> **Musician's Note on Op-Amps:** While this circuit is pin-compatible with higher-end op-amps like the **TL072**, real-world testing on the Atari 7800 showed that the humble **LM358** actually produced a more desirable "retro" tone. The LM358's performance on the single 5V rail adds a slight warmth and grit that perfectly complements the YM2149 PSG. This configuration ensures the audio remains "pure" by avoiding the op-amp's internal slew-rate limiting, while still benefiting from its reactive loading. That said, any pin-compatible op-amp can be used here.
+> **Musician's Note on Op-Amps:** While this circuit is pin-compatible with higher-end op-amps like the **TL072**, real-world testing on the Atari 7800 showed that the humble **LM358** actually produced a more desirable "retro" tone. The LM358's performance on the single 5V rail adds a slight warmth and grit that perfectly complements the YM2149 PSG. That said, any pin-compatible op-amp can be used here.
 
 **Audio Path Details:**
-*   **Mixing**: YM2149 Channels A, B, and C each go through a **1kΩ resistor** to a single **Summing Node**.
-*   **Direct Output**: The **Summing Node** is wired directly to the Atari 7800 **Pin 18 (Exaudio)** input.
-*   **The Active Shunt**: The LM358 Op-Amp is wired as a Ground-follower — Pin 3 grounded, Pins 1 & 2 shorted together to form a **Feedback Node**.
-*   **Shunt Loads**: Two **4.7kΩ resistors** connect the **Feedback Node** to Ground (one between Pins 2 and 3, one between Pins 4 and 1).
-*   **Reactive Feedback**: A **4.7kΩ resistor** connects the **Feedback Node** (Pin 1) to the **Positive (+) terminal** of a **10µF electrolytic capacitor**. The **Negative (-) terminal** of the capacitor connects back to the **Summing Node** (and therefore also to Exaudio).
+*   **Passive Mixing Node**: YM2149 Channels A, B, and C each go through a **1kΩ isolation resistor** to a single **Summing Node**, which is wired directly to the Atari 7800 **Pin 18 (Exaudio)** input.
+*   **Feedback Loop**: A **1kΩ resistor** connects the Summing Node (Pin 2) to the op-amp Output (Pin 1). Since Pin 3 is grounded and inputs are positive, the op-amp saturates at `0V`, making this resistor behave as a passive `1kΩ` load to Ground to prevent console clipping.
+*   **Class-A Bias Pull-Down**: A **1kΩ resistor** connects from Pin 1 (OUT1) to Ground (Pin 4) to bias the LM358's output stage into Class-A operation, eliminating crossover distortion.
+*   **AC Shunt Network**: A **1kΩ resistor** in series with a **10µF capacitor** connects Pin 1 (OUT1 / `0V`) to the Summing Node. At audio frequencies, the capacitor acts as a short, putting the second `1kΩ` resistor in parallel with the feedback resistor to decrease AC load impedance to `500Ω`, smoothing square wave transients.
 
 
 ## Hardware Pinout Reference
