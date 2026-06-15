@@ -49,11 +49,12 @@ for fp in stubs:
 print(f"  Removed {removed} tscircuit:Unknown stub footprint(s)")
 print(f"  Fixed text size on {fixed} reference designator(s)")
 
-# Set GND zones to always remove isolated copper islands
+# Set GND zones to always remove isolated copper islands and allow narrow flow
 for zone in board.Zones():
     if zone.GetNetname() == "GND":
         zone.SetIslandRemovalMode(0)  # 0 = ALWAYS
-print("  Set GND zone island removal: ALWAYS")
+        zone.SetMinThickness(pcbnew.FromMM(0.15))
+print("  Set GND zone island removal: ALWAYS, min thickness: 0.15mm")
 
 board.Save(PCB_PATH)
 print(f"  Saved {PCB_PATH}")
@@ -72,11 +73,12 @@ if os.path.exists(PRO_PATH):
     rules["min_via_diameter"]          = 0.3
     rules["min_via_annular_width"]     = 0.05
     rules["min_through_hole_diameter"] = 0.2
+    rules["min_copper_edge_clearance"] = 0.0
     with open(PRO_PATH, "w") as f:
         json.dump(pro, f, indent=2)
     print("  Patched kicad_pro DRC severities")
 else:
-    print("  WARNING: kicad_pro not found — run 'git checkout KiCad/index.kicad_pro'")
+    print("  WARNING: kicad_pro not found — run 'git checkout pcb/KiCad/index.kicad_pro'")
 
 # ── 3. kicad_dru: custom design rules ────────────────────────────────────────
 with open(DRU_PATH, "w") as f:
@@ -89,10 +91,10 @@ with open(DRU_PATH, "w") as f:
   (condition "A.Reference == 'J1' || B.Reference == 'J1'")
 )
 
-# HALT, A13, A14 must escape through the narrow connector notch.
+# HALT, A13, A14, VCC, GND must escape through the narrow connector notch.
 (rule "connector_notch_escape_clearance"
   (constraint edge_clearance (min 0mm))
-  (condition "A.NetName == 'HALT' || B.NetName == 'HALT' || A.NetName == 'A13' || B.NetName == 'A13' || A.NetName == 'A14' || B.NetName == 'A14'")
+  (condition "A.NetName == 'HALT' || B.NetName == 'HALT' || A.NetName == 'A13' || B.NetName == 'A13' || A.NetName == 'A14' || B.NetName == 'A14' || A.NetName == 'VCC' || B.NetName == 'VCC' || A.NetName == 'GND' || B.NetName == 'GND'")
 )
 """)
 print("  Wrote kicad_dru custom design rules")

@@ -41,10 +41,55 @@ export default () => (
     />
 
     {/* Stitch via to ensure GND zone continuity near right shoulder */}
-    <via
+    <chip
+      name="gnd_via"
+      pcbX="31mm"
+      pcbY="-15mm"
+      pinLabels={{ 1: "GND" }}
+      connections={{ 1: "net.GND" }}
+    >
+      <footprint>
+        <platedhole
+          shape="circle"
+          holeDiameter="0.3mm"
+          outerDiameter="0.6mm"
+          pcbX={0}
+          pcbY={0}
+          portHints={["pin1"]}
+        />
+      </footprint>
+    </chip>
+
+    <trace
+      from=".U3 > .GND"
+      to=".gnd_via > .pin1"
+      thickness="0.4mm"
+    />
+
+    {/* Stitch via to ensure GND zone continuity near right middle (next to YM) */}
+    <chip
+      name="gnd_via2"
       pcbX="30mm"
-      pcbY="-14.25mm"
-      connectsTo="net.GND"
+      pcbY="15.75mm"
+      pinLabels={{ 1: "GND" }}
+      connections={{ 1: "net.GND" }}
+    >
+      <footprint>
+        <platedhole
+          shape="circle"
+          holeDiameter="0.3mm"
+          outerDiameter="0.6mm"
+          pcbX={0}
+          pcbY={0}
+          portHints={["pin1"]}
+        />
+      </footprint>
+    </chip>
+
+    <trace
+      from=".C4 > .pin2"
+      to=".gnd_via2 > .pin1"
+      thickness="0.4mm"
     />
 
     {/* Dedicated Power Traces for stability (16 mil) */}
@@ -400,7 +445,7 @@ export default () => (
         capacitance="10uF"
         footprint="axial"
         polarized
-        pcbX="10mm"
+        pcbX="15mm"
         pcbY="0mm"
         pcbRotation={90}
         schX={40}
@@ -414,7 +459,7 @@ export default () => (
         name="RPULL"
         resistance="1k"
         footprint="axial"
-        pcbX="15mm"
+        pcbX="20mm"
         pcbY="0mm"
         pcbRotation={90}
         schX={34}
@@ -428,7 +473,7 @@ export default () => (
         name="CBYPASS"
         capacitance="0.1uF"
         footprint="axial"
-        pcbX="20mm"
+        pcbX="-15mm"
         pcbY="0mm"
         pcbRotation={90}
         schX={32}
@@ -456,7 +501,7 @@ export default () => (
         name="RSERIES"
         resistance="1k"
         footprint="axial"
-        pcbX="-15mm"
+        pcbX="10mm"
         pcbY="0mm"
         pcbRotation={90}
         schX={34}

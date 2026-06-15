@@ -54,19 +54,11 @@ FIXED_ROMS     := $(foreach f,$(FIXED_BASE),$(BUILD_DIR)/$(f).rom)
 
 all: tools a78
 
-KICAD_PCB    := KiCad/index.kicad_pcb
-ifeq ($(shell uname -s),Darwin)
-    KICAD_PYTHON ?= /Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
-else
-    KICAD_PYTHON ?= python3
-endif
 
 pcb:
-	@echo "Exporting KiCad PCB from tscircuit..."
-	@cd pcb && npx tsci export -f kicad_pcb index.circuit.tsx -o ../$(KICAD_PCB)
-	@echo "Patching PCB via KiCad pcbnew API..."
-	@$(KICAD_PYTHON) scripts/patch_pcb.py $(KICAD_PCB)
-	@echo "Done. Open KiCad/index.kicad_pcb to review."
+	@echo "Exporting and autorouting KiCad PCB from tscircuit..."
+	@cd pcb && node ./auto-route.mjs
+
 
 schematic:
 	@echo "Exporting schematic SVG from tscircuit..."

@@ -6,8 +6,8 @@
   (condition "A.Reference == 'J1' || B.Reference == 'J1'")
 )
 
-# HALT, A13, A14 must escape through the narrow connector notch.
+# HALT, A13, A14, VCC, GND must escape through the narrow connector notch.
 (rule "connector_notch_escape_clearance"
   (constraint edge_clearance (min 0mm))
-  (condition "A.NetName == 'HALT' || B.NetName == 'HALT' || A.NetName == 'A13' || B.NetName == 'A13' || A.NetName == 'A14' || B.NetName == 'A14'")
+  (condition "A.NetName == 'HALT' || B.NetName == 'HALT' || A.NetName == 'A13' || B.NetName == 'A13' || A.NetName == 'A14' || B.NetName == 'A14' || A.NetName == 'VCC' || B.NetName == 'VCC' || A.NetName == 'GND' || B.NetName == 'GND'")
 )
