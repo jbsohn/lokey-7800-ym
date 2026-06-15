@@ -17,7 +17,7 @@ console.log("1. Exporting unrouted board from tscircuit React...");
 execSync("npx tsci export index.circuit.tsx -f kicad_pcb -o " + PCB_PATH, { stdio: "inherit" });
 
 console.log("2. Patching PCB design settings via KiCad Python API...");
-execSync(`${PYTHON_BIN} ../scripts/patch_pcb.py ${PCB_PATH}`, { stdio: "inherit" });
+execSync(`${PYTHON_BIN} ./patch_pcb.py ${PCB_PATH}`, { stdio: "inherit" });
 
 console.log("3. Exporting board to Specctra DSN...");
 const exportCmd = `${PYTHON_BIN} -c "import pcbnew; board = pcbnew.LoadBoard('${PCB_PATH}'); pcbnew.ExportSpecctraDSN(board, '${DSN_PATH}')"`;

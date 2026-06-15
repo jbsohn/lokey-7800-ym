@@ -44,3 +44,6 @@ KiCad/*.ses
 # DRC reports
 *.rpt
 
+# Bun lockfile (using npm)
+bun.lock
+
