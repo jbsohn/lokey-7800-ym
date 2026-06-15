@@ -204,7 +204,7 @@ export default () => (
       <capacitor
         name="C1"
         capacitance="0.1uF"
-        footprint="axial"
+        footprint="C_Disc_D5.0mm_W2.5mm_P5.00mm"
         pcbX="20mm"
         pcbY="0mm"
         schX={4}
@@ -246,7 +246,7 @@ export default () => (
       <capacitor
         name="C2"
         capacitance="0.1uF"
-        footprint="axial"
+        footprint="C_Disc_D5.0mm_W2.5mm_P5.00mm"
         schX={0}
         schY={6}
         pcbX="15mm"
@@ -295,7 +295,7 @@ export default () => (
       <capacitor
         name="C3"
         capacitance="0.1uF"
-        footprint="axial"
+        footprint="C_Disc_D5.0mm_W2.5mm_P5.00mm"
         schX={8}
         schY={8}
         pcbX="15mm"
@@ -338,7 +338,7 @@ export default () => (
       <capacitor
         name="C4"
         capacitance="0.1uF"
-        footprint="axial"
+        footprint="C_Disc_D5.0mm_W2.5mm_P5.00mm"
         schX={18}
         schY={5}
         pcbX="28mm"
@@ -351,7 +351,7 @@ export default () => (
       />
       <resistor
         name="RRESET1"
-        resistance="4.7k"
+        resistance="10k"
         footprint="axial"
         schX={12}
         schY={10}
@@ -419,7 +419,7 @@ export default () => (
 
     <group
       name="Amp"
-      pcbX="0mm"
+      pcbX="8mm"
       pcbY="34mm"
     >
       <LM358
@@ -472,7 +472,7 @@ export default () => (
       <capacitor
         name="CBYPASS"
         capacitance="0.1uF"
-        footprint="axial"
+        footprint="C_Disc_D5.0mm_W2.5mm_P5.00mm"
         pcbX="-15mm"
         pcbY="0mm"
         pcbRotation={90}
@@ -516,9 +516,15 @@ export default () => (
 
     <silkscreentext
       text="Lokey 7800 YM v0.1"
-      pcbX="0mm"
-      pcbY="-30.25mm"
+      pcbX="-18mm"
+      pcbY="36mm"
       fontSize="2mm"
+    />
+    <silkscreentext
+      text="github.com/jbsohn/lokey-7800-ym"
+      pcbX="-18mm"
+      pcbY="33mm"
+      fontSize="1.2mm"
     />
   </board>
 );

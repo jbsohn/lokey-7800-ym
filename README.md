@@ -64,6 +64,7 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 * **[Music Tools](docs/MusicTools.md)** - Theory and usage for `YmToYmb`, `VgmToYmb`, and `YmbToWav`.
 * **[YMB Format](docs/YmbFormat.md)** - Technical specification of the music binary format.
 * **[Musical Credits](docs/Musicians.md)** - Honoring the original composers.
+* **[TODO](docs/TODO.md)** - Known issues and improvements.
 * **[Crazy Future Ideas](docs/FutureIdeas.md)** - Roadmap for hardware/software expansions.
 
 ---
