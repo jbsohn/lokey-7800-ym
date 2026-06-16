@@ -43,7 +43,7 @@ export default () => (
 
     {/* Stitch via to ensure GND zone continuity near right shoulder */}
     <chip
-      name="gnd_via"
+      name="U6"
       pcbX="31mm"
       pcbY="-15mm"
       pinLabels={{ 1: "GND" }}
@@ -63,13 +63,13 @@ export default () => (
 
     <trace
       from=".U3 > .GND"
-      to=".gnd_via > .pin1"
+      to=".U6 > .pin1"
       thickness="0.4mm"
     />
 
     {/* Stitch via to ensure GND zone continuity near right middle (next to YM) */}
     <chip
-      name="gnd_via2"
+      name="U7"
       pcbX="30mm"
       pcbY="15.75mm"
       pinLabels={{ 1: "GND" }}
@@ -89,7 +89,7 @@ export default () => (
 
     <trace
       from=".C4 > .pin2"
-      to=".gnd_via2 > .pin1"
+      to=".U7 > .pin1"
       thickness="0.4mm"
     />
 
@@ -471,7 +471,7 @@ export default () => (
         }}
       />
       <capacitor
-        name="CBYPASS"
+        name="C6"
         capacitance="0.1uF"
         footprint="C_Disc_D5.0mm_W2.5mm_P5.00mm"
         pcbX="-15mm"

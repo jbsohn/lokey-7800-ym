@@ -107,7 +107,11 @@ print("  Wrote kicad_dru custom design rules")
 
 # 5. Export board to Specctra DSN
 print("3. Exporting board to Specctra DSN...")
-pcbnew.ExportSpecctraDSN(board, DSN_PATH)
+dsn_ok = pcbnew.ExportSpecctraDSN(board, DSN_PATH)
+if not dsn_ok or not os.path.exists(DSN_PATH):
+    print("Error: Failed to export board to Specctra DSN.")
+    print("This is usually caused by duplicate reference designators (e.g. U?, C?) or critical DRC violations in the board layout.")
+    sys.exit(1)
 
 # 6. Patch DSN rules and boundary
 print("4. Patching DSN rules and boundary...")
@@ -174,7 +178,17 @@ if os.path.exists(SES_PATH):
     except OSError:
         pass
 
-subprocess.run(["freerouting", "-de", DSN_PATH, "-do", SES_PATH, "-mp", "10"], check=True)
+freerouting_bin = os.getenv("FREEROUTING_BIN", "freerouting")
+if not shutil.which(freerouting_bin) and not os.path.exists(freerouting_bin):
+    mac_app_bin = os.getenv("FREEROUTING_APP", "/Applications/freerouting.app/Contents/MacOS/freerouting")
+    if sys.platform == "darwin" and os.path.exists(mac_app_bin):
+        freerouting_bin = mac_app_bin
+    else:
+        print(f"Error: freerouting executable not found in PATH or at {mac_app_bin}")
+        print("You can override these paths by setting FREEROUTING_BIN or FREEROUTING_APP environment variables.")
+        sys.exit(1)
+
+subprocess.run([freerouting_bin, "-de", DSN_PATH, "-do", SES_PATH, "-mp", "10"], check=True)
 
 if not os.path.exists(SES_PATH):
     print("Error: freerouting failed to generate session file.")

@@ -19,6 +19,16 @@ WAVTOOL       := $(BIN_DIR)/ymbtowav
 A78GEN        := $(BIN_DIR)/a78gen
 SIGN          := 7800sign
 
+# --- OS Detection & KiCad Setup ---
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+  KICAD_APP    ?= /Applications/KiCad/KiCad.app
+  KICAD_PYTHON ?= $(KICAD_APP)/Contents/Frameworks/Python.framework/Versions/3.9/bin/python3
+  export PATH  := $(KICAD_APP)/Contents/MacOS:$(PATH)
+else
+  KICAD_PYTHON ?= python3
+endif
+
 # --- Assembler Setup ---
 ifeq ($(ASSEMBLER),mads)
   ASM_CMD   := mads
@@ -57,7 +67,7 @@ all: tools a78
 
 pcb:
 	@echo "Exporting and autorouting KiCad PCB from tscircuit..."
-	@cd pcb && python3 ./route_and_patch.py
+	@cd pcb && $(KICAD_PYTHON) ./route_and_patch.py
 	@$(MAKE) schematic
 	@$(MAKE) previews
 
