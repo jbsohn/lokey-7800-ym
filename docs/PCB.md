@@ -22,12 +22,12 @@ Because we maintain a code-first design, the single source of truth is `pcb/inde
 
 To keep the pipeline robust, we interface directly with the **official KiCad Python API (`pcbnew`) and native `kicad-cli` commands** wherever possible rather than relying on custom text parsers.
 
-The build runner (`pcb/auto-route.mjs`) executes the following sequential steps:
+The build runner (`pcb/route_and_patch.py`) executes the following sequential steps:
 
 ```mermaid
 graph TD
     A[React Code index.circuit.tsx] -->|npx tsci export| B[Unrouted KiCad PCB]
-    B -->|pcb/patch_pcb.py| C[Patched KiCad PCB & Rules]
+    B -->|pcb/route_and_patch.py| C[Patched KiCad PCB & Rules]
     C -->|kicad-cli / python pcbnew| D[Specctra DSN Export]
     D -->|Boundary & Clearance Patch| E[Freerouting Session]
     E -->|Import SES| F[Routed KiCad PCB]
@@ -35,8 +35,8 @@ graph TD
 ```
 
 ### Pipeline Steps:
-1. **Export**: Compiles the React TSX file into an unrouted KiCad board (`.kicad_pcb`).
-2. **Patching Design Settings (`patch_pcb.py`)**:
+1. **Export**: Compiles the React TSX file into a fully defined schematic and physical footprint layout on the board, but without any copper trace routing (an unrouted KiCad board, `.kicad_pcb`).
+2. **Patching Design Settings (`route_and_patch.py`)**:
    * **Stubs**: Cleans up dummy `tscircuit:Unknown` footprint stubs.
    * **Silkscreen**: Standardizes reference designator text dimensions (height/width $\ge 0.8\text{mm}$, thickness $\ge 0.1\text{mm}$) to satisfy manufacturing silkscreen rules.
    * **DRC Severity**: Disables cosmetic warnings (e.g., missing footprints from libraries, text size out of range) in the project settings (`.kicad_pro`).
@@ -49,11 +49,14 @@ graph TD
 5. **Freerouting**: Launches the Freerouting CLI to automatically route all signals.
 6. **Import**: Imports the generated Specctra SES route session back into the `.kicad_pcb` board.
 7. **DRC & Zone Refill**: Refills all copper zones and executes `kicad-cli` Design Rule Checking.
-8. **Export Gerbers**: Outputs production-ready plot files to `pcb/KiCad/gerbers/`.
+8. **Export Gerbers**: Outputs production-ready plot files to `pcb/gerbers/`.
 
 ---
 
 ## Workarounds for Current `tscircuit` Limitations
+
+> **_NOTE:_**
+> We pushed `tscircuit` as far as we could to solve these layout and DRC issues natively, but it's entirely possible we missed a cleaner setting, flag, or feature in the framework. Regardless of whether a native solution exists, this pipeline is how we successfully resolved the issues and got the board layout and routing fully working.
 
 Maintaining a complex 2-layer cartridge design pushes some boundaries of `tscircuit`. Admittedly, our current build pipeline is a bit "hacky" as it relies on automated post-export scripts to patch geometry and project rules to make things compile cleanly:
 
@@ -71,9 +74,9 @@ Maintaining a complex 2-layer cartridge design pushes some boundaries of `tscirc
 
 ---
 
-## Future Roadmap
+The ultimate goal of this project's layout pipeline is to **completely eliminate the need for external post-export scripts** (such as `pcb/route_and_patch.py`) and perform all design rule configurations, footprint cleanup, and routing directly inside `tscircuit`. 
 
-The ultimate goal of this project's layout pipeline is to **completely eliminate the need for external post-export scripts** (such as `pcb/patch_pcb.py` and `pcb/auto-route.mjs`) and perform all design rule configurations, footprint cleanup, and routing directly inside `tscircuit`.
+Currently, KiCad is only used as a final post-processing tool to get the design over the finish line (for routing and DRC/Gerber generation). As `tscircuit` matures, we expect to be fully native within the `tscircuit` environment for the entire design and fabrication lifecycle.
 
 However, if physical layout and routing constraints become too complex to declare programmatically, the project may pivot to **designing the PCB layout directly in KiCad**, while maintaining the **schematic design in tscircuit** as the source of truth for component connections and code-first schematics.
 
@@ -88,12 +91,12 @@ As the framework and surrounding ecosystem mature, we hope to transition by:
 
 Marrying code-first React PCB declarations with custom low-level python scripts is a *Long and Winding Road*, but we managed to *get by with a little help from my friends* (in this case, the AI assistant). 
 
-This joint effort was primarily focused on developing and refining the `pcb/patch_pcb.py` and `pcb/auto-route.mjs` scripts, where the AI played a vital role in:
+This joint effort was primarily focused on developing and refining the `pcb/route_and_patch.py` pipeline, where the AI played a vital role in:
 * **Debugging tscircuit's internal structure** to successfully port custom plated-hole via definitions.
 * **Diagnosing Freerouting boundary clearance math** and finding the exact coordinate offset hacks needed to place edge pins flush with the card boundary.
 * **Automating pythonic patches** to KiCad's project settings and zone priorities to eliminate design rule violations headless.
 
-This project is a testament to how pair programming with AI tools can accelerate hardware prototyping workflows from concept to tape-out.
+This project is a testament to how pair programming with AI tools can accelerate hardware prototyping workflows from start to end.
 
 ---
 

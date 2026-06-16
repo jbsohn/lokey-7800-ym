@@ -57,7 +57,7 @@ all: tools a78
 
 pcb:
 	@echo "Exporting and autorouting KiCad PCB from tscircuit..."
-	@cd pcb && node ./auto-route.mjs
+	@cd pcb && python3 ./route_and_patch.py
 
 
 schematic:
