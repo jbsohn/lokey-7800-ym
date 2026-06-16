@@ -110,10 +110,10 @@ The audio stage uses an LM358 op-amp in a parallel **Active-Passive Hybrid Shunt
 > **Musician's Note on Op-Amps:** While this circuit is pin-compatible with higher-end op-amps like the **TL072**, real-world testing on the Atari 7800 showed that the humble **LM358** actually produced a more desirable "retro" tone. The LM358's performance on the single 5V rail adds a slight warmth and grit that perfectly complements the YM2149 PSG. That said, any pin-compatible op-amp can be used here.
 
 **Audio Path Details:**
-*   **Passive Mixing Node**: YM2149 Channels A, B, and C each go through a **1kΩ isolation resistor** to a single **Summing Node**, which is wired directly to the Atari 7800 **Pin 18 (Exaudio)** input.
-*   **Feedback Loop**: A **1kΩ resistor** connects the Summing Node (Pin 2) to the op-amp Output (Pin 1). Since Pin 3 is grounded and inputs are positive, the op-amp saturates at `0V`, making this resistor behave as a passive `1kΩ` load to Ground to prevent console clipping.
+*   **Summing Node**: YM2149 Channels A, B, and C each go through a **1kΩ isolation resistor** to a single **Summing Node**, which connects directly to Pin 2 of the op-amp.
+*   **Feedback Loop**: A **1kΩ resistor** connects the Summing Node (Pin 2) to the op-amp Output (Pin 1). Since Pin 3 is grounded, the op-amp output sits at `0V`, making this resistor behave as a passive `1kΩ` load to Ground to prevent console clipping.
 *   **Class-A Bias Pull-Down**: A **1kΩ resistor** connects from Pin 1 (OUT1) to Ground (Pin 4) to bias the LM358's output stage into Class-A operation, eliminating crossover distortion.
-*   **AC Shunt Network**: A **1kΩ resistor** in series with a **10µF capacitor** connects Pin 1 (OUT1 / `0V`) to the Summing Node. At audio frequencies, the capacitor acts as a short, putting the second `1kΩ` resistor in parallel with the feedback resistor to decrease AC load impedance to `500Ω`, smoothing square wave transients.
+*   **AC Output Coupling Network**: A **1kΩ resistor** in series with a **10µF capacitor** connects Pin 1 (OUT1 / `0V`) to the Atari 7800 **Pin 18 (Exaudio)** input. The resistor connects to the positive (+) terminal of the capacitor, and the negative (-) terminal connects directly to the console's Exaudio line, blocking DC offset and smoothing square wave transients.
 
 
 ## Hardware Pinout Reference

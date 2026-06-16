@@ -27,6 +27,7 @@ export default () => (
     <net name="SUM_NODE" />
     <net name="OPAMP_OUT" />
     <net name="CAP_PLUS" />
+    <net name="OPAMP_OUT_AC" />
     <net name="RESET_DELAYED" />
     <net name="U5_UNUSED_FB" />
 
@@ -174,7 +175,7 @@ export default () => (
         RW: "net.RW",
         HALT: "net.HALT",
         PHI2: "net.PHI2",
-        Exaudio: "net.SUM_NODE",
+        Exaudio: "net.OPAMP_OUT_AC",
       }}
     />
 
@@ -451,8 +452,8 @@ export default () => (
         schX={40}
         schY={2}
         connections={{
-          pin1: "net.CAP_PLUS",     // Positive (+) to Series Resistor
-          pin2: "net.SUM_NODE",     // Negative (-) back to Sum Node / Exaudio
+          pin1: "net.CAP_PLUS",     // Positive (+) from Series Resistor
+          pin2: "net.OPAMP_OUT_AC", // Negative (-) to Exaudio / Console
         }}
       />
       <resistor
