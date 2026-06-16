@@ -50,7 +50,7 @@ PRO_A78S       := $(foreach f,$(PRO_BASE),$(BUILD_DIR)/$(f).a78)
 FIXED_ROMS     := $(foreach f,$(FIXED_BASE),$(BUILD_DIR)/$(f).rom)
 
 # --- Core Targets ---
-.PHONY: all help clean logic rom a78 bin wav tools pro pcb schematic
+.PHONY: all help clean logic rom a78 bin wav tools pro pcb schematic previews
 
 all: tools a78
 
@@ -58,12 +58,19 @@ all: tools a78
 pcb:
 	@echo "Exporting and autorouting KiCad PCB from tscircuit..."
 	@cd pcb && python3 ./route_and_patch.py
+	@$(MAKE) schematic
+	@$(MAKE) previews
 
 
 schematic:
 	@echo "Exporting schematic SVG from tscircuit..."
 	@mkdir -p $(BUILD_DIR)
 	@cd pcb && npx tsci export -f schematic-svg index.circuit.tsx -o ../docs/schematic.svg
+
+previews:
+	@echo "Exporting PCB SVG previews from KiCad..."
+	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o docs/pcb_front.svg pcb/KiCad/index.kicad_pcb
+	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o docs/pcb_back.svg pcb/KiCad/index.kicad_pcb
 
 # The 'pro' target specifically builds the MADS-only showcase
 pro:
@@ -110,14 +117,15 @@ help:
 	@echo "Assembler: $(ASSEMBLER) (Use 'make ASSEMBLER=mads' to switch)"
 	@echo ""
 	@echo "Targets:"
-	@echo "  make tools  - Build the .NET music conversion tools"
-	@echo "  make pcb    - Export KiCad PCB from tscircuit and patch silkscreen text"
-	@echo "  make logic  - Build the ATF16V8B logic files (.jed)"
-	@echo "  make a78    - Build library of preview ROMs (emulator format)"
-	@echo "  make pro    - Build the MADS 'Pro' showcase demo"
-	@echo "  make rom    - Build and sign raw ROMs for hardware (.rom)"
-	@echo "  make wav    - Generate verification .wav files for all tracks"
-	@echo "  make clean  - Wipe all build artifacts"
+	@echo "  make tools     - Build the .NET music conversion tools"
+	@echo "  make pcb       - Export KiCad PCB from tscircuit and patch silkscreen text"
+	@echo "  make previews  - Export front/back SVG previews of the current PCB design"
+	@echo "  make logic     - Build the ATF16V8B logic files (.jed)"
+	@echo "  make a78       - Build library of preview ROMs (emulator format)"
+	@echo "  make pro       - Build the MADS 'Pro' showcase demo"
+	@echo "  make rom       - Build and sign raw ROMs for hardware (.rom)"
+	@echo "  make wav       - Generate verification .wav files for all tracks"
+	@echo "  make clean     - Wipe all build artifacts"
 
 $(BUILD_DIR):
 	@mkdir -p $(BUILD_DIR)

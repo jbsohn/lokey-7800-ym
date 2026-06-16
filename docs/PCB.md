@@ -15,10 +15,21 @@ The board is a **2-layer cartridge PCB** currently in the **experimental prototy
 * **U4 (YM2149 Sound Chip)**: Synthesizes 3-channel audio.
 * **U5 (LM358 Op-Amp)**: Active summing amplifier and output buffer.
 
+### Board Previews:
+
+| Front View (Top Copper & Silkscreen) | Back View (Bottom Copper & Silkscreen - Mirrored) |
+| :---: | :---: |
+| ![PCB Front Preview](pcb_front.svg) | ![PCB Back Preview](pcb_back.svg) |
+
 ---
 
 ## Compilation & Routing Pipeline
 Because we maintain a code-first design, the single source of truth is `pcb/index.circuit.tsx`. Generating the final routed KiCad project and manufacturing-ready Gerber/Drill files is fully automated via the `make pcb` task. 
+
+To quickly regenerate the side-by-side SVG visual board previews for documentation (using the currently compiled board design), you can run the standalone command:
+```bash
+make previews
+```
 
 To keep the pipeline robust, we interface directly with the **official KiCad Python API (`pcbnew`) and native `kicad-cli` commands** wherever possible rather than relying on custom text parsers.
 
