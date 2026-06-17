@@ -1,5 +1,8 @@
 # PCB Design & Automated Routing Pipeline
 
+> [!WARNING]
+> **Work in Progress**: The PCB design is in an experimental prototype phase and is **not production-ready**. The physical board has **not yet been ordered or tested** for fabrication.
+
 This document explains the architecture of the Atari 7800 YM2149 sound card cartridge PCB, how the automated compilation and routing pipeline works, and the design decisions made to work around current `tscircuit` limitations.
 
 > [!NOTE]
