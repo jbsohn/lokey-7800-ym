@@ -97,16 +97,20 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 
 * **The Atari Community**: We are grateful to the dedicated fans keeping the 16-bit and 8-bit flames alive through archival and homebrew development.
 
+## Contributing
+
+This project is completely open source, and since this is a first-time PCB design, community feedback and contributions are highly welcome! *"Help! I need someone... not just anybody... you know I need someone!"* as the Beatles said, so any help or review of the schematics, code, or board layout is greatly appreciated.
+
 ## AI Assistance
-
-This project was developed with assistance from AI. For the author, AI has been a "force multiplier"—making it possible to tackle long-held "I've always wanted to do this" projects within the limited hours of evenings and weekends.
-
+ 
+This project was developed with assistance from AI. For the author, AI has been a "force multiplier"—making it possible to tackle long-held "I've always wanted to do this" projects within the limited hours of evenings and weekends. In particular, it really helped with developing the [route_and_patch.py](file:///home/john/Projects/7800-ym2149-lab/pcb/route_and_patch.py) build pipeline.
+ 
 For reflections on the legacy of the Atari ST and how AI is changing the landscape of hardware and software side-projects, see the author's blog posts:
-
+ 
 [John's Music & Tech](https://johnsmusicandtech.com/)
 
 ## License
-
+ 
 This project is licensed under the **GNU General Public License v2.0 (GPL-2.0)**. See `LICENSE` for details.
-
+ 
 **Use at your own risk.** The author is not responsible for any damage to your hardware or loss of data.
