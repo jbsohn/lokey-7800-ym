@@ -194,3 +194,5 @@ clean:
 	@rm -rf $(BUILD_DIR)
 	@rm -rf $(BIN_DIR)
 	@rm -f $(BUILD_DIR)/*.wav $(YM_DIR)/*.wav $(VGM_DIR)/*.wav
+	@rm -rf pcb/KiCad/
+	@rm -f pcb/index-drc.rpt

@@ -29,17 +29,8 @@ yarn-error.log*
 # tscircuit cache
 .tscircuit/
 
-# KiCad temporary and local settings files
-KiCad/*.lck
-KiCad/*-bak
-KiCad/*-backups/
-KiCad/_autosave-*
-KiCad/*.bck
-KiCad/*.kicad_prl
-
-# Specctra DSN/SES routing files (dynamically generated/regenerated)
-KiCad/*.dsn
-KiCad/*.ses
+# KiCad files (all intermediate, generated via route_and_patch.py)
+KiCad/
 
 # DRC reports
 *.rpt

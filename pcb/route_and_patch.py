@@ -17,6 +17,7 @@ DRU_PATH = "./KiCad/index.kicad_dru"
 
 # 1. Export unrouted board from tscircuit React
 print("1. Exporting unrouted board from tscircuit React...")
+os.makedirs(os.path.dirname(PCB_PATH), exist_ok=True)
 subprocess.run(["npx", "tsci", "export", "index.circuit.tsx", "-f", "kicad_pcb", "-o", PCB_PATH], check=True)
 
 # 2. Patch PCB design settings via KiCad Python API
