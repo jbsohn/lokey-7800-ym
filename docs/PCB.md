@@ -27,6 +27,21 @@ The board is a **2-layer cartridge PCB** currently in the **experimental prototy
 * **U3 (74HCT373 Latch)**: Demultiplexes/latches the multiplexed data/address bus.
 * **U4 (YM2149 Sound Chip)**: Synthesizes 3-channel audio.
 * **U5 (LM358 Op-Amp)**: Active summing amplifier and output buffer.
+* **JP1, JP2 (Solder Jumpers)**: Configure the socket compatibility for 16KB, 32KB, or 64KB ROM sizes.
+
+### Universal ROM Compatibility (Solder Jumpers)
+
+The board features two 3-pad solder jumpers placed directly next to the ROM socket (`U1`) to configure the board for different capacity 28-pin JEDEC EPROMs:
+
+*   **16KB (27C128)**:
+    *   Bridge **JP1** to **VCC** (Left).
+    *   Bridge **JP2** to **VCC** (Left) — keeps the `~PGM` pin pulled high.
+*   **32KB (27C256)**:
+    *   Bridge **JP1** to **VCC** (Left).
+    *   Bridge **JP2** to **A14** (Right).
+*   **64KB (27C512)**:
+    *   Bridge **JP1** to **A15** (Right) — routes address line A15 to Pin 1.
+    *   Bridge **JP2** to **A14** (Right).
 
 ### Board Previews:
 

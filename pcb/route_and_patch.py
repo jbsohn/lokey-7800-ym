@@ -80,7 +80,7 @@ if os.path.exists(PRO_PATH):
     rules["min_via_diameter"]          = 0.3
     rules["min_via_annular_width"]     = 0.05
     rules["min_through_hole_diameter"] = 0.2
-    rules["min_copper_edge_clearance"] = 0.0
+    rules["min_copper_edge_clearance"] = 0.5
     with open(PRO_PATH, "w") as f:
         json.dump(pro, f, indent=2)
     print("  Patched kicad_pro DRC severities")

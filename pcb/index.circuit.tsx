@@ -4,6 +4,7 @@ import { ATF16V8B } from "./ATF16V8B";
 import { Latch74HCT373 } from "./74HCT373";
 import { YM2149 } from "./YM2149";
 import { LM358 } from "./LM358";
+import { SolderJumper } from "./SolderJumper";
 
 export default () => (
   <board
@@ -30,6 +31,8 @@ export default () => (
     <net name="OPAMP_OUT_AC" />
     <net name="RESET_DELAYED" />
     <net name="U5_UNUSED_FB" />
+    <net name="ROM_VPP" />
+    <net name="ROM_A14" />
 
     {/* Ground Plane & Basic Net Configuration */}
     <copperpour
@@ -44,8 +47,8 @@ export default () => (
     {/* Stitch via to ensure GND zone continuity near right shoulder */}
     <chip
       name="U6"
-      pcbX="31mm"
-      pcbY="-15mm"
+      pcbX="29mm"
+      pcbY="-13mm"
       pinLabels={{ 1: "GND" }}
       connections={{ 1: "net.GND" }}
     >
@@ -70,7 +73,7 @@ export default () => (
     {/* Stitch via to ensure GND zone continuity near right middle (next to YM) */}
     <chip
       name="U7"
-      pcbX="30mm"
+      pcbX="26mm"
       pcbY="15.75mm"
       pinLabels={{ 1: "GND" }}
       connections={{ 1: "net.GND" }}
@@ -191,22 +194,50 @@ export default () => (
         pcbRotation={270}
         connections={{
           VCC: "net.VCC",
-          VPP: "net.VCC",
+          VPP: "net.ROM_VPP",
           GND: "net.GND",
           OE: "net.GND",
           CE: "net.ROM_CE",
           A0: "net.A0", A1: "net.A1", A2: "net.A2", A3: "net.A3", A4: "net.A4",
           A5: "net.A5", A6: "net.A6", A7: "net.A7", A8: "net.A8", A9: "net.A9",
-          A10: "net.A10", A11: "net.A11", A12: "net.A12", A13: "net.A13", A14: "net.A14",
+          A10: "net.A10", A11: "net.A11", A12: "net.A12", A13: "net.A13", A14: "net.ROM_A14",
           D0: "net.D0", D1: "net.D1", D2: "net.D2", D3: "net.D3", D4: "net.D4",
           D5: "net.D5", D6: "net.D6", D7: "net.D7",
+        }}
+      />
+      <SolderJumper
+        name="JP1"
+        pcbX="20mm"
+        pcbY="4.5mm"
+        pcbRotation={90}
+        label="JP1 (VPP)"
+        labelL="VCC"
+        labelR="A15"
+        connections={{
+          L: "net.VCC",
+          C: "net.ROM_VPP",
+          R: "net.A15",
+        }}
+      />
+      <SolderJumper
+        name="JP2"
+        pcbX="20mm"
+        pcbY="-4.5mm"
+        pcbRotation={90}
+        label="JP2 (A14)"
+        labelL="VCC"
+        labelR="A14"
+        connections={{
+          L: "net.VCC",
+          C: "net.ROM_A14",
+          R: "net.A14",
         }}
       />
       <capacitor
         name="C1"
         capacitance="0.1uF"
         footprint="C_Disc_D5.0mm_W2.5mm_P5.00mm"
-        pcbX="20mm"
+        pcbX="24mm"
         pcbY="0mm"
         schX={4}
         schY={-12}

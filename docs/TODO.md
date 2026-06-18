@@ -24,3 +24,4 @@ Remaining issues from the PCB design review.
 - **`auto-route.mjs` DSN patching** — boundary string replacement tied to specific tscircuit export format; could break on tscircuit version updates.
 - **`auto-route.mjs` no `freerouting` check** — script fails cryptically if `freerouting` binary is not installed.
 - **No test points** — no dedicated test pads for PHI2, RESET, BDIR, BC1, or audio debugging.
+- **Right-shoulder isolated GND island** — DRC reports unconnected copper pour at `(31.8mm, -15.66mm)` in the chamfer corner. Fix by either constraining the custom `connector_notch_escape_clearance` design rule to only apply near the connector slot (e.g., `Y < -20mm`), shifting `U6` slightly to the right (e.g. `29.5mm`), or adding a keepout zone.
