@@ -236,8 +236,8 @@ export default () => (
       <capacitor
         name="C1"
         capacitance="0.1uF"
-        footprint="C_Disc_D5.0mm_W2.5mm_P5.00mm"
-        pcbX="24mm"
+        footprint="axial"
+        pcbX="20mm"
         pcbY="0mm"
         schX={4}
         schY={-12}
@@ -278,7 +278,7 @@ export default () => (
       <capacitor
         name="C2"
         capacitance="0.1uF"
-        footprint="C_Disc_D5.0mm_W2.5mm_P5.00mm"
+        footprint="axial"
         schX={0}
         schY={6}
         pcbX="15mm"
@@ -327,7 +327,7 @@ export default () => (
       <capacitor
         name="C3"
         capacitance="0.1uF"
-        footprint="C_Disc_D5.0mm_W2.5mm_P5.00mm"
+        footprint="axial"
         schX={8}
         schY={8}
         pcbX="15mm"
@@ -370,7 +370,7 @@ export default () => (
       <capacitor
         name="C4"
         capacitance="0.1uF"
-        footprint="C_Disc_D5.0mm_W2.5mm_P5.00mm"
+        footprint="axial"
         schX={18}
         schY={5}
         pcbX="28mm"
@@ -504,7 +504,7 @@ export default () => (
       <capacitor
         name="C6"
         capacitance="0.1uF"
-        footprint="C_Disc_D5.0mm_W2.5mm_P5.00mm"
+        footprint="axial"
         pcbX="-15mm"
         pcbY="0mm"
         pcbRotation={90}
