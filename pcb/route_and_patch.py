@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-import sys
-import os
 import json
-import subprocess
+import os
 import shutil
+import subprocess
+import sys
+
 import pcbnew
 
 # Change to the script's directory (pcb/)
@@ -24,7 +25,7 @@ subprocess.run(
 )
 
 print("Patching PCB design settings via KiCad Python API...")
-# Suppress C-level wx "create wxApp" noise that fires on first headless LoadBoard
+# Suppress C-level wx "create wxApp" noise that fires on first headless LoadBoard.
 _null = os.open(os.devnull, os.O_WRONLY)
 _old = os.dup(2)
 os.dup2(_null, 2)
@@ -77,27 +78,35 @@ ds.m_MinThroughDrill = pcbnew.FromMM(0.2)
 ds.m_CopperEdgeClearance = 0
 print("  Set design rules: via 0.3mm, annular 0.05mm, drill 0.2mm, edge clearance 0mm")
 
+board.GetTitleBlock().SetRevision("Rev1")
+print("  Set board revision: Rev1")
+
 board.Save(PCB_PATH)
 
-# 3. Suppress cosmetic DRC warnings in index.kicad_pro
+# Suppress cosmetic DRC warnings in index.kicad_pro.
+# Create the file with a minimal skeleton if it doesn't exist yet (e.g. after make clean).
 if os.path.exists(PRO_PATH):
     with open(PRO_PATH) as f:
         pro = json.load(f)
-    sev = pro["board"]["design_settings"]["rule_severities"]
-    sev["lib_footprint_issues"] = "ignore"
-    sev["text_height"] = "ignore"
-    sev["text_thickness"] = "ignore"
-    # tscircuit zone polygon creates a small isolated copper at the right-shoulder chamfer
-    # corner (F.Cu ↔ B.Cu at 131.8, 115.667 mm).  Real GND connectivity is maintained
-    # through all through-hole component leads; this is a zone fill geometry artifact.
-    sev["unconnected_items"] = "warning"
-    with open(PRO_PATH, "w") as f:
-        json.dump(pro, f, indent=2)
-    print("  Patched kicad_pro DRC severities")
 else:
-    print("Warning: kicad_pro not found")
+    pro = {
+        "meta": {"filename": "index.kicad_pro", "version": 1},
+        "board": {"design_settings": {"rule_severities": {}}},
+    }
+sev = pro["board"]["design_settings"]["rule_severities"]
+sev["lib_footprint_issues"] = "ignore"
+sev["text_height"] = "ignore"
+sev["text_thickness"] = "ignore"
+# The right-shoulder area has no component pads, so the GND zone fill there
+# produces a small isolated island that KiCad reports as zone-to-zone
+# unconnected.  Real GND connectivity is maintained through all through-hole
+# component leads; this is a zone fill geometry artifact (see TODO.md).
+sev["unconnected_items"] = "warning"
+with open(PRO_PATH, "w") as f:
+    json.dump(pro, f, indent=2)
+print("  Patched kicad_pro DRC severities")
 
-# 4. Write kicad_dru custom design rules
+# Write kicad_dru custom design rules.
 with open(DRU_PATH, "w") as f:
     f.write("""\
 (version 1)
@@ -114,10 +123,9 @@ with open(DRU_PATH, "w") as f:
   (condition "A.NetName == 'HALT' || B.NetName == 'HALT' || A.NetName == 'A13' || B.NetName == 'A13' || A.NetName == 'A14' || B.NetName == 'A14' || A.NetName == 'VCC' || B.NetName == 'VCC' || A.NetName == 'GND' || B.NetName == 'GND'")
 )
 
-# tscircuit's zone polygon creates a degenerate spike at the right-shoulder chamfer corner.
-# Zone fill produces an isolated GND region there that KiCad reports as zone-to-zone
-# unconnected (F.Cu vs B.Cu).  Real GND connectivity is maintained through all the
-# through-hole component leads.  Zone-to-zone unconnected is safe to ignore on this board.
+# The right-shoulder area has no component pads so the GND zone fill produces an
+# isolated island there.  Real GND connectivity is maintained through all through-hole
+# component leads.  Zone-to-zone unconnected is safe to ignore on this board.
 (rule "gnd_zone_fill_artifact"
   (constraint unconnected (severity ignore))
   (condition "A.Type == 'Zone' && B.Type == 'Zone'")
@@ -130,15 +138,16 @@ dsn_ok = pcbnew.ExportSpecctraDSN(board, DSN_PATH)
 if not dsn_ok or not os.path.exists(DSN_PATH):
     print("Error: Failed to export board to Specctra DSN.")
     print(
-        "This is usually caused by duplicate reference designators (e.g. U?, C?) or critical DRC violations in the board layout."
+        "This is usually caused by duplicate reference designators (e.g. U?, C?)"
+        " or critical DRC violations in the board layout."
     )
     sys.exit(1)
 
 print("Patching DSN rules and boundary...")
-with open(DSN_PATH, "r") as f:
+with open(DSN_PATH) as f:
     dsn = f.read()
 
-# Patch the global rule block
+# Patch the global rule block.
 global_rule_old = """    (rule
       (width 200)
       (clearance 200)
@@ -154,7 +163,7 @@ global_rule_new = """    (rule
 if global_rule_old in dsn:
     dsn = dsn.replace(global_rule_old, global_rule_new)
 
-# Patch the class rule block
+# Patch the class rule block.
 class_rule_old = """      (rule
         (width 200)
         (clearance 200)
@@ -168,7 +177,7 @@ class_rule_new = """      (rule
 if class_rule_old in dsn:
     dsn = dsn.replace(class_rule_old, class_rule_new)
 
-# Patch boundary bottom edge coordinates from -140000 to -140200
+# Patch boundary bottom edge coordinates from -140000 to -140200.
 boundary_start = dsn.find("(boundary")
 if boundary_start != -1:
     paren_count = 0
@@ -200,19 +209,22 @@ if os.path.exists(SES_PATH):
 freerouting_bin = os.getenv("FREEROUTING_BIN", "freerouting")
 if not shutil.which(freerouting_bin) and not os.path.exists(freerouting_bin):
     mac_app_bin = os.getenv(
-        "FREEROUTING_APP", "/Applications/freerouting.app/Contents/MacOS/freerouting"
+        "FREEROUTING_APP",
+        "/Applications/freerouting.app/Contents/MacOS/freerouting",
     )
     if sys.platform == "darwin" and os.path.exists(mac_app_bin):
         freerouting_bin = mac_app_bin
     else:
         print(f"Error: freerouting executable not found in PATH or at {mac_app_bin}")
         print(
-            "You can override these paths by setting FREEROUTING_BIN or FREEROUTING_APP environment variables."
+            "You can override these paths by setting FREEROUTING_BIN"
+            " or FREEROUTING_APP environment variables."
         )
         sys.exit(1)
 
 subprocess.run(
-    [freerouting_bin, "-de", DSN_PATH, "-do", SES_PATH, "-mp", "10"], check=True
+    [freerouting_bin, "-de", DSN_PATH, "-do", SES_PATH, "-mp", "10"],
+    check=True,
 )
 
 if not os.path.exists(SES_PATH):
@@ -226,18 +238,33 @@ board.Save(PCB_PATH)
 
 print("Refilling zones and running DRC...")
 subprocess.run(
-    ["kicad-cli", "pcb", "drc", "--refill-zones", "--save-board", PCB_PATH], check=True
+    ["kicad-cli", "pcb", "drc", "--refill-zones", "--save-board", PCB_PATH],
+    check=True,
 )
 
 print("Exporting Gerbers and Drill files...")
-if not os.path.exists(GERBER_DIR):
-    os.makedirs(GERBER_DIR)
+os.makedirs(GERBER_DIR, exist_ok=True)
 subprocess.run(
-    ["kicad-cli", "pcb", "export", "gerbers", "-o", GERBER_DIR, PCB_PATH], check=True
+    ["kicad-cli", "pcb", "export", "gerbers", "-o", GERBER_DIR, PCB_PATH],
+    check=True,
 )
 subprocess.run(
-    ["kicad-cli", "pcb", "export", "drill", "-o", GERBER_DIR, PCB_PATH], check=True
+    ["kicad-cli", "pcb", "export", "drill", "-o", GERBER_DIR, PCB_PATH],
+    check=True,
 )
+
+print("Patching Gerber job file metadata...")
+gbrjob_path = os.path.join(GERBER_DIR, "index-job.gbrjob")
+if os.path.exists(gbrjob_path):
+    with open(gbrjob_path) as f:
+        gbrjob = json.load(f)
+    gbrjob["GeneralSpecs"]["Finish"] = "HAL"
+    gbrjob["GeneralSpecs"]["ProjectId"]["Revision"] = "Rev1"
+    with open(gbrjob_path, "w") as f:
+        json.dump(gbrjob, f, indent=2)
+    print("  Set Finish: HAL, Revision: Rev1")
+else:
+    print("Warning: gbrjob not found")
 
 print("Zipping Gerber files to gerbers.zip...")
 shutil.make_archive("gerbers", "zip", GERBER_DIR)

@@ -11,11 +11,9 @@ export default () => (
     outline={[
       { x: "-32mm", y: "40mm" },      // Top-left
       { x: "32mm", y: "40mm" },       // Top-right
-      { x: "32mm", y: "-15.75mm" },   // Chamfer start — right shoulder corner
-      { x: "31.5mm", y: "-16.25mm" },  // Chamfer end
+      { x: "32mm", y: "-16.25mm" },   // Right shoulder corner
       ...ATARI_7800_CONNECTOR_OUTLINE,
-      { x: "-31.5mm", y: "-16.25mm" }, // Chamfer end — left shoulder corner
-      { x: "-32mm", y: "-15.75mm" },  // Chamfer start
+      { x: "-32mm", y: "-16.25mm" },  // Left shoulder corner
     ]}
     routingDisabled={true}
   >
@@ -32,7 +30,7 @@ export default () => (
     <net name="RESET_DELAYED" />
     <net name="U5_UNUSED_FB" />
     <net name="ROM_VPP" />
-    <net name="ROM_A14" />
+    <net name="ROM_ADDR14" />
 
     {/* Ground Plane & Basic Net Configuration */}
     <copperpour
@@ -147,8 +145,8 @@ export default () => (
       thickness="0.15mm"
     />
     <trace
-      from=".J1 > .A14"
-      to=".U1 > .A14"
+      from=".U1 > .A14"
+      to=".JP2 > .C"
       thickness="0.15mm"
     />
     <trace
@@ -200,7 +198,7 @@ export default () => (
           CE: "net.ROM_CE",
           A0: "net.A0", A1: "net.A1", A2: "net.A2", A3: "net.A3", A4: "net.A4",
           A5: "net.A5", A6: "net.A6", A7: "net.A7", A8: "net.A8", A9: "net.A9",
-          A10: "net.A10", A11: "net.A11", A12: "net.A12", A13: "net.A13", A14: "net.ROM_A14",
+          A10: "net.A10", A11: "net.A11", A12: "net.A12", A13: "net.A13", A14: "net.ROM_ADDR14",
           D0: "net.D0", D1: "net.D1", D2: "net.D2", D3: "net.D3", D4: "net.D4",
           D5: "net.D5", D6: "net.D6", D7: "net.D7",
         }}
@@ -229,7 +227,7 @@ export default () => (
         labelR="A14"
         connections={{
           L: "net.VCC",
-          C: "net.ROM_A14",
+          C: "net.ROM_ADDR14",
           R: "net.A14",
         }}
       />
@@ -548,15 +546,17 @@ export default () => (
 
     <silkscreentext
       text="Lokey 7800 YM v0.1"
-      pcbX="-18mm"
-      pcbY="36mm"
+      pcbX="-30mm"
+      pcbY="26mm"
       fontSize="2mm"
+      pcbRotation={90}
     />
     <silkscreentext
       text="github.com/jbsohn/lokey-7800-ym"
-      pcbX="-18mm"
-      pcbY="33mm"
+      pcbX="-28mm"
+      pcbY="25.25mm"
       fontSize="1.2mm"
+      pcbRotation={90}
     />
   </board>
 );

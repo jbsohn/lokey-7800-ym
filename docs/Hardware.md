@@ -77,18 +77,18 @@ make logic
 
 ### 4. Hardware Reset Logic (Warm Start Fix)
 
-To prevent the YM2149 registers from retaining garbage data during a quick console power cycle ("Warm Start")—which bypasses default internal BIOS delays and causes a stuck, high-frequency tone—a dedicated hardware RC network and manual override switch are implemented on **Pin 23 (/RESET)**.
+To prevent the YM2149 registers from retaining garbage data during a quick console power cycle ("Warm Start")—which bypasses default internal BIOS delays and causes a stuck, high-frequency tone—a dedicated hardware RC network is implemented on **Pin 23 (/RESET)**.
 
 #### Connection & Wiring Guide
-The components are tied together at a single electrical node connecting straight to the audio chip:
+The two components meet at a single node connected directly to **Pin 23 (/RESET)** of the YM2149:
 
-1. **The Pull-Up Resistor (10kΩ):** Connect one leg directly to your main **+5V (VCC)** power rail, and connect the other leg to **Pin 23 (/RESET)** of the YM2149.
-2. **The Capacitor (10µF):** Connect the positive (+) terminal (usually the longer leg) to **Pin 23 (/RESET)** of the YM2149, and connect the negative (-) terminal directly to your common **Ground plane (GND)**.
-3. **The Reset Switch (Normally Open):** Wire the two primary contacts in parallel across the capacitor. Connect one pin to **Pin 23 (/RESET)** of the YM2149, and the other pin to **Ground (GND)**.
+1. **The Pull-Up Resistor (10kΩ):** Connect one leg to **+5V (VCC)** and the other leg to **Pin 23 (/RESET)**.
+2. **The Capacitor (10µF, polarized):** Connect the positive (+) terminal to **Pin 23 (/RESET)** and the negative (−) terminal to **GND**.
+
+> **Note:** No manual reset switch is fitted on the PCB. The RC network provides automatic power-on reset only. If you want a manual override on a breadboard build, wire a normally-open switch in parallel with the capacitor (one contact to `/RESET`, the other to GND), but this is not required for normal cartridge operation.
 
 #### Theory of Operation
-1. **Power-On Reset (POR):** At initial power-up, the capacitor is empty, acting as a temporary short to Ground. This safely forces `/RESET` low while the main system +5V rail stabilizes. The capacitor slowly charges through the `10kΩ` pull-up resistor, releasing the reset line to `HIGH` once voltage conditions match normal operating constraints.
-2. **Manual Hard Reset:** Pressing the normally-open tactile switch instantly discharges the capacitor directly to Ground, forcing a clean software-independent hardware re-initialization of the audio chip registers.
+At initial power-up, the discharged capacitor acts as a momentary short to Ground, holding `/RESET` low while the +5V rail stabilizes. The capacitor charges through the 10kΩ resistor over roughly 100ms, then releases `/RESET` high and allows the PSG to begin normal operation. This delay ensures the console BIOS has had time to silence the audio channels before the YM2149 comes out of reset, preventing the warm-start stuck-tone issue.
 
 ### 5. LM358 Audio Stage (Active-Passive Hybrid Shunt Mixer)
 
