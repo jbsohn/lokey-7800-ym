@@ -1,8 +1,8 @@
 import { type ChipProps } from "tscircuit";
 
 export const ATARI_7800_CONNECTOR_OUTLINE = [
-  { x: "23.8mm", y: "-16.25mm" },      // Transition-right (Top of connector area)
-  { x: "23.8mm", y: "-40mm" },         // Bottom-right
+  // Connector notch geometry only — step-in handled by shoulder recesses in main outline
+  { x: "23.5mm", y: "-40mm" },         // Bottom-right
   { x: "17.71mm", y: "-40mm" },        // Right notch outer
   { x: "17.71mm", y: "-30.3mm" },      // Right notch top-outer
   { x: "15.31mm", y: "-30.3mm" },      // Right notch top-inner
@@ -11,8 +11,7 @@ export const ATARI_7800_CONNECTOR_OUTLINE = [
   { x: "-15.31mm", y: "-30.3mm" },     // Left notch top-inner
   { x: "-17.71mm", y: "-30.3mm" },     // Left notch top-outer
   { x: "-17.71mm", y: "-40mm" },       // Left notch outer
-  { x: "-23.8mm", y: "-40mm" },        // Bottom-left
-  { x: "-23.8mm", y: "-16.25mm" },     // Transition-left (Top of connector area)
+  { x: "-23.5mm", y: "-40mm" },        // Bottom-left
 ];
 
 const Atari7800EdgeConnector = (props: ChipProps) => {
