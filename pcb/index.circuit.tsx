@@ -197,7 +197,7 @@ export default () => (
     <group
       name="Rom"
       pcbX="0mm"
-      pcbY="-18.25mm"
+      pcbY="-20.5mm"
     >
       <ROM_27C256
         name="U_ROM"
@@ -259,113 +259,62 @@ export default () => (
           pin2: "net.GND",
         }}
       />
-    </group>
-
-    <group
-      name="GAL"
-      pcbX="0mm"
-      pcbY="-18.25mm"
-    >
-      <ATF16V8B
-        name="U_GAL"
-        schX={-2}
-        schY={4}
-        pcbRotation={270}
-        layer="bottom"
-        connections={{
-          VCC: "net.VCC",
-          GND: "net.GND",
-          A15: "net.A15",
-          A14: "net.A14",
-          A0: "net.A0",
-          HALT: "net.HALT",
-          RW: "net.RW",
-          PHI2: "net.PHI2",
-          ROM_CE: "net.ROM_CE",
-          BDIR: "net.BDIR",
-          BC1: "net.BC1",
-          PHI2OUT: "net.PHI2OUT",
-          YM_LE: "net.YM_LE",
-        }}
-      />
-      <capacitor
-        name="C_GAL"
-        capacitance="0.1uF"
-        footprint="axial"
-        schX={0}
-        schY={6}
-        pcbX="15mm"
+      <group
+        name="GAL"
+        pcbX="0mm"
         pcbY="0mm"
-        pcbRotation={270}
-        layer="bottom"
-        connections={{
-          pin1: "net.VCC",
-          pin2: "net.GND"
-        }}
-      />
-    </group>
-
-    <group
-      name="Latch"
-      pcbX="0mm"
-      pcbY="24mm"
-    >
-      <Latch74HCT373
-        name="U_LATCH"
-        schX={6}
-        schY={4}
-        pcbRotation={270}
-        layer="bottom"
-        connections={{
-          VCC: "net.VCC",
-          GND: "net.GND",
-          OE: "net.GND",
-          LE: "net.YM_LE",
-          D0: "net.D0",
-          D1: "net.D1",
-          D2: "net.D2",
-          D3: "net.D3",
-          D4: "net.D4",
-          D5: "net.D5",
-          D6: "net.D6",
-          D7: "net.D7",
-          Q0: "net.DA0",
-          Q1: "net.DA1",
-          Q2: "net.DA2",
-          Q3: "net.DA3",
-          Q4: "net.DA4",
-          Q5: "net.DA5",
-          Q6: "net.DA6",
-          Q7: "net.DA7",
-        }}
-      />
-      <capacitor
-        name="C_LATCH"
-        capacitance="0.1uF"
-        footprint="axial"
-        schX={8}
-        schY={8}
-        pcbX="15mm"
-        pcbY="0mm"
-        pcbRotation={270}
-        layer="bottom"
-        connections={{
-          pin1: "net.VCC",
-          pin2: "net.GND"
-        }}
-      />
+      >
+        <ATF16V8B
+          name="U_GAL"
+          schX={-2}
+          schY={4}
+          pcbRotation={270}
+          layer="bottom"
+          connections={{
+            VCC: "net.VCC",
+            GND: "net.GND",
+            A15: "net.A15",
+            A14: "net.A14",
+            A0: "net.A0",
+            HALT: "net.HALT",
+            RW: "net.RW",
+            PHI2: "net.PHI2",
+            ROM_CE: "net.ROM_CE",
+            BDIR: "net.BDIR",
+            BC1: "net.BC1",
+            PHI2OUT: "net.PHI2OUT",
+            YM_LE: "net.YM_LE",
+          }}
+        />
+        <capacitor
+          name="C_GAL"
+          capacitance="0.1uF"
+          footprint="axial"
+          schX={0}
+          schY={6}
+          pcbX="15mm"
+          pcbY="0mm"
+          pcbRotation={270}
+          layer="bottom"
+          connections={{
+            pin1: "net.VCC",
+            pin2: "net.GND"
+          }}
+        />
+      </group>
     </group>
 
     <group
       name="YM"
-      pcbX="0mm"
-      pcbY="24mm"
+      pcbX="-10mm"
+      pcbY="14.0mm"
+      pcbRotation={0}
     >
       <YM2149
         name="U_YM"
         schX={16}
         schY={0}
-        pcbRotation={270}
+        pcbRotation={0}
         connections={{
           VCC: "net.VCC",
           BC2: "net.VCC",
@@ -383,28 +332,15 @@ export default () => (
           ANALOG_C: "net.ANALOG_C",
         }}
       />
-      <capacitor
-        name="C_YM"
-        capacitance="0.1uF"
-        footprint="axial"
-        schX={18}
-        schY={5}
-        pcbX="28mm"
-        pcbY="0mm"
-        pcbRotation={270}
-        connections={{
-          pin1: "net.VCC",
-          pin2: "net.GND",
-        }}
-      />
       <resistor
         name="R_RESET"
         resistance="10k"
         footprint="axial"
         schX={12}
         schY={10}
-        pcbX="6mm"
-        pcbY="-11.5mm"
+        pcbX="0mm"
+        pcbY="-16mm"
+        layer="bottom"
         connections={{
           pin1: "net.VCC",
           pin2: "net.RESET_DELAYED",
@@ -417,10 +353,24 @@ export default () => (
         polarized
         schX={14}
         schY={7}
-        pcbX="12mm"
-        pcbY="-11.5mm"
+        pcbX="0mm"
+        pcbY="-20mm"
+        layer="bottom"
         connections={{
           pin1: "net.RESET_DELAYED",
+          pin2: "net.GND",
+        }}
+      />
+      <capacitor
+        name="C_YM"
+        capacitance="0.1uF"
+        footprint="axial"
+        schX={18}
+        schY={5}
+        pcbX="-12mm"
+        pcbY="24mm"
+        connections={{
+          pin1: "net.VCC",
           pin2: "net.GND",
         }}
       />
@@ -428,8 +378,8 @@ export default () => (
         name="R_YM_AUDIOA"
         resistance="1k"
         footprint="axial"
-        pcbX="-6mm"
-        pcbY="-11.5mm"
+        pcbX="-12mm"
+        pcbY="20mm"
         schX={24}
         schY={5}
         connections={{
@@ -441,8 +391,8 @@ export default () => (
         name="R_YM_AUDIOB"
         resistance="1k"
         footprint="axial"
-        pcbX="-18mm"
-        pcbY="-11.5mm"
+        pcbX="-12mm"
+        pcbY="16mm"
         schX={24}
         schY={2}
         connections={{
@@ -455,7 +405,7 @@ export default () => (
         resistance="1k"
         footprint="axial"
         pcbX="-12mm"
-        pcbY="-11.5mm"
+        pcbY="12mm"
         schX={24}
         schY={-1}
         connections={{
@@ -463,9 +413,91 @@ export default () => (
           pin2: "net.SUM_NODE",
         }}
       />
+
+      <group
+        name="YM2"
+        pcbX="20mm"
+        pcbY="0mm"
+        pcbRotation={0}
+      >
+        <YM2149
+          name="U_YM2"
+          schX={16}
+          schY={0}
+          pcbRotation={0}
+          connections={{
+          }}
+        />
+        <capacitor
+          name="C_YM2"
+          capacitance="0.1uF"
+          footprint="axial"
+          schX={18}
+          schY={5}
+          pcbX="10mm"
+          pcbY="23mm"
+          pcbRotation={270}
+          connections={{
+            pin1: "net.VCC",
+            pin2: "net.GND",
+          }}
+        />
+      </group>
+
+      <group
+        name="Latch"
+        pcbX="0mm"
+        pcbY="0mm"
+        pcbRotation={0}
+      >
+        <Latch74HCT373
+          name="U_LATCH"
+          schX={6}
+          schY={4}
+          pcbRotation={0}
+          layer="bottom"
+          connections={{
+            VCC: "net.VCC",
+            GND: "net.GND",
+            OE: "net.GND",
+            LE: "net.YM_LE",
+            D0: "net.D0",
+            D1: "net.D1",
+            D2: "net.D2",
+            D3: "net.D3",
+            D4: "net.D4",
+            D5: "net.D5",
+            D6: "net.D6",
+            D7: "net.D7",
+            Q0: "net.DA0",
+            Q1: "net.DA1",
+            Q2: "net.DA2",
+            Q3: "net.DA3",
+            Q4: "net.DA4",
+            Q5: "net.DA5",
+            Q6: "net.DA6",
+            Q7: "net.DA7",
+          }}
+        />
+        <capacitor
+          name="C_LATCH"
+          capacitance="0.1uF"
+          footprint="axial"
+          schX={8}
+          schY={8}
+          pcbX="0mm"
+          pcbY="15mm"
+          pcbRotation={0}
+          layer="bottom"
+          connections={{
+            pin1: "net.VCC",
+            pin2: "net.GND"
+          }}
+        />
+      </group>
     </group>
 
-    <group
+    {/* <group
       name="Amp"
       pcbX="0mm"
       pcbY="-1.25mm"
@@ -560,13 +592,13 @@ export default () => (
         }}
       />
 
-    </group>
+    </group> */}
 
-    <silkscreentext
+    {/* <silkscreentext
       text="Lokey 7800 YM v0.1  github.com/jbsohn/lokey-7800-ym"
       pcbX="-8mm"
       pcbY="37mm"
       fontSize="1.2mm"
-    />
+    /> */}
   </board>
 );
