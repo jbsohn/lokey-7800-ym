@@ -4,7 +4,6 @@ import os
 import shutil
 import subprocess
 import sys
-
 import pcbnew
 
 # Change to the script's directory (pcb/)
@@ -88,6 +87,9 @@ board.Save(PCB_PATH)
 if os.path.exists(PRO_PATH):
     with open(PRO_PATH) as f:
         pro = json.load(f)
+    if "rule_severities" not in (pro.get("board", {}).get("design_settings", {})):
+        print("Error: index.kicad_pro is missing board.design_settings.rule_severities")
+        sys.exit(1)
 else:
     pro = {
         "meta": {"filename": "index.kicad_pro", "version": 1},
@@ -162,6 +164,8 @@ global_rule_new = """    (rule
     )"""
 if global_rule_old in dsn:
     dsn = dsn.replace(global_rule_old, global_rule_new)
+else:
+    print("Warning: global rule block not found in DSN — edge clearance patch skipped")
 
 # Patch the class rule block.
 class_rule_old = """      (rule
@@ -176,6 +180,8 @@ class_rule_new = """      (rule
       )"""
 if class_rule_old in dsn:
     dsn = dsn.replace(class_rule_old, class_rule_new)
+else:
+    print("Warning: class rule block not found in DSN — edge clearance patch skipped")
 
 # Patch boundary bottom edge coordinates from -140000 to -140200.
 boundary_start = dsn.find("(boundary")
