@@ -1,5 +1,5 @@
 import Atari7800EdgeConnector, { ATARI_7800_CONNECTOR_OUTLINE } from "./Atari7800EdgeConnector";
-import { ROM_27C256 } from "./ROM_27C256";
+import { ROM_27Cxxx } from "./ROM_27Cxxx";
 import { ATF16V8B } from "./ATF16V8B";
 import { Latch74HCT373 } from "./74HCT373";
 import { YM2149 } from "./YM2149";
@@ -34,17 +34,36 @@ export default () => (
     {/* Explicit Nets */}
     <net name="VCC" />
     <net name="GND" />
-    <net name="ANALOG_A" />
-    <net name="ANALOG_B" />
-    <net name="ANALOG_C" />
+    <net name="YM_AUDIO_A" />
+    <net name="YM_AUDIO_B" />
+    <net name="YM_AUDIO_C" />
+    <net name="YM2_AUDIO_A" />
+    <net name="YM2_AUDIO_B" />
+    <net name="YM2_AUDIO_C" />
     <net name="SUM_NODE" />
     <net name="OPAMP_OUT" />
     <net name="CAP_PLUS" />
     <net name="OPAMP_OUT_AC" />
     <net name="RESET_DELAYED" />
     <net name="AMP_UNUSED_FB" />
-    <net name="ROM_VPP" />
-    <net name="ROM_ADDR14" />
+    <net name="ROM_A15" />   {/* socket pad 3:  A15 → JP1 (VCC for 28-pin VPP, or YM_IOA0) */}
+    <net name="ROM_A16" />   {/* socket pad 2:  A16 → JP2 (GND fixed, or YM_IOA1) */}
+    <net name="ROM_A17" />   {/* socket pad 30: A17 → JP3 (VCC for 28-pin VCC, or YM_IOA2) */}
+    <net name="ROM_A18" />   {/* socket pad 31: A18/PGM → JP4 (VCC for 010/020, or future IOA3) */}
+    <net name="YM_IOA0" />   {/* YM1 pin 21 (IOA0) → ROM A15 bank bit */}
+    <net name="YM_IOA1" />   {/* YM1 pin 20 (IOA1) → ROM A16 bank bit */}
+    <net name="YM_IOA2" />   {/* YM1 pin 19 (IOA2) → ROM A17 bank bit */}
+    <net name="YM_IOA3" />   {/* YM1 pin 18 (IOA3) → JP4 R-pad */}
+    <net name="YM_IOA6" />   {/* YM1 pin 15 (IOA6) → YM2 BDIR */}
+    <net name="YM_IOA7" />   {/* YM1 pin 14 (IOA7) → YM2 BC1 */}
+    <net name="YM_IOB0" />   {/* YM1 pin 13 (IOB0) → YM2 DA0 */}
+    <net name="YM_IOB1" />   {/* YM1 pin 12 (IOB1) → YM2 DA1 */}
+    <net name="YM_IOB2" />   {/* YM1 pin 11 (IOB2) → YM2 DA2 */}
+    <net name="YM_IOB3" />   {/* YM1 pin 10 (IOB3) → YM2 DA3 */}
+    <net name="YM_IOB4" />   {/* YM1 pin 9  (IOB4) → YM2 DA4 */}
+    <net name="YM_IOB5" />   {/* YM1 pin 8  (IOB5) → YM2 DA5 */}
+    <net name="YM_IOB6" />   {/* YM1 pin 7  (IOB6) → YM2 DA6 */}
+    <net name="YM_IOB7" />   {/* YM1 pin 6  (IOB7) → YM2 DA7 */}
 
     {/* Ground Plane & Basic Net Configuration */}
     <copperpour
@@ -134,11 +153,7 @@ export default () => (
       to=".U_LATCH > .VCC"
       thickness="0.4mm"
     />
-    <trace
-      from=".U_LATCH > .VCC"
-      to=".U_AMP > .VCC"
-      thickness="0.4mm"
-    />
+    {/* power trace to U_AMP added when amp group is uncommented */}
 
     {/* General Signal Width (6 mil baseline for pad escape) */}
     <trace
@@ -159,8 +174,8 @@ export default () => (
       thickness="0.15mm"
     />
     <trace
-      from=".U_ROM > .A14"
-      to=".JP2 > .C"
+      from=".Rom > .U_ROM > .A16"
+      to=".Rom > .JP2 > .C"
       thickness="0.15mm"
     />
     <trace
@@ -185,6 +200,7 @@ export default () => (
         A0: "net.A0", A1: "net.A1", A2: "net.A2", A3: "net.A3", A4: "net.A4",
         A5: "net.A5", A6: "net.A6", A7: "net.A7", A8: "net.A8", A9: "net.A9",
         A10: "net.A10", A11: "net.A11", A12: "net.A12", A13: "net.A13", A14: "net.A14",
+        A15: "net.A15",
         D0: "net.D0", D1: "net.D1", D2: "net.D2", D3: "net.D3", D4: "net.D4",
         D5: "net.D5", D6: "net.D6", D7: "net.D7",
         RW: "net.RW",
@@ -196,60 +212,96 @@ export default () => (
 
     <group
       name="Rom"
-      pcbX="0mm"
+      pcbX="-1mm"
       pcbY="-20.5mm"
     >
-      <ROM_27C256
+      <ROM_27Cxxx
         name="U_ROM"
         schX={2}
         schY={-8}
         pcbRotation={270}
         connections={{
           VCC: "net.VCC",
-          VPP: "net.ROM_VPP",
+          VPP: "net.VCC",        // pin 1: VCC always (28-pin uses JP1 instead)
           GND: "net.GND",
           OE: "net.GND",
           CE: "net.ROM_CE",
           A0: "net.A0", A1: "net.A1", A2: "net.A2", A3: "net.A3", A4: "net.A4",
           A5: "net.A5", A6: "net.A6", A7: "net.A7", A8: "net.A8", A9: "net.A9",
-          A10: "net.A10", A11: "net.A11", A12: "net.A12", A13: "net.A13", A14: "net.ROM_ADDR14",
+          A10: "net.A10", A11: "net.A11", A12: "net.A12", A13: "net.A13", A14: "net.A14",
+          A15: "net.ROM_A15",    // pin 3:  JP1 → VCC (28-pin VPP) or YM_IOA0 (32-pin)
+          A16: "net.ROM_A16",    // pin 2:  JP2 → GND (fixed) or YM_IOA1 (banking)
+          A17: "net.ROM_A17",    // pin 30: JP3 → VCC (28-pin VCC) or YM_IOA2 (256K+)
+          A18: "net.ROM_A18",    // pin 31: JP4 → VCC (010/020 PGM) or future IOA3 (512K)
           D0: "net.D0", D1: "net.D1", D2: "net.D2", D3: "net.D3", D4: "net.D4",
           D5: "net.D5", D6: "net.D6", D7: "net.D7",
         }}
       />
+      {/* JP1: socket pad 3 — bridge L (VCC) for 28-pin VPP; bridge R (YM_IOA0) for 32-pin A15 */}
       <SolderJumper
         name="JP1"
-        pcbX="20mm"
-        pcbY="4.5mm"
+        pcbX="22mm"
+        pcbY="8mm"
         pcbRotation={90}
-        label="JP1 (VPP)"
+        label="JP1 A15"
         labelL="VCC"
-        labelR="A15"
+        labelR="IOA0"
         connections={{
           L: "net.VCC",
-          C: "net.ROM_VPP",
-          R: "net.A15",
+          C: "net.ROM_A15",
+          R: "net.YM_IOA0",
         }}
       />
+      {/* JP2: socket pad 2 — bridge L (GND) for fixed A16=0; bridge R (YM_IOA1) for banking */}
       <SolderJumper
         name="JP2"
-        pcbX="20mm"
-        pcbY="-4.5mm"
+        pcbX="22mm"
+        pcbY="4mm"
         pcbRotation={90}
-        label="JP2 (A14)"
+        label="JP2 A16"
+        labelL="GND"
+        labelR="IOA1"
+        connections={{
+          L: "net.GND",
+          C: "net.ROM_A16",
+          R: "net.YM_IOA1",
+        }}
+      />
+      {/* JP3: socket pad 30 — bridge L (VCC) for 28-pin VCC and 27C010 NC; bridge R (YM_IOA2) for 256K+ A17 */}
+      <SolderJumper
+        name="JP3"
+        pcbX="22mm"
+        pcbY="-4mm"
+        pcbRotation={90}
+        label="JP3 A17"
         labelL="VCC"
-        labelR="A14"
+        labelR="IOA2"
         connections={{
           L: "net.VCC",
-          C: "net.ROM_ADDR14",
-          R: "net.A14",
+          C: "net.ROM_A17",
+          R: "net.YM_IOA2",
+        }}
+      />
+      {/* JP4: socket pad 31 — bridge L (VCC) for 27C010/020 PGM; bridge R for future 512K A18 */}
+      <SolderJumper
+        name="JP4"
+        pcbX="22mm"
+        pcbY="-8mm"
+        pcbRotation={90}
+        label="JP4 A18"
+        labelL="VCC"
+        labelR="IOA3"
+        connections={{
+          L: "net.VCC",
+          C: "net.ROM_A18",
+          R: "net.YM_IOA3",
         }}
       />
       <capacitor
         name="C_ROM"
         capacitance="0.1uF"
         footprint="axial"
-        pcbX="20mm"
+        pcbX="22mm"
         pcbY="0mm"
         schX={4}
         schY={-12}
@@ -327,9 +379,23 @@ export default () => (
           RESET: "net.RESET_DELAYED",
           A8: "net.VCC",
           A9: "net.GND",
-          ANALOG_A: "net.ANALOG_A",
-          ANALOG_B: "net.ANALOG_B",
-          ANALOG_C: "net.ANALOG_C",
+          ANALOG_A: "net.YM_AUDIO_A",
+          ANALOG_B: "net.YM_AUDIO_B",
+          ANALOG_C: "net.YM_AUDIO_C",
+          IOA0: "net.YM_IOA0",  // → ROM A15 (bank bit 0)
+          IOA1: "net.YM_IOA1",  // → ROM A16 (bank bit 1)
+          IOA2: "net.YM_IOA2",  // → ROM A17 (bank bit 2)
+          IOA3: "net.YM_IOA3",  // → JP4 R-pad (bank bit 3)
+          IOA6: "net.YM_IOA6",  // → YM2 BDIR
+          IOA7: "net.YM_IOA7",  // → YM2 BC1
+          IOB0: "net.YM_IOB0",  // → YM2 DA0
+          IOB1: "net.YM_IOB1",
+          IOB2: "net.YM_IOB2",
+          IOB3: "net.YM_IOB3",
+          IOB4: "net.YM_IOB4",
+          IOB5: "net.YM_IOB5",
+          IOB6: "net.YM_IOB6",
+          IOB7: "net.YM_IOB7",  // → YM2 DA7
         }}
       />
       <resistor
@@ -383,7 +449,7 @@ export default () => (
         schX={24}
         schY={5}
         connections={{
-          pin1: "net.ANALOG_A",
+          pin1: "net.YM_AUDIO_A",
           pin2: "net.SUM_NODE",
         }}
       />
@@ -396,7 +462,7 @@ export default () => (
         schX={24}
         schY={2}
         connections={{
-          pin1: "net.ANALOG_B",
+          pin1: "net.YM_AUDIO_B",
           pin2: "net.SUM_NODE",
         }}
       />
@@ -409,7 +475,7 @@ export default () => (
         schX={24}
         schY={-1}
         connections={{
-          pin1: "net.ANALOG_C",
+          pin1: "net.YM_AUDIO_C",
           pin2: "net.SUM_NODE",
         }}
       />
@@ -426,6 +492,26 @@ export default () => (
           schY={0}
           pcbRotation={0}
           connections={{
+            VCC: "net.VCC",
+            GND: "net.GND",
+            BC2: "net.VCC",
+            A8: "net.VCC",
+            A9: "net.GND",
+            CLK: "net.PHI2OUT",
+            RESET: "net.RESET_DELAYED",
+            BDIR: "net.YM_IOA6",   // driven by YM1 IOA6
+            BC1: "net.YM_IOA7",    // driven by YM1 IOA7
+            DA0: "net.YM_IOB0",    // data bus from YM1 IOB
+            DA1: "net.YM_IOB1",
+            DA2: "net.YM_IOB2",
+            DA3: "net.YM_IOB3",
+            DA4: "net.YM_IOB4",
+            DA5: "net.YM_IOB5",
+            DA6: "net.YM_IOB6",
+            DA7: "net.YM_IOB7",
+            ANALOG_A: "net.YM2_AUDIO_A",
+            ANALOG_B: "net.YM2_AUDIO_B",
+            ANALOG_C: "net.YM2_AUDIO_C",
           }}
         />
         <capacitor
@@ -434,12 +520,50 @@ export default () => (
           footprint="axial"
           schX={18}
           schY={5}
-          pcbX="10mm"
-          pcbY="23mm"
-          pcbRotation={270}
+          pcbX="12mm"
+          pcbY="24mm"
           connections={{
             pin1: "net.VCC",
             pin2: "net.GND",
+          }}
+        />
+        <resistor
+          name="R_YM2_AUDIOA"
+          resistance="1k"
+          footprint="axial"
+          pcbX="12mm"
+          pcbY="20mm"
+          schX={24}
+          schY={5}
+          connections={{
+            pin1: "net.YM2_AUDIO_A",
+            pin2: "net.SUM_NODE",
+          }}
+        />
+        <resistor
+          name="R_YM2_AUDIOB"
+          resistance="1k"
+          footprint="axial"
+          pcbX="12mm"
+          pcbY="16mm"
+          schX={24}
+          schY={2}
+          connections={{
+            pin1: "net.YM2_AUDIO_B",
+            pin2: "net.SUM_NODE",
+          }}
+        />
+        <resistor
+          name="R_YM2_AUDIOC"
+          resistance="1k"
+          footprint="axial"
+          pcbX="12mm"
+          pcbY="12mm"
+          schX={24}
+          schY={-1}
+          connections={{
+            pin1: "net.YM2_AUDIO_C",
+            pin2: "net.SUM_NODE",
           }}
         />
       </group>
@@ -497,7 +621,8 @@ export default () => (
       </group>
     </group>
 
-    {/* <group
+    {/* 
+    <group
       name="Amp"
       pcbX="0mm"
       pcbY="-1.25mm"
@@ -594,11 +719,12 @@ export default () => (
 
     </group> */}
 
-    {/* <silkscreentext
-      text="Lokey 7800 YM v0.1  github.com/jbsohn/lokey-7800-ym"
-      pcbX="-8mm"
-      pcbY="37mm"
+    <silkscreentext
+      text="Lokey 7800 YM v0.2 lokeyaudio.com"
+      pcbX="-29mm"
+      pcbY="25mm"
+      pcbRotation={90}
       fontSize="1.2mm"
-    /> */}
+    />
   </board>
 );
