@@ -5,6 +5,7 @@ import { Latch74HCT373 } from "./74HCT373";
 import { YM2149 } from "./YM2149";
 import { LM358 } from "./LM358";
 import { SolderJumper } from "./SolderJumper";
+import { SRAM_62256 } from "./SRAM_62256";
 
 export default () => (
   <board
@@ -724,6 +725,14 @@ export default () => (
         }}
       />
     </group>
+
+    <SRAM_62256
+      name="U_RAM"
+      pcbX="0mm"
+      pcbY="-80mm"
+      schX={0}
+      schY={20}
+    />
 
     <silkscreentext
       text="Lokey 7800 YM v0.2 lokeyaudio.com"
