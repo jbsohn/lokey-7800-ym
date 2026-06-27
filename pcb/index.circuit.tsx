@@ -621,11 +621,12 @@ export default () => (
       </group>
     </group>
 
-    {/* 
+
     <group
       name="Amp"
-      pcbX="0mm"
-      pcbY="-1.25mm"
+      pcbX="10mm"
+      pcbY="10mm"
+      pcbRotation={270}
     >
       <LM358
         name="U_AMP"
@@ -634,6 +635,7 @@ export default () => (
         schX={28}
         schY={2}
         pcbRotation={270}
+        layer="bottom"
         connections={{
           VCC: "net.VCC",
           GND: "net.GND",
@@ -652,6 +654,7 @@ export default () => (
         polarized
         pcbX="17mm"
         pcbY="0mm"
+        layer="bottom"
         pcbRotation={90}
         schX={40}
         schY={2}
@@ -667,6 +670,7 @@ export default () => (
         pcbX="10mm"
         pcbY="0mm"
         pcbRotation={90}
+        layer="bottom"
         schX={34}
         schY={2}
         connections={{
@@ -681,6 +685,7 @@ export default () => (
         pcbX="-15mm"
         pcbY="0mm"
         pcbRotation={90}
+        layer="bottom"
         schX={32}
         schY={-4}
         connections={{
@@ -695,6 +700,7 @@ export default () => (
         pcbX="-10mm"
         pcbY="0mm"
         pcbRotation={90}
+        layer="bottom"
         schX={34}
         schY={6}
         connections={{
@@ -709,6 +715,7 @@ export default () => (
         pcbX="13.5mm"
         pcbY="0mm"
         pcbRotation={90}
+        layer="bottom"
         schX={34}
         schY={0}
         connections={{
@@ -716,8 +723,7 @@ export default () => (
           pin2: "net.CAP_PLUS",
         }}
       />
-
-    </group> */}
+    </group>
 
     <silkscreentext
       text="Lokey 7800 YM v0.2 lokeyaudio.com"
