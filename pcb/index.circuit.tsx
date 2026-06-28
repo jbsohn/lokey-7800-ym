@@ -196,7 +196,7 @@ export default () => (
 
     <group
       name="Rom"
-      pcbX="0mm"
+      pcbX="-2mm"
       pcbY="-18.25mm"
     >
       <ROM_27C256
@@ -259,51 +259,52 @@ export default () => (
           pin2: "net.GND",
         }}
       />
+      <group
+        name="GAL"
+        pcbX={0}
+        pcbY={0}
+      >
+        <ATF16V8B
+          name="U_GAL"
+          schX={-2}
+          schY={4}
+          pcbRotation={270}
+          layer="bottom"
+          connections={{
+            VCC: "net.VCC",
+            GND: "net.GND",
+            A15: "net.A15",
+            A14: "net.A14",
+            A0: "net.A0",
+            HALT: "net.HALT",
+            RW: "net.RW",
+            PHI2: "net.PHI2",
+            ROM_CE: "net.ROM_CE",
+            BDIR: "net.BDIR",
+            BC1: "net.BC1",
+            PHI2OUT: "net.PHI2OUT",
+            YM_LE: "net.YM_LE",
+          }}
+        />
+        <capacitor
+          name="C_GAL"
+          capacitance="0.1uF"
+          footprint="axial"
+          schX={0}
+          schY={6}
+          pcbX="14.5mm"
+          pcbY="0mm"
+          pcbRotation={270}
+          layer="bottom"
+          connections={{
+            pin1: "net.VCC",
+            pin2: "net.GND"
+          }}
+        />
+      </group>
     </group>
 
-    <group
-      name="GAL"
-      pcbX="0mm"
-      pcbY="-18.25mm"
-    >
-      <ATF16V8B
-        name="U_GAL"
-        schX={-2}
-        schY={4}
-        pcbRotation={270}
-        layer="bottom"
-        connections={{
-          VCC: "net.VCC",
-          GND: "net.GND",
-          A15: "net.A15",
-          A14: "net.A14",
-          A0: "net.A0",
-          HALT: "net.HALT",
-          RW: "net.RW",
-          PHI2: "net.PHI2",
-          ROM_CE: "net.ROM_CE",
-          BDIR: "net.BDIR",
-          BC1: "net.BC1",
-          PHI2OUT: "net.PHI2OUT",
-          YM_LE: "net.YM_LE",
-        }}
-      />
-      <capacitor
-        name="C_GAL"
-        capacitance="0.1uF"
-        footprint="axial"
-        schX={0}
-        schY={6}
-        pcbX="15mm"
-        pcbY="0mm"
-        pcbRotation={270}
-        layer="bottom"
-        connections={{
-          pin1: "net.VCC",
-          pin2: "net.GND"
-        }}
-      />
-    </group>
+
 
     <group
       name="Latch"
@@ -362,6 +363,7 @@ export default () => (
       pcbY="24mm"
     >
       <YM2149
+        pcbX="-2mm"
         name="U_YM"
         schX={16}
         schY={0}
@@ -389,7 +391,7 @@ export default () => (
         footprint="axial"
         schX={18}
         schY={5}
-        pcbX="28mm"
+        pcbX="25mm"
         pcbY="0mm"
         pcbRotation={270}
         connections={{
@@ -467,9 +469,37 @@ export default () => (
 
     <group
       name="Amp"
-      pcbX="0mm"
-      pcbY="-1.25mm"
+    // pcbX="-1mm"
+    // pcbY="-1.25mm"
     >
+      <capacitor
+        name="C_AMP"
+        capacitance="0.1uF"
+        footprint="axial"
+        pcbX="-12mm"
+        pcbY="0mm"
+        pcbRotation={90}
+        schX={32}
+        schY={-4}
+        connections={{
+          pin1: "net.VCC",
+          pin2: "net.GND",
+        }}
+      />
+      <resistor
+        name="R_FB"
+        resistance="1k"
+        footprint="axial"
+        pcbX="-8mm"
+        pcbY="0mm"
+        pcbRotation={90}
+        schX={34}
+        schY={6}
+        connections={{
+          pin1: "net.SUM_NODE",
+          pin2: "net.OPAMP_OUT",
+        }}
+      />
       <LM358
         name="U_AMP"
         pcbX="0mm"
@@ -488,26 +518,11 @@ export default () => (
           OUT2: "net.AMP_UNUSED_FB",   // Pin 7: Unity-gain follower (output = GND)
         }}
       />
-      <capacitor
-        name="C_AUDIO_OUT"
-        capacitance="10uF"
-        footprint="axial"
-        polarized
-        pcbX="17mm"
-        pcbY="0mm"
-        pcbRotation={90}
-        schX={40}
-        schY={2}
-        connections={{
-          pin1: "net.CAP_PLUS",     // Positive (+) from Series Resistor
-          pin2: "net.OPAMP_OUT_AC", // Negative (-) to Exaudio / Console
-        }}
-      />
       <resistor
         name="R_PULL"
         resistance="1k"
         footprint="axial"
-        pcbX="10mm"
+        pcbX="8mm"
         pcbY="0mm"
         pcbRotation={90}
         schX={34}
@@ -517,39 +532,11 @@ export default () => (
           pin2: "net.GND",
         }}
       />
-      <capacitor
-        name="C_AMP"
-        capacitance="0.1uF"
-        footprint="axial"
-        pcbX="-15mm"
-        pcbY="0mm"
-        pcbRotation={90}
-        schX={32}
-        schY={-4}
-        connections={{
-          pin1: "net.VCC",
-          pin2: "net.GND",
-        }}
-      />
-      <resistor
-        name="R_FB"
-        resistance="1k"
-        footprint="axial"
-        pcbX="-10mm"
-        pcbY="0mm"
-        pcbRotation={90}
-        schX={34}
-        schY={6}
-        connections={{
-          pin1: "net.SUM_NODE",
-          pin2: "net.OPAMP_OUT",
-        }}
-      />
       <resistor
         name="R_SERIES"
         resistance="1k"
         footprint="axial"
-        pcbX="13.5mm"
+        pcbX="12mm"
         pcbY="0mm"
         pcbRotation={90}
         schX={34}
@@ -559,13 +546,35 @@ export default () => (
           pin2: "net.CAP_PLUS",
         }}
       />
-
+      <capacitor
+        name="C_AUDIO_OUT"
+        capacitance="10uF"
+        footprint="axial"
+        polarized
+        pcbX="16mm"
+        pcbY="0mm"
+        pcbRotation={90}
+        schX={40}
+        schY={2}
+        connections={{
+          pin1: "net.CAP_PLUS",     // Positive (+) from Series Resistor
+          pin2: "net.OPAMP_OUT_AC", // Negative (-) to Exaudio / Console
+        }}
+      />
     </group>
 
     <silkscreentext
-      text="Lokey 7800 YM v0.1  github.com/jbsohn/lokey-7800-ym"
-      pcbX="-8mm"
-      pcbY="37mm"
+      text="Lokey 7800 YM v0.2"
+      anchorAlignment="top_left"
+      pcbX={-27}
+      pcbY={38}
+      fontSize="1.2mm"
+    />
+    <silkscreentext
+      text="github.com/jbsohn/lokey-7800-ym"
+      anchorAlignment="top_left"
+      pcbX={-27}
+      pcbY={36}
       fontSize="1.2mm"
     />
   </board>
