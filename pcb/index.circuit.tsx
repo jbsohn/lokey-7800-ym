@@ -469,8 +469,6 @@ export default () => (
 
     <group
       name="Amp"
-    // pcbX="-1mm"
-    // pcbY="-1.25mm"
     >
       <capacitor
         name="C_AMP"
