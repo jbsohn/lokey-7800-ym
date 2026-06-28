@@ -9,11 +9,25 @@ import { SolderJumper } from "./SolderJumper";
 export default () => (
   <board
     outline={[
-      { x: "-32mm", y: "40mm" },      // Top-left
-      { x: "32mm", y: "40mm" },       // Top-right
-      { x: "32mm", y: "-16.25mm" },   // Right shoulder corner
+      { x: "-30mm", y: "40mm" },         // Top-left (±30mm upper body)
+      { x: "30mm", y: "40mm" },          // Top-right
+      { x: "30mm", y: "9.5mm" },         // Right, step in at shoulder top
+      { x: "20.64mm", y: "9.5mm" },      // Right shoulder recess (2.86mm from ±23.5mm, matching cart case)
+      { x: "20.64mm", y: "-0.63mm" },   // Right mid-notch top (rail grip slot)
+      { x: "19.05mm", y: "-0.63mm" },
+      { x: "19.05mm", y: "-5.08mm" },
+      { x: "20.64mm", y: "-5.08mm" },   // Right mid-notch bottom
+      { x: "20.64mm", y: "-7mm" },       // Right shoulder bottom
+      { x: "23.5mm", y: "-7mm" },        // Right back to connector width
       ...ATARI_7800_CONNECTOR_OUTLINE,
-      { x: "-32mm", y: "-16.25mm" },  // Left shoulder corner
+      { x: "-23.5mm", y: "-7mm" },       // Left back to connector width
+      { x: "-20.64mm", y: "-7mm" },      // Left shoulder bottom
+      { x: "-20.64mm", y: "-5.08mm" },   // Left mid-notch bottom (rail grip slot)
+      { x: "-19.05mm", y: "-5.08mm" },
+      { x: "-19.05mm", y: "-0.63mm" },
+      { x: "-20.64mm", y: "-0.63mm" },   // Left mid-notch top
+      { x: "-20.64mm", y: "9.5mm" },     // Left shoulder top
+      { x: "-30mm", y: "9.5mm" },        // Left step out to upper body
     ]}
     routingDisabled={true}
   >
@@ -28,7 +42,7 @@ export default () => (
     <net name="CAP_PLUS" />
     <net name="OPAMP_OUT_AC" />
     <net name="RESET_DELAYED" />
-    <net name="U5_UNUSED_FB" />
+    <net name="AMP_UNUSED_FB" />
     <net name="ROM_VPP" />
     <net name="ROM_ADDR14" />
 
@@ -45,8 +59,8 @@ export default () => (
     {/* Stitch via to ensure GND zone continuity near right shoulder */}
     <chip
       name="U6"
-      pcbX="29mm"
-      pcbY="-13mm"
+      pcbX="21mm"
+      pcbY="-8.5mm"
       pinLabels={{ 1: "GND" }}
       connections={{ 1: "net.GND" }}
     >
@@ -55,15 +69,15 @@ export default () => (
           shape="circle"
           holeDiameter="0.3mm"
           outerDiameter="0.6mm"
-          pcbX={0}
-          pcbY={0}
+          pcbX="0mm"
+          pcbY="0mm"
           portHints={["pin1"]}
         />
       </footprint>
     </chip>
 
     <trace
-      from=".U3 > .GND"
+      from=".U_LATCH > .GND"
       to=".U6 > .pin1"
       thickness="0.4mm"
     />
@@ -81,15 +95,15 @@ export default () => (
           shape="circle"
           holeDiameter="0.3mm"
           outerDiameter="0.6mm"
-          pcbX={0}
-          pcbY={0}
+          pcbX="0mm"
+          pcbY="0mm"
           portHints={["pin1"]}
         />
       </footprint>
     </chip>
 
     <trace
-      from=".C4 > .pin2"
+      from=".C_YM > .pin2"
       to=".U7 > .pin1"
       thickness="0.4mm"
     />
@@ -97,61 +111,61 @@ export default () => (
     {/* Dedicated Power Traces for stability (16 mil) */}
     <trace
       from=".J1 > .VCC"
-      to=".U4 > .VCC"
+      to=".U_YM > .VCC"
       thickness="0.4mm"
     />
     <trace
       from=".J1 > .GND"
-      to=".U4 > .GND"
+      to=".U_YM > .GND"
       thickness="0.4mm"
     />
     <trace
-      from=".U4 > .VCC"
-      to=".U1 > .VCC"
+      from=".U_YM > .VCC"
+      to=".U_ROM > .VCC"
       thickness="0.4mm"
     />
     <trace
-      from=".U1 > .VCC"
-      to=".U2 > .VCC"
+      from=".U_ROM > .VCC"
+      to=".U_GAL > .VCC"
       thickness="0.4mm"
     />
     <trace
-      from=".U2 > .VCC"
-      to=".U3 > .VCC"
+      from=".U_GAL > .VCC"
+      to=".U_LATCH > .VCC"
       thickness="0.4mm"
     />
     <trace
-      from=".U3 > .VCC"
-      to=".U5 > .VCC"
+      from=".U_LATCH > .VCC"
+      to=".U_AMP > .VCC"
       thickness="0.4mm"
     />
 
     {/* General Signal Width (6 mil baseline for pad escape) */}
     <trace
       from=".J1 > .A0"
-      to=".U1 > .A0"
+      to=".U_ROM > .A0"
       thickness="0.15mm"
     />
     <trace
       from=".J1 > .D0"
-      to=".U3 > .D0"
+      to=".U_LATCH > .D0"
       thickness="0.15mm"
     />
 
     {/* Critical edge-routed signals — keep away from connector notches */}
     <trace
       from=".J1 > .A13"
-      to=".U1 > .A13"
+      to=".U_ROM > .A13"
       thickness="0.15mm"
     />
     <trace
-      from=".U1 > .A14"
+      from=".U_ROM > .A14"
       to=".JP2 > .C"
       thickness="0.15mm"
     />
     <trace
       from=".J1 > .HALT"
-      to=".U2 > .HALT"
+      to=".U_GAL > .HALT"
       thickness="0.15mm"
     />
 
@@ -170,7 +184,7 @@ export default () => (
         "30": "net.GND",
         A0: "net.A0", A1: "net.A1", A2: "net.A2", A3: "net.A3", A4: "net.A4",
         A5: "net.A5", A6: "net.A6", A7: "net.A7", A8: "net.A8", A9: "net.A9",
-        A10: "net.A10", A11: "net.A11", A12: "net.A12", A13: "net.A13", A14: "net.A14", A15: "net.A15",
+        A10: "net.A10", A11: "net.A11", A12: "net.A12", A13: "net.A13", A14: "net.A14",
         D0: "net.D0", D1: "net.D1", D2: "net.D2", D3: "net.D3", D4: "net.D4",
         D5: "net.D5", D6: "net.D6", D7: "net.D7",
         RW: "net.RW",
@@ -182,11 +196,11 @@ export default () => (
 
     <group
       name="Rom"
-      pcbX="0mm"
+      pcbX="-2mm"
       pcbY="-18.25mm"
     >
       <ROM_27C256
-        name="U1"
+        name="U_ROM"
         schX={2}
         schY={-8}
         pcbRotation={270}
@@ -232,7 +246,7 @@ export default () => (
         }}
       />
       <capacitor
-        name="C1"
+        name="C_ROM"
         capacitance="0.1uF"
         footprint="axial"
         pcbX="20mm"
@@ -245,60 +259,64 @@ export default () => (
           pin2: "net.GND",
         }}
       />
+      <group
+        name="GAL"
+        pcbX="0mm"
+        pcbY="0mm"
+      >
+        <ATF16V8B
+          name="U_GAL"
+          schX={-2}
+          schY={4}
+          pcbRotation={270}
+          layer="bottom"
+          connections={{
+            VCC: "net.VCC",
+            GND: "net.GND",
+            A15: "net.A15",
+            A14: "net.A14",
+            A0: "net.A0",
+            HALT: "net.HALT",
+            RW: "net.RW",
+            PHI2: "net.PHI2",
+            ROM_CE: "net.ROM_CE",
+            BDIR: "net.BDIR",
+            BC1: "net.BC1",
+            PHI2OUT: "net.PHI2OUT",
+            YM_LE: "net.YM_LE",
+          }}
+        />
+        <capacitor
+          name="C_GAL"
+          capacitance="0.1uF"
+          footprint="axial"
+          schX={0}
+          schY={6}
+          pcbX="14.5mm"
+          pcbY="0mm"
+          pcbRotation={270}
+          layer="bottom"
+          connections={{
+            pin1: "net.VCC",
+            pin2: "net.GND"
+          }}
+        />
+      </group>
     </group>
 
-    <group
-      name="GAL"
-      pcbX="-16mm"
-      pcbY="-2.25mm"
-    >
-      <ATF16V8B
-        name="U2"
-        schX={-2}
-        schY={4}
-        pcbRotation={270}
-        connections={{
-          VCC: "net.VCC",
-          GND: "net.GND",
-          A15: "net.A15",
-          A14: "net.A14",
-          A0: "net.A0",
-          HALT: "net.HALT",
-          RW: "net.RW",
-          PHI2: "net.PHI2",
-          ROM_CE: "net.ROM_CE",
-          BDIR: "net.BDIR",
-          BC1: "net.BC1",
-          PHI2OUT: "net.PHI2OUT",
-          YM_LE: "net.YM_LE",
-        }}
-      />
-      <capacitor
-        name="C2"
-        capacitance="0.1uF"
-        footprint="axial"
-        schX={0}
-        schY={6}
-        pcbX="15mm"
-        pcbY="0mm"
-        pcbRotation={270}
-        connections={{
-          pin1: "net.VCC",
-          pin2: "net.GND"
-        }}
-      />
-    </group>
+
 
     <group
       name="Latch"
-      pcbX="14mm"
-      pcbY="-2.25mm"
+      pcbX="0mm"
+      pcbY="24mm"
     >
       <Latch74HCT373
-        name="U3"
+        name="U_LATCH"
         schX={6}
         schY={4}
         pcbRotation={270}
+        layer="bottom"
         connections={{
           VCC: "net.VCC",
           GND: "net.GND",
@@ -323,7 +341,7 @@ export default () => (
         }}
       />
       <capacitor
-        name="C3"
+        name="C_LATCH"
         capacitance="0.1uF"
         footprint="axial"
         schX={8}
@@ -331,6 +349,7 @@ export default () => (
         pcbX="15mm"
         pcbY="0mm"
         pcbRotation={270}
+        layer="bottom"
         connections={{
           pin1: "net.VCC",
           pin2: "net.GND"
@@ -341,10 +360,11 @@ export default () => (
     <group
       name="YM"
       pcbX="0mm"
-      pcbY="15.75mm"
+      pcbY="24mm"
     >
       <YM2149
-        name="U4"
+        pcbX="-2mm"
+        name="U_YM"
         schX={16}
         schY={0}
         pcbRotation={270}
@@ -366,12 +386,12 @@ export default () => (
         }}
       />
       <capacitor
-        name="C4"
+        name="C_YM"
         capacitance="0.1uF"
         footprint="axial"
         schX={18}
         schY={5}
-        pcbX="28mm"
+        pcbX="25mm"
         pcbY="0mm"
         pcbRotation={270}
         connections={{
@@ -380,12 +400,12 @@ export default () => (
         }}
       />
       <resistor
-        name="RRESET1"
+        name="R_RESET"
         resistance="10k"
         footprint="axial"
         schX={12}
         schY={10}
-        pcbX="-14mm"
+        pcbX="6mm"
         pcbY="-11.5mm"
         connections={{
           pin1: "net.VCC",
@@ -393,13 +413,13 @@ export default () => (
         }}
       />
       <capacitor
-        name="CRESET1"
+        name="C_RESET"
         capacitance="10uF"
         footprint="axial"
         polarized
         schX={14}
         schY={7}
-        pcbX="-20mm"
+        pcbX="12mm"
         pcbY="-11.5mm"
         connections={{
           pin1: "net.RESET_DELAYED",
@@ -407,11 +427,11 @@ export default () => (
         }}
       />
       <resistor
-        name="RAUDIOA"
+        name="R_YM_AUDIOA"
         resistance="1k"
         footprint="axial"
-        pcbX="16mm"
-        pcbY="10.5mm"
+        pcbX="-6mm"
+        pcbY="-11.5mm"
         schX={24}
         schY={5}
         connections={{
@@ -420,11 +440,11 @@ export default () => (
         }}
       />
       <resistor
-        name="RAUDIOB"
+        name="R_YM_AUDIOB"
         resistance="1k"
         footprint="axial"
-        pcbX="22mm"
-        pcbY="10.5mm"
+        pcbX="-18mm"
+        pcbY="-11.5mm"
         schX={24}
         schY={2}
         connections={{
@@ -433,10 +453,10 @@ export default () => (
         }}
       />
       <resistor
-        name="RAUDIOC"
+        name="R_YM_AUDIOC"
         resistance="1k"
         footprint="axial"
-        pcbX="20mm"
+        pcbX="-12mm"
         pcbY="-11.5mm"
         schX={24}
         schY={-1}
@@ -449,11 +469,37 @@ export default () => (
 
     <group
       name="Amp"
-      pcbX="8mm"
-      pcbY="34mm"
     >
+      <capacitor
+        name="C_AMP"
+        capacitance="0.1uF"
+        footprint="axial"
+        pcbX="-12mm"
+        pcbY="0mm"
+        pcbRotation={90}
+        schX={32}
+        schY={-4}
+        connections={{
+          pin1: "net.VCC",
+          pin2: "net.GND",
+        }}
+      />
+      <resistor
+        name="R_FB"
+        resistance="1k"
+        footprint="axial"
+        pcbX="-8mm"
+        pcbY="0mm"
+        pcbRotation={90}
+        schX={34}
+        schY={6}
+        connections={{
+          pin1: "net.SUM_NODE",
+          pin2: "net.OPAMP_OUT",
+        }}
+      />
       <LM358
-        name="U5"
+        name="U_AMP"
         pcbX="0mm"
         pcbY="0mm"
         schX={28}
@@ -466,30 +512,15 @@ export default () => (
           IN1_NEG: "net.SUM_NODE",    // Pin 2: Connected directly to summing node
           OUT1: "net.OPAMP_OUT",      // Pin 1: Op-amp Output
           IN2_POS: "net.GND",         // Pin 5: Unused section - input tied to GND
-          IN2_NEG: "net.U5_UNUSED_FB", // Pin 6: Unused section - shorted to output
-          OUT2: "net.U5_UNUSED_FB",   // Pin 7: Unity-gain follower (output = GND)
-        }}
-      />
-      <capacitor
-        name="C5"
-        capacitance="10uF"
-        footprint="axial"
-        polarized
-        pcbX="15mm"
-        pcbY="0mm"
-        pcbRotation={90}
-        schX={40}
-        schY={2}
-        connections={{
-          pin1: "net.CAP_PLUS",     // Positive (+) from Series Resistor
-          pin2: "net.OPAMP_OUT_AC", // Negative (-) to Exaudio / Console
+          IN2_NEG: "net.AMP_UNUSED_FB", // Pin 6: Unused section - shorted to output
+          OUT2: "net.AMP_UNUSED_FB",   // Pin 7: Unity-gain follower (output = GND)
         }}
       />
       <resistor
-        name="RPULL"
+        name="R_PULL"
         resistance="1k"
         footprint="axial"
-        pcbX="20mm"
+        pcbX="8mm"
         pcbY="0mm"
         pcbRotation={90}
         schX={34}
@@ -499,39 +530,11 @@ export default () => (
           pin2: "net.GND",
         }}
       />
-      <capacitor
-        name="C6"
-        capacitance="0.1uF"
-        footprint="axial"
-        pcbX="-15mm"
-        pcbY="0mm"
-        pcbRotation={90}
-        schX={32}
-        schY={-4}
-        connections={{
-          pin1: "net.VCC",
-          pin2: "net.GND",
-        }}
-      />
       <resistor
-        name="RFB"
+        name="R_SERIES"
         resistance="1k"
         footprint="axial"
-        pcbX="-10mm"
-        pcbY="0mm"
-        pcbRotation={90}
-        schX={34}
-        schY={6}
-        connections={{
-          pin1: "net.SUM_NODE",
-          pin2: "net.OPAMP_OUT",
-        }}
-      />
-      <resistor
-        name="RSERIES"
-        resistance="1k"
-        footprint="axial"
-        pcbX="10mm"
+        pcbX="12mm"
         pcbY="0mm"
         pcbRotation={90}
         schX={34}
@@ -541,22 +544,36 @@ export default () => (
           pin2: "net.CAP_PLUS",
         }}
       />
-
+      <capacitor
+        name="C_AUDIO_OUT"
+        capacitance="10uF"
+        footprint="axial"
+        polarized
+        pcbX="16mm"
+        pcbY="0mm"
+        pcbRotation={90}
+        schX={40}
+        schY={2}
+        connections={{
+          pin1: "net.CAP_PLUS",     // Positive (+) from Series Resistor
+          pin2: "net.OPAMP_OUT_AC", // Negative (-) to Exaudio / Console
+        }}
+      />
     </group>
 
     <silkscreentext
-      text="Lokey 7800 YM v0.1"
-      pcbX="-30mm"
-      pcbY="26mm"
-      fontSize="2mm"
-      pcbRotation={90}
+      text="Lokey 7800 YM v0.2"
+      anchorAlignment="top_left"
+      pcbX="-27mm"
+      pcbY="38mm"
+      fontSize="1.2mm"
     />
     <silkscreentext
       text="github.com/jbsohn/lokey-7800-ym"
-      pcbX="-28mm"
-      pcbY="25.25mm"
+      anchorAlignment="top_left"
+      pcbX="-27mm"
+      pcbY="36mm"
       fontSize="1.2mm"
-      pcbRotation={90}
     />
   </board>
 );

@@ -55,7 +55,22 @@ make logic
 | 19 | **!ROM_CE** | Connect to 27C256 ROM Pin 20 (~CE) |
 | 20 | VCC | +5V |
 
-### 2. 74HCT373 Octal Latch Connections
+### 2. 27C256 ROM & Solder Jumpers (JP1, JP2)
+
+The board accepts any 28-pin JEDEC EPROM (16KB, 32KB, or 64KB). Two solder jumpers next to the ROM socket configure the upper address lines for the installed chip size.
+
+| Jumper | Left pad | Right pad | Purpose |
+| :--- | :--- | :--- | :--- |
+| **JP1** | VCC | A15 | Pin 1 (VPP/A15): tie high for 16K/32K, or route A15 for 64K |
+| **JP2** | VCC | A14 | Pin 27 (A14): tie high for 16K, or route A14 for 32K/64K |
+
+| ROM | Size | JP1 | JP2 | Accessible |
+| :--- | :--- | :--- | :--- | :--- |
+| 27C128 | 16KB | Left (VCC) | Left (VCC) | 16KB (mirrored) |
+| 27C256 | 32KB | Left (VCC) | Right (A14) | 32KB |
+| 27C512 | 64KB | Right (A15) | Right (A14) | 48KB ($4000–$FFFF) |
+
+### 3. 74HCT373 Octal Latch Connections
 
 | Latch Pin | Signal | Connection | 27C256 ROM Pin |
 | :--- | :--- | :--- | :--- |
@@ -66,7 +81,7 @@ make logic
 | 11 | LE | Logic Pin 15 (**YM_LE**) | - |
 | 19 | Q7 | YM Pin 30 (DA7) | - |
 
-### 3. YM2149 / AY-3-8910 Connections
+### 4. YM2149 / AY-3-8910 Connections
 
 | YM Pin | Signal | Connection |
 | :--- | :--- | :--- |
@@ -75,7 +90,7 @@ make logic
 | 29 | BC1 | Logic Pin 17 |
 | 30–37 | DA7–DA0 | 74HCT373 Q7–Q0 |
 
-### 4. Hardware Reset Logic (Warm Start Fix)
+### 5. Hardware Reset Logic (Warm Start Fix)
 
 To prevent the YM2149 registers from retaining garbage data during a quick console power cycle ("Warm Start")—which bypasses default internal BIOS delays and causes a stuck, high-frequency tone—a dedicated hardware RC network is implemented on **Pin 23 (/RESET)**.
 
@@ -90,7 +105,7 @@ The two components meet at a single node connected directly to **Pin 23 (/RESET)
 #### Theory of Operation
 At initial power-up, the discharged capacitor acts as a momentary short to Ground, holding `/RESET` low while the +5V rail stabilizes. The capacitor charges through the 10kΩ resistor over roughly 100ms, then releases `/RESET` high and allows the PSG to begin normal operation. This delay ensures the console BIOS has had time to silence the audio channels before the YM2149 comes out of reset, preventing the warm-start stuck-tone issue.
 
-### 5. LM358 Audio Stage (Active-Passive Hybrid Shunt Mixer)
+### 6. LM358 Audio Stage (Active-Passive Hybrid Shunt Mixer)
 
 The audio stage uses an LM358 op-amp in a parallel **Active-Passive Hybrid Shunt** configuration. This design uses the op-amp's feedback loop and single-supply saturation limits to act as a passive load that prevents console audio clipping, while incorporating an AC shunt network to smooth out high-frequency square wave edges.
 
