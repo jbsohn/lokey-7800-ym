@@ -69,8 +69,8 @@ export default () => (
           shape="circle"
           holeDiameter="0.3mm"
           outerDiameter="0.6mm"
-          pcbX={0}
-          pcbY={0}
+          pcbX="0mm"
+          pcbY="0mm"
           portHints={["pin1"]}
         />
       </footprint>
@@ -95,8 +95,8 @@ export default () => (
           shape="circle"
           holeDiameter="0.3mm"
           outerDiameter="0.6mm"
-          pcbX={0}
-          pcbY={0}
+          pcbX="0mm"
+          pcbY="0mm"
           portHints={["pin1"]}
         />
       </footprint>
@@ -261,8 +261,8 @@ export default () => (
       />
       <group
         name="GAL"
-        pcbX={0}
-        pcbY={0}
+        pcbX="0mm"
+        pcbY="0mm"
       >
         <ATF16V8B
           name="U_GAL"
@@ -566,15 +566,15 @@ export default () => (
     <silkscreentext
       text="Lokey 7800 YM v0.2"
       anchorAlignment="top_left"
-      pcbX={-27}
-      pcbY={38}
+      pcbX="-27mm"
+      pcbY="38mm"
       fontSize="1.2mm"
     />
     <silkscreentext
       text="github.com/jbsohn/lokey-7800-ym"
       anchorAlignment="top_left"
-      pcbX={-27}
-      pcbY={36}
+      pcbX="-27mm"
+      pcbY="36mm"
       fontSize="1.2mm"
     />
   </board>
