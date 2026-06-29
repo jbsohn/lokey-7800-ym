@@ -18,10 +18,16 @@ jobs:
       - name: Install Node.js and Java
         run: |
           apt-get update -q
-          apt-get install -y curl default-jre wget make
+          apt-get install -y curl wget make
           curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
           apt-get install -y nodejs
           npm install -g bun
+          
+          # Install JDK 25 to run Freerouting v2.2.4+
+          wget -q https://corretto.aws/downloads/latest/amazon-corretto-25-x64-linux-jdk.tar.gz -O /tmp/jdk25.tar.gz
+          mkdir -p /usr/local/lib/jvm
+          tar -xzf /tmp/jdk25.tar.gz -C /usr/local/lib/jvm
+          ln -sf /usr/local/lib/jvm/amazon-corretto-25*/bin/java /usr/local/bin/java
 
       - name: Install Freerouting
         run: |
