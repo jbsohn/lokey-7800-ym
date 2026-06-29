@@ -16,10 +16,12 @@ GERBER_DIR = "./gerbers/"
 PRO_PATH = "./KiCad/index.kicad_pro"
 DRU_PATH = "./KiCad/index.kicad_dru"
 
-print("Exporting unrouted board from tscircuit React...")
+ENTRY_FILE = sys.argv[1] if len(sys.argv) > 1 else "index.circuit.tsx"
+
+print(f"Exporting unrouted board from tscircuit React ({ENTRY_FILE})...")
 os.makedirs(os.path.dirname(PCB_PATH), exist_ok=True)
 subprocess.run(
-    ["npx", "tsci", "export", "index.circuit.tsx", "-f", "kicad_pcb", "-o", PCB_PATH],
+    ["npx", "tsci", "export", ENTRY_FILE, "-f", "kicad_pcb", "-o", PCB_PATH],
     check=True,
 )
 

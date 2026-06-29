@@ -2,18 +2,7 @@ import { type ChipProps } from "tscircuit";
 
 // Compatible with AT27C010 (128KB), AT27C020 (256KB), AT27C040 (512KB).
 // Pin 30 (A17) is NC on 27C010. Pin 31 (A18) is PGM on 27C010/27C020.
-// For 28-pin 27C256: insert at +2 offset (chip pin 1 at socket hole 3).
-export const ROM_27Cxxx = (props: ChipProps) => {
-  const PITCH = 2.54;
-  const ROW_X = 7.62;   // 600mil / 2
-
-  // Pin y-positions: pin 1 at top of left row (positive Y)
-  const pinY = (n: number) => (15 / 2) * PITCH - (n - 1) * PITCH;
-
-  // 28-pin chip at +2 offset: pin 1 lands at socket hole 3
-  const BODY_X = ROW_X + 1.5;
-
-  return (
+export const ROM_27Cxxx = (props: ChipProps) => (
     <chip
       {...props}
       footprint="dip32_w600mil"
@@ -63,60 +52,5 @@ export const ROM_27Cxxx = (props: ChipProps) => {
           direction: "top-to-bottom",
         },
       }}
-    >
-      <footprint>
-        {/* 28-pin IC silkscreen outline (27C256 at +2 offset: pin 1 → socket hole 3) */}
-        <silkscreenpath
-          route={[
-            { x: -BODY_X, y: pinY(3) },
-            { x: -1.2, y: pinY(3) },
-          ]}
-          strokeWidth={0.12}
-        />
-        <silkscreenpath
-          route={[
-            { x: 1.2, y: pinY(3) },
-            { x: BODY_X, y: pinY(3) },
-          ]}
-          strokeWidth={0.12}
-        />
-        <silkscreenpath
-          route={[
-            { x: -BODY_X, y: pinY(16) },
-            { x: BODY_X, y: pinY(16) },
-          ]}
-          strokeWidth={0.12}
-        />
-        <silkscreenpath
-          route={[
-            { x: -BODY_X, y: pinY(3) },
-            { x: -BODY_X, y: pinY(16) },
-          ]}
-          strokeWidth={0.12}
-        />
-        <silkscreenpath
-          route={[
-            { x: BODY_X, y: pinY(3) },
-            { x: BODY_X, y: pinY(16) },
-          ]}
-          strokeWidth={0.12}
-        />
-        {/* Notch half-circle arc — curves inward into the body */}
-        <silkscreenpath
-          route={[
-            { x: -1.2, y: pinY(3) },
-            { x: -1.04, y: pinY(3) - 0.6 },
-            { x: -0.6, y: pinY(3) - 1.04 },
-            { x: 0, y: pinY(3) - 1.2 },
-            { x: 0.6, y: pinY(3) - 1.04 },
-            { x: 1.04, y: pinY(3) - 0.6 },
-            { x: 1.2, y: pinY(3) },
-          ]}
-          strokeWidth={0.12}
-        />
-        <silkscreencircle pcbX={-ROW_X} pcbY={pinY(3)} radius={0.6} strokeWidth={0.12} />
-        <silkscreentext pcbX={0} pcbY={pinY(3) - 2} text="28-pin\nROM" fontSize={1.0} />
-      </footprint>
-    </chip>
-  );
-};
+    />
+);

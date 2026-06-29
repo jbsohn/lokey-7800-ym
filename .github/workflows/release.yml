@@ -1,0 +1,56 @@
+name: PCB Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-pcb:
+    runs-on: ubuntu-latest
+    container: ghcr.io/kicad/kicad-docker:9.0
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Node.js and Java
+        run: |
+          apt-get update -q
+          apt-get install -y curl default-jre wget
+          curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+          apt-get install -y nodejs
+
+      - name: Install Freerouting
+        run: |
+          VERSION=$(curl -s https://api.github.com/repos/freerouting/freerouting/releases/latest | grep tag_name | cut -d'"' -f4)
+          wget -q "https://github.com/freerouting/freerouting/releases/download/${VERSION}/freerouting-${VERSION#v}-executable.jar" \
+            -O /usr/local/lib/freerouting.jar
+          printf '#!/bin/bash\nexec java -jar /usr/local/lib/freerouting.jar "$@"\n' > /usr/local/bin/freerouting
+          chmod +x /usr/local/bin/freerouting
+
+      - name: Install Node dependencies
+        run: cd pcb && npm install
+
+      - name: Build 32pin-max PCB
+        run: make pcb-32pin-max
+
+      - name: Collect 32pin-max gerbers
+        run: cp pcb/gerbers.zip gerbers-32pin-max.zip
+
+      - name: Build 28pin PCB
+        run: make pcb-28pin
+
+      - name: Collect 28pin gerbers
+        run: cp pcb/gerbers.zip gerbers-28pin.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            gerbers-32pin-max.zip
+            gerbers-28pin.zip
+            docs/pcb_front.svg
+            docs/pcb_back.svg
+            docs/schematic-28pin.svg
+            docs/schematic-32pin-max.svg
