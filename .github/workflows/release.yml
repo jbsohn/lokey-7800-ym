@@ -24,7 +24,7 @@ jobs:
 
       - name: Install Freerouting
         run: |
-          VERSION=$(curl -s https://api.github.com/repos/freerouting/freerouting/releases/latest | grep tag_name | cut -d'"' -f4)
+          VERSION="v2.2.4"
           wget -q "https://github.com/freerouting/freerouting/releases/download/${VERSION}/freerouting-${VERSION#v}-executable.jar" \
             -O /usr/local/lib/freerouting.jar
           printf '#!/bin/bash\nexec java -jar /usr/local/lib/freerouting.jar "$@"\n' > /usr/local/bin/freerouting
