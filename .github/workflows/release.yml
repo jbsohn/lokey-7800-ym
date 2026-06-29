@@ -18,7 +18,7 @@ jobs:
       - name: Install Node.js and Java
         run: |
           apt-get update -q
-          apt-get install -y curl default-jre wget
+          apt-get install -y curl default-jre wget make
           curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
           apt-get install -y nodejs
 
