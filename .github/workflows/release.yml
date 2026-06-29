@@ -21,6 +21,7 @@ jobs:
           apt-get install -y curl default-jre wget make
           curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
           apt-get install -y nodejs
+          npm install -g bun
 
       - name: Install Freerouting
         run: |
