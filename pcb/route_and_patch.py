@@ -231,7 +231,16 @@ if not shutil.which(freerouting_bin) and not os.path.exists(freerouting_bin):
         sys.exit(1)
 
 subprocess.run(
-    [freerouting_bin, "-de", DSN_PATH, "-do", SES_PATH, "-mp", "10"],
+    [
+        freerouting_bin,
+        "-de",
+        DSN_PATH,
+        "-do",
+        SES_PATH,
+        "-mp",
+        "10",
+        "--gui.enabled=false",
+    ],
     check=True,
 )
 
@@ -242,11 +251,15 @@ if not os.path.exists(SES_PATH):
 print("Importing session routing back into KiCad...")
 board = pcbnew.LoadBoard(PCB_PATH)
 pcbnew.ImportSpecctraSES(board, SES_PATH)
+
+print("Refilling zones...")
+filler = pcbnew.ZONE_FILLER(board)
+filler.Fill(board.Zones())
 board.Save(PCB_PATH)
 
-print("Refilling zones and running DRC...")
+print("Running DRC...")
 subprocess.run(
-    ["kicad-cli", "pcb", "drc", "--refill-zones", "--save-board", PCB_PATH],
+    ["kicad-cli", "pcb", "drc", PCB_PATH],
     check=True,
 )
 
