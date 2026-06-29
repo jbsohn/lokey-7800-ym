@@ -8,7 +8,8 @@ on:
 jobs:
   build-pcb:
     runs-on: ubuntu-latest
-    container: registry.gitlab.com/kicad/packaging/kicad-docker:9.0-stable
+    container:
+      image: ghcr.io/kicad/kicad:9.0
 
     steps:
       - uses: actions/checkout@v4
