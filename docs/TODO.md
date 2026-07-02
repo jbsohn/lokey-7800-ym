@@ -28,14 +28,14 @@ Remaining issues from the PCB design review.
 
 ## Future Upgrades: 64KB Bank-Switching Support
 
-Plan to support true **64KB ROM bank-switching** in a future revision by routing a registered output from the ATF16V8B GAL to the ROM's high-order address pin (A15).
+Plan to support true **64KB ROM bank-switching** in a future revision by routing a registered output from the ATF16V8B PLD to the ROM's high-order address pin (A15).
 
 ### Tasks
 - **PCB Schematic & Netlist Changes**:
-  - Connect GAL Pin 11 (`OE`) to `GND` (required for registered mode).
-  - Connect GAL Pin 12 (`BANK`) to JP1 Pin 3 (Right pad), replacing the direct `A15` connection.
+  - Connect PLD Pin 11 (`OE`) to `GND` (required for registered mode).
+  - Connect PLD Pin 12 (`BANK`) to JP1 Pin 3 (Right pad), replacing the direct `A15` connection.
   - Update `JP1` silkscreen to label `L` as `VCC (16K/32K)` and `R` as `BANK (64K)`.
-- **GAL Logic Upgrades**:
-  - Convert GAL PLD design to registered mode.
+- **PLD Logic Upgrades**:
+  - Convert PLD design to registered mode.
   - Implement logic to latch the state of address lines on write cycles to register bank changes (e.g., using `A0` to toggle the bank output pin 12 when writing to `$8000`).
 

@@ -9,7 +9,7 @@ This document describes the various file extensions and build artifacts used in 
 | `.ym` / `.YM` | YM Sample | Original Atari ST / Amstrad CPC music files (YM2149 register dumps). |
 | `.vgm` / `.vgz` | VGM Sample | Video Game Music files containing AY-3-8910 command streams. |
 | `.asm` | 6502 Assembly | Source code for the music player, logic ROMs, and hardware drivers. |
-| `.pld` | CUPL Logic | Source code for ATF16V8B Programmable Logic Devices (address decoding). |
+| `.pld` | CUPL Logic | Source code for the PLD address decoder, compiled with `galette` (see `gal/`; ATF16V8B on the [28-pin board](Hardware-28pin.md), ATF22V10 on the [32-pin board](Hardware-32pin.md)). |
 
 ## Intermediate Build Artifacts
 
@@ -25,4 +25,4 @@ This document describes the various file extensions and build artifacts used in 
 | :--- | :--- | :--- |
 | **`.rom`** | **Hardware ROM** | Raw 32KB binary image. These are **signed** via `7800sign` and are ready to be flashed to physical EPROMs. |
 | **`.a78`** | **Emulator ROM** | Includes a standard 128-byte Atari 7800 header. Used for testing in emulators like A7800, B7800, or JS7800. |
-| `.jed` | JEDEC Logic | Compiled fuse map for the ATF16V8B, generated from `.pld` files via `galette`. |
+| `.jed` | JEDEC Logic | Compiled fuse map for the PLD, generated from `.pld` files via `galette`. |

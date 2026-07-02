@@ -53,9 +53,11 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 * **[SDK Samples & Building](docs/Samples.md)** - Compile ROMs and set up the environment.
 
 * **[File Extension Reference](docs/FileExtensions.md)** - Guide to `.ymb`, `.ymi`, `.rom`, and `.a78` files.
-* **[Hardware & Wiring](docs/Hardware.md)** - Pinouts, memory mapping, and logic chips.
+* **[Hardware & Wiring](docs/Hardware.md)** - Shared memory mapping and connector/chip pinouts.
+  * **[28-Pin Board](docs/Hardware-28pin.md)** - Single-YM2149, jumper-configured ROM board.
+  * **[32-Pin Board](docs/Hardware-32pin.md)** - Bank-switched ROM, optional dual-YM2149 board.
 
-* **[PCB Design (tscircuit)](docs/PCB.md)** - Code-to-PCB workflow and **[Schematic](docs/schematic.svg)**.
+* **[PCB Design (tscircuit)](docs/PCB.md)** - Code-to-PCB workflow.
 
 * **[Emulator Support](docs/Emulation.md)** - Using `a7800` and `js7800` for development.
 
@@ -114,6 +116,6 @@ For reflections on the legacy of the Atari ST and how AI is changing the landsca
 This project uses a split license:
 
 * **PCB design** (`pcb/`): Licensed under the **GNU General Public License v2.0 (GPL-2.0)**. See `pcb/LICENSE` for details.
-* **Everything else** (assembly, tools, docs, GAL sources): Licensed under the **MIT License**. See `LICENSE` for details.
+* **Everything else** (assembly, tools, docs, PLD sources): Licensed under the **MIT License**. See `LICENSE` for details.
 
 **Use at your own risk.** The author is not responsible for any damage to your hardware or loss of data.

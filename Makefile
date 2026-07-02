@@ -202,8 +202,8 @@ $(BUILD_DIR)/%.rom: $(BUILD_DIR)/%.bin
 
 # --- Utilities ---
 logic: $(BUILD_DIR)
-	@echo "Building ATF16V8B JED files from .pld sources..."
-	@galette gal/rom.pld && galette gal/rom_ym.pld
+	@echo "Building 32-pin board PLD JED files from .pld sources..."
+	@galette gal/rom_32pin.pld && galette gal/rom_ym_32pin.pld
 	@mv gal/*.jed $(BUILD_DIR)/ 2>/dev/null || true
 
 clean:
