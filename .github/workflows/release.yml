@@ -8,6 +8,8 @@ on:
 jobs:
   build-pcb:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     container:
       image: ghcr.io/kicad/kicad:9.0
       options: --user root
