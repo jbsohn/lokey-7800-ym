@@ -105,7 +105,7 @@ export default () => (
     <chip
       name="U7"
       pcbX="28mm"
-      pcbY="17mm"
+      pcbY="18mm"
       pinLabels={{ 1: "GND" }}
       connections={{ 1: "net.GND" }}
     >
@@ -235,7 +235,7 @@ export default () => (
       <capacitor
         name="C_ROM"
         capacitance="0.1uF"
-        footprint="axial"
+        footprint="axial_p7.62mm"
         pcbX="22mm"
         pcbY="0mm"
         schX={4}
@@ -287,7 +287,7 @@ export default () => (
         <capacitor
           name="C_GAL"
           capacitance="0.1uF"
-          footprint="axial"
+          footprint="axial_p7.62mm"
           schX={-3}
           schY={4}
           pcbX="17mm"
@@ -347,7 +347,7 @@ export default () => (
       <resistor
         name="R_RESET"
         resistance="10k"
-        footprint="axial"
+        footprint="axial_p7.62mm"
         schX={10}
         schY={7}
         pcbX="0mm"
@@ -361,7 +361,7 @@ export default () => (
       <capacitor
         name="C_RESET"
         capacitance="10uF"
-        footprint="axial"
+        footprint="axial_p7.62mm"
         polarized
         schX={12}
         schY={7}
@@ -376,7 +376,7 @@ export default () => (
       <capacitor
         name="C_YM"
         capacitance="0.1uF"
-        footprint="axial"
+        footprint="axial_p7.62mm"
         schX={16}
         schY={4}
         pcbX="0mm"
@@ -390,8 +390,8 @@ export default () => (
       <resistor
         name="R_YM_AUDIOA"
         resistance="1k"
-        footprint="axial"
-        pcbX="-12mm"
+        footprint="axial_p7.62mm"
+        pcbX="-14.5mm"
         pcbY="24mm"
         schX={21}
         schY={3}
@@ -403,8 +403,8 @@ export default () => (
       <resistor
         name="R_YM_AUDIOB"
         resistance="1k"
-        footprint="axial"
-        pcbX="-12mm"
+        footprint="axial_p7.62mm"
+        pcbX="-14.5mm"
         pcbY="20mm"
         schX={21}
         schY={1}
@@ -416,8 +416,8 @@ export default () => (
       <resistor
         name="R_YM_AUDIOC"
         resistance="1k"
-        footprint="axial"
-        pcbX="-12mm"
+        footprint="axial_p7.62mm"
+        pcbX="-14.5mm"
         pcbY="16mm"
         schX={21}
         schY={-1}
@@ -429,8 +429,8 @@ export default () => (
       <resistor
         name="R_YM2_AUDIOA"
         resistance="1k"
-        footprint="axial"
-        pcbX="-12mm"
+        footprint="axial_p7.62mm"
+        pcbX="-14.5mm"
         pcbY="12mm"
         schX={21}
         schY={17}
@@ -442,8 +442,8 @@ export default () => (
       <resistor
         name="R_YM2_AUDIOB"
         resistance="1k"
-        footprint="axial"
-        pcbX="-12mm"
+        footprint="axial_p7.62mm"
+        pcbX="-14.5mm"
         pcbY="8mm"
         schX={21}
         schY={15}
@@ -455,8 +455,8 @@ export default () => (
       <resistor
         name="R_YM2_AUDIOC"
         resistance="1k"
-        footprint="axial"
-        pcbX="-12mm"
+        footprint="axial_p7.62mm"
+        pcbX="-14.5mm"
         pcbY="4mm"
         schX={21}
         schY={13}
@@ -502,7 +502,7 @@ export default () => (
         <capacitor
           name="C_YM2"
           capacitance="0.1uF"
-          footprint="axial"
+          footprint="axial_p7.62mm"
           schX={16}
           schY={18}
           pcbX="0mm"
@@ -561,7 +561,7 @@ export default () => (
         <capacitor
           name="C_LATCH"
           capacitance="0.1uF"
-          footprint="axial"
+          footprint="axial_p7.62mm"
           schX={5}
           schY={6}
           pcbX="0mm"
@@ -579,14 +579,14 @@ export default () => (
 
     <group
       name="Amp"
-      pcbX="24mm"
+      pcbX="26mm"
       pcbY="26mm"
     >
       <resistor
         name="R_FB"
         resistance="1k"
-        footprint="axial"
-        pcbX="0mm"
+        footprint="axial_p7.62mm"
+        pcbX="-1.5mm"
         pcbY="12mm"
         pcbRotation={0}
         schX={26}
@@ -599,8 +599,8 @@ export default () => (
       <capacitor
         name="C_AMP"
         capacitance="0.1uF"
-        footprint="axial"
-        pcbX="0mm"
+        footprint="axial_p7.62mm"
+        pcbX="-1.5mm"
         pcbY="9mm"
         pcbRotation={0}
         schX={30}
@@ -612,7 +612,7 @@ export default () => (
       />
       <LM358
         name="U_AMP"
-        pcbX="0mm"
+        pcbX="-1.5mm"
         pcbY="2mm"
         schX={28}
         schY={2}
@@ -631,8 +631,8 @@ export default () => (
       <resistor
         name="R_PULL"
         resistance="1k"
-        footprint="axial"
-        pcbX="0mm"
+        footprint="axial_p7.62mm"
+        pcbX="-1.5mm"
         pcbY="-6mm"
         pcbRotation={0}
         schX={34}
@@ -645,8 +645,8 @@ export default () => (
       <resistor
         name="R_SERIES"
         resistance="1k"
-        footprint="axial"
-        pcbX="0mm"
+        footprint="axial_p7.62mm"
+        pcbX="-1.5mm"
         pcbY="-10mm"
         pcbRotation={0}
         schX={34}
@@ -659,9 +659,9 @@ export default () => (
       <capacitor
         name="C_AUDIO_OUT"
         capacitance="10uF"
-        footprint="axial"
+        footprint="axial_p7.62mm"
         polarized
-        pcbX="0mm"
+        pcbX="-1.5mm"
         pcbY="-14mm"
         pcbRotation={0}
         schX={40}
@@ -674,18 +674,16 @@ export default () => (
     </group>
 
     <silkscreentext
-      text="Lokey 7800 YM"
-      pcbX="-29mm"
-      pcbY="20mm"
-      pcbRotation={90}
-      fontSize="2mm"
+      text="Lokey 7800 YM v0.2"
+      pcbX="0mm"
+      pcbY="-19mm"
+      fontSize="1.5mm"
     />
     <silkscreentext
-      text="lokeyaudio.com"
-      pcbX="-27mm"
-      pcbY="20mm"
-      pcbRotation={90}
-      fontSize="2mm"
+      text="github.com/jbsohn/lokey-7800-ym"
+      pcbX="0mm"
+      pcbY="-22mm"
+      fontSize="1.5mm"
     />
   </board>
 );

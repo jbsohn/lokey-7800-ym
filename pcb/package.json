@@ -17,11 +17,10 @@
     "snapshot": "tsci snapshot",
     "snapshot:update": "tsci snapshot --update",
     "start": "tsci dev",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "npx --yes --package typescript tsc --noEmit"
   },
   "devDependencies": {
-    "@types/react": "^19.2.14",
-    "typescript": "^5.0.0"
+    "@types/react": "^19.2.14"
   },
   "dependencies": {
     "tscircuit": "^0.0.1966"
