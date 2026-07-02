@@ -82,8 +82,8 @@ const Atari7800EdgeConnector = (props: ChipProps) => {
             portHints={[`pin${pad.num}`]}
           />
         ))}
-        <silkscreentext pcbX="-23mm" pcbY="-5mm" text="1" fontSize="1.2mm" />
-        <silkscreentext pcbX="23mm" pcbY="-5mm" text="16" fontSize="1.2mm" />
+        <silkscreentext pcbX={-23} pcbY={-5} text="1" fontSize={1.2} />
+        <silkscreentext pcbX={23} pcbY={-5} text="16" fontSize={1.2} />
       </footprint>
     </chip>
   );

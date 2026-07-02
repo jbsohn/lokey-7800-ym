@@ -43,24 +43,24 @@ export const SolderJumper = ({ label, labelL, labelR, ...props }: SolderJumperPr
       />
       {label && (
         <silkscreentext
-          pcbX="0mm"
-          pcbY="1.5mm"
+          pcbX={0}
+          pcbY={1.5}
           text={label}
           fontSize="0.8mm"
         />
       )}
       {labelL && (
         <silkscreentext
-          pcbX="-1.2mm"
-          pcbY="-1.5mm"
+          pcbX={-1.2}
+          pcbY={-1.5}
           text={labelL}
           fontSize="0.6mm"
         />
       )}
       {labelR && (
         <silkscreentext
-          pcbX="1.2mm"
-          pcbY="-1.5mm"
+          pcbX={1.2}
+          pcbY={-1.5}
           text={labelR}
           fontSize="0.6mm"
         />

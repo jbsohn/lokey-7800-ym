@@ -16,3 +16,10 @@ bin/
 .testing/
 .DS_Store
 .tscircuit
+pcb/gerbers/
+pcb/gerbers.zip
+pcb/KiCad/
+pcb/index-drc.rpt
+pcb/node_modules/
+pcb/dist/
+pcb/bun.lock

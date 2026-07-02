@@ -60,13 +60,13 @@ A dedicated **3.5mm Stereo Jack** directly on the top of the cartridge.
 
 This is a cohesive board architecture that ties several ideas together with minimal parts.
 
-### The Core Idea: GAL Decodes, YM Does the Rest
+### The Core Idea: PLD Decodes, YM Does the Rest
 
-The GAL handles all address decoding:
+The PLD handles all address decoding:
 - `$0800`/`$0801` → YM1 BDIR/BC1 (the "YM $800" / Pokey800 standard, using YM instead of Pokey)
 - ROM address range → `ROM_CE`
 
-Because the GAL owns the bus decode completely, **the YM2149's IOA and IOB ports are fully available** as general-purpose outputs. This is the key that unlocks everything below.
+Because the PLD owns the bus decode completely, **the YM2149's IOA and IOB ports are fully available** as general-purpose outputs. This is the key that unlocks everything below.
 
 ### ROM Bankswitching via IOA
 
@@ -75,7 +75,7 @@ Software writes to YM1 register 14 (Port A) to set ROM bank bits directly on the
 - `IOA1` → ROM `A16`
 - `IOA2` → ROM `A17`
 
-This supports 32-pin EPROMs (27C010/27C020/27C040 — 128KB to 512KB) with no extra chips and no additional GAL logic. The board carries a DIP-32 footprint; a 28-pin ROM plugs into the center and the outer holes are unused.
+This supports 32-pin EPROMs (27C010/27C020/27C040 — 128KB to 512KB) with no extra chips and no additional PLD logic. The board carries a DIP-32 footprint; a 28-pin ROM plugs into the center and the outer holes are unused.
 
 ### Optional Second YM2149 via IOB
 
@@ -97,7 +97,7 @@ Software protocol to write a register to YM2:
 ### Why This Is Good
 
 - **YM2 is 100% optional** — unpopulated, nothing changes. No jumpers, no config.
-- **No second address decode** — the GAL is unchanged for a dual-YM board.
+- **No second address decode** — the PLD is unchanged for a dual-YM board.
 - **No extra chips** — 6 audio channels from two YMs with zero additional logic.
 - **32-pin ROM for free** — IOA bank bits replace what would otherwise be a separate bankswitch register chip.
 - **Board is future-proof** — reserve the YM2 footprint and DIP-32 pads now; populate later.

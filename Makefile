@@ -60,22 +60,36 @@ PRO_A78S       := $(foreach f,$(PRO_BASE),$(BUILD_DIR)/$(f).a78)
 FIXED_ROMS     := $(foreach f,$(FIXED_BASE),$(BUILD_DIR)/$(f).rom)
 
 # --- Core Targets ---
-.PHONY: all help clean logic rom a78 bin wav tools pro pcb schematic previews
+.PHONY: all help clean logic rom a78 bin wav tools pro pcb pcb-28pin pcb-32pin-max schematic previews
 
 all: tools a78
 
 
-pcb:
-	@echo "Exporting and autorouting KiCad PCB from tscircuit..."
-	@cd pcb && $(KICAD_PYTHON) ./route_and_patch.py
-	@$(MAKE) schematic
+pcb-28pin:
+	@echo "Exporting and autorouting 28-pin PCB from tscircuit..."
+	@cd pcb && $(KICAD_PYTHON) ./route_and_patch.py 28pin.circuit.tsx
+	@$(MAKE) schematic-28pin
 	@$(MAKE) previews
 
+pcb-32pin-max:
+	@echo "Exporting and autorouting 32-pin-max PCB from tscircuit..."
+	@cd pcb && $(KICAD_PYTHON) ./route_and_patch.py 32pin-max.circuit.tsx
+	@$(MAKE) schematic-32pin-max
+	@$(MAKE) previews
 
-schematic:
-	@echo "Exporting schematic SVG from tscircuit..."
+pcb: pcb-32pin-max
+
+schematic-28pin:
+	@echo "Exporting 28-pin schematic SVG..."
 	@mkdir -p $(BUILD_DIR)
-	@cd pcb && npx tsci export -f schematic-svg index.circuit.tsx -o ../docs/schematic.svg
+	@cd pcb && npx tsci export -f schematic-svg 28pin.circuit.tsx -o ../docs/schematic-28pin.svg
+
+schematic-32pin-max:
+	@echo "Exporting 32-pin-max schematic SVG..."
+	@mkdir -p $(BUILD_DIR)
+	@cd pcb && npx tsci export -f schematic-svg 32pin-max.circuit.tsx -o ../docs/schematic-32pin-max.svg
+
+schematic: schematic-32pin-max
 
 previews:
 	@echo "Exporting PCB SVG previews from KiCad..."
@@ -128,7 +142,9 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "  make tools     - Build the .NET music conversion tools"
-	@echo "  make pcb       - Export KiCad PCB from tscircuit and patch silkscreen text"
+	@echo "  make pcb-28pin     - Build 28-pin board PCB"
+	@echo "  make pcb-32pin-max - Build 32-pin max board PCB"
+	@echo "  make pcb           - Build PCB for current BOARD_TARGET (default: 32pin-max)"
 	@echo "  make previews  - Export front/back SVG previews of the current PCB design"
 	@echo "  make logic     - Build the ATF16V8B logic files (.jed)"
 	@echo "  make a78       - Build library of preview ROMs (emulator format)"
@@ -186,8 +202,8 @@ $(BUILD_DIR)/%.rom: $(BUILD_DIR)/%.bin
 
 # --- Utilities ---
 logic: $(BUILD_DIR)
-	@echo "Building ATF16V8B JED files from .pld sources..."
-	@galette gal/rom.pld && galette gal/rom_ym.pld
+	@echo "Building 32-pin board PLD JED files from .pld sources..."
+	@galette gal/rom_32pin.pld && galette gal/rom_ym_32pin.pld
 	@mv gal/*.jed $(BUILD_DIR)/ 2>/dev/null || true
 
 clean:
