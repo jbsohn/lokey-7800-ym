@@ -19,7 +19,7 @@ The samples are located in the `examples/` directory and demonstrate different a
 
 These use a "Universal Subset" of 6502 assembly compatible with both assemblers.
 
-* **Universal Triad (`triad.asm`)**: A bare-metal diagnostic test that plays a C-Major triad (C3, E3, G3). Shows direct register writes to `$4000`/`$4001`.
+* **Universal Triad (`triad.asm`)**: A bare-metal diagnostic test that plays a C-Major triad (C3, E3, G3). Shows direct register writes to `$0800`/`$0801`.
 * **Universal Player (`player.asm`)**: The core engine for playing compressed `.ymb` files with high-precision fractional timing.
 
 ### MADS "Pro" Sample (MADS Only)

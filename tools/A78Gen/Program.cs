@@ -16,7 +16,7 @@ public class A78Config
     [JsonPropertyName("slot_passthrough")] public byte SlotPassthrough { get; set; } = 0;
     [JsonPropertyName("mapper")] public byte Mapper { get; set; } = 0;
     [JsonPropertyName("mapper_opts")] public byte MapperOpts { get; set; } = 0;
-    [JsonPropertyName("audio")] public ushort Audio { get; set; } = 0x4000;
+    [JsonPropertyName("audio")] public ushort Audio { get; set; } = 0x0800;
     [JsonPropertyName("interrupt")] public ushort Interrupt { get; set; } = 0;
 }
 

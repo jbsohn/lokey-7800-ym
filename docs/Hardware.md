@@ -17,14 +17,14 @@ The YM2149 is mapped to two specific addresses:
 
 | Address | Function |
 | :--- | :--- |
-| **$4000** | YM2149 Address Register (select internal register) |
-| **$4001** | YM2149 Data Register (write value to selected register) |
+| **$0800** | YM2149 Address Register (select internal register) |
+| **$0801** | YM2149 Data Register (write value to selected register) |
 
-This mapping follows the historical precedent set by classic Atari 7800 games like **Ballblazer** and **Commando**, which mapped the **POKEY** sound chip to $4000. By mirroring this 16 KB "Sound Area," we ensure high compatibility with existing hardware designs.
+This mapping follows the **"YM $800" / Pokey800-compatible** decoding scheme: the PLD decodes a single address bit (`A11`, with `A15-A12` all low) rather than mirroring the chip across a wide window. This frees the entire `$4000-$7FFF` cartridge ROM window for actual game data instead of write-only sound registers, at the cost of dropping compatibility with the older "classic POKEY@$4000" mapping used by games like **Ballblazer** and **Commando**.
 
 ### Write-Only Mirroring
 
-The current logic implementation is gated by the `!RW` (Read/Write) line. This means the YM2149 is a "write-only" device at $4000. This allows other devices (like ROM or RAM) to reside at the same memory addresses for **read** operations without bus contention.
+The current logic implementation is gated by the `!RW` (Read/Write) line. This means the YM2149 is a "write-only" device at $0800. This allows other devices (like ROM or RAM) to reside at the same memory addresses for **read** operations without bus contention.
 
 ---
 

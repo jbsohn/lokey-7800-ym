@@ -4,9 +4,9 @@
 ; ============================================================
 
 ; --- Hardware Registers ---
-; Mapped to $4000-$4001 in the Industrial Lab layout
-AY_ADDR     = $4000
-AY_DATA     = $4001
+; Mapped to $0800-$0801 (the "YM $800" / Pokey800-compatible layout)
+AY_ADDR     = $0800
+AY_DATA     = $0801
 
 ; --- Constants ---
 NUM_REGS    = 14

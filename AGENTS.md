@@ -10,7 +10,7 @@ This document defines specialized subagents for the Lokey 7800 YM project. These
 ### Instructions
 - Follow the DASM coding style defined in `CLAUDE.md`.
 - Ensure all ROMs start at `$8000` and have correct vectors at `$FFFA-$FFFF`.
-- Use `ay_addr = $4000` and `ay_data = $4001` for YM2149 communication.
+- Use `ay_addr = $0800` and `ay_data = $0801` for YM2149 communication.
 - Optimize for cycle counting in VBI (Vertical Blank Interrupt) routines.
 - Refer to `examples/` for implementation patterns of the YM2149 player.
 

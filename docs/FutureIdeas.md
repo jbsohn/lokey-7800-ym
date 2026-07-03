@@ -11,13 +11,12 @@ We are transitioning from the initial DASM-based rapid prototyping environment t
 *   **Best-in-Class**: Widely considered one of the best Atari assemblers available.
 *   **Advanced Features**: Offers powerful macros, better bank-switching support, and flexible linking options required for "Pro" level 7800 development.
 
-## Pokey800 Memory Mapping Standard
-The MVP currently uses the "Classic Pokey" decoding scheme (pioneered by *Ballblazer* and *Commando*), which mirrors the sound chip across the entire **$4000–$7FFF** range. 
+## Pokey800 Memory Mapping Standard (DONE)
+**Status**: Implemented on both the 28-pin and 32-pin boards — see [Hardware.md](Hardware.md#memory-mapping).
 
-### Enhancement:
-Future versions could move to the **Pokey800** mapping standard.
-*   **Why**: Modern 7800 homebrew feedback suggests that broad 16KB mirroring can interfere with other advanced expansions. 
-*   **The Goal**: Refine the logic equations to use a narrower, more specific address window (often just a few bytes) to match the Pokey800 standard. This would allow the Lokey-YM to coexist with other high-end hardware in a single system.
+The project originally used the "Classic Pokey" decoding scheme (pioneered by *Ballblazer* and *Commando*), which mirrored the sound chip across the entire $4000–$7FFF range. It has since moved to the **Pokey800** mapping standard, decoding a narrow $0800/$0801 window (a single address bit, `A11`) instead of mirroring across 16KB.
+*   **Why**: Modern 7800 homebrew feedback suggests that broad 16KB mirroring can interfere with other advanced expansions, and it wastes the entire $4000–$7FFF ROM window for a write-only sound register.
+*   **Result**: The Lokey-YM can now coexist with other high-end hardware in a single system, and the full $4000–$FFFF range is free for ROM.
 
 ## ATtiny85 Startup Supervisor (The "Chime" Module)
 **Status**: Examined, but put on hold for MVP.

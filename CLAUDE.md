@@ -21,8 +21,8 @@
   - `snake_case` for labels, RAM variables, and code (e.g., `play_frame`, `music_ptr`).
 - **Vectors**: All ROMs must include standard Atari 7800 vectors at the end.
 - **Memory Map**:
-  - YM2149 Address Register: `$4000`
-  - YM2149 Data Register: `$4001`
+  - YM2149 Address Register: `$0800`
+  - YM2149 Data Register: `$0801`
   - ROM Start: `$8000` (for 32KB images)
 
 ### C# / .NET

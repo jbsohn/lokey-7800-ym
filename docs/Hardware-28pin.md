@@ -53,7 +53,7 @@ graph TD
         JP2[JP2 Jumper]
     end
 
-    Bus -->|A15, A14, A0, R/W, PHI2, HALT| GAL
+    Bus -->|A15-A11, A0, R/W, PHI2, HALT| GAL
     Bus -->|D0-D7| Latch
     Bus -->|D0-D7| ROM
     Bus -->|A0-A13| ROM
@@ -74,17 +74,17 @@ graph TD
 
 ## 2. Address Decoding & Memory Map
 
-The PLD (`U_GAL` — ATF16V8B) acts as the address decoder, monitoring address lines `A15` and `A14` to divide the memory map (see [Hardware.md](Hardware.md#memory-mapping) for the full $4000/$4001 register mapping shared across boards):
+The PLD (`U_GAL` — ATF16V8B) acts as the address decoder (see [Hardware.md](Hardware.md#memory-mapping) for the full $0800/$0801 register mapping shared across boards):
 
 * **ROM reads ($4000–$FFFF)**:
   * When `RW = 1` (read) and (`A15 = 1` or `A14 = 1`), the PLD asserts `/ROM_CE` (Pin 19) `LOW`, enabling the EPROM (`U_ROM`).
   * The ROM drives the data bus (`D0–D7`) to return game instructions. This covers both the $8000–$FFFF (32KB, `A15=1`) and $4000–$7FFF (16KB, `A14=1`) windows — see the jumper table in [§7](#7-solder-jumper-configurations-rom-size) for how much of this is actually usable per ROM size.
-* **Sound Card Register Space ($4000–$4001, writes only)**:
-  * The PLD asserts YM2149 control signals when `A15 = 0` and `A14 = 1` during write cycles (`R/W = 0`). Since `RW = 0` here, `/ROM_CE` is not asserted, so there's no bus contention between the write-only YM2149 and the ROM's read path.
+* **Sound Card Register Space ($0800–$0801, writes only)**:
+  * The PLD asserts YM2149 control signals when `A15 = A14 = A13 = A12 = 0` and `A11 = 1` during write cycles (`R/W = 0`). Since `RW = 0` here, `/ROM_CE` is not asserted, so there's no bus contention between the write-only YM2149 and the ROM's read path. Unlike the old $4000-mirrored scheme, this doesn't overlap the ROM window at all, so the full $4000–$FFFF range is available for actual game data.
 
 ### ATF16V8B Pinout (`U_GAL`)
 
-Logic source: `gal/rom_ym.pld`.
+Logic source: `gal/rom_ym_28pin.pld`.
 
 | Pin | Signal | Source / Destination |
 | :--- | :--- | :--- |
@@ -95,6 +95,9 @@ Logic source: `gal/rom_ym.pld`.
 | 5 | HALT | 7800 Maria Halt Signal |
 | 6 | R/W | 7800 CPU R/W Line |
 | 7 | PHI2 | 7800 CPU Clock (Cart Pin 32) |
+| 8 | A13 | 7800 Address Bus |
+| 9 | A12 | 7800 Address Bus |
+| 11 | A11 | 7800 Address Bus |
 | 15 | **YM_LE** | Latch Enable → 74HCT373 Pin 11 |
 | 16 | **PHI2OUT** | Buffered Clock → U_YM Pin 22 |
 | 17 | **BC1** | → U_YM Pin 29 |
@@ -201,6 +204,6 @@ Before powering on the cartridge, bridge solder jumpers `JP1` and `JP2` to confi
 | **32 KB (27C256)** | Bridge Left (VCC) | Bridge Right (A14) | 32KB |
 | **64 KB (27C512)** | Bridge Right (A15) | Bridge Right (A14) | 48KB, **not mirrored** — see below |
 
-> **Why 48KB, not 32KB, for the 64KB part:** `gal/rom_ym.pld`'s `/ROM_CE` equation asserts on *any* read (`RW=1`) where `A15=1` OR `A14=1` — not just `A15=1`. With JP1/JP2 both bridged right, the 7800's A15/A14 lines drive the ROM's own A15/A14 pins directly, so $8000–$FFFF (32KB, `A15=1`) and $4000–$7FFF (16KB, `A14=1`) each address a distinct region of the 64KB chip. That's 48KB of genuinely unique, addressable ROM content — not a mirrored 32KB.
+> **Why 48KB, not 32KB, for the 64KB part:** `gal/rom_ym_28pin.pld`'s `/ROM_CE` equation asserts on *any* read (`RW=1`) where `A15=1` OR `A14=1` — not just `A15=1`. With JP1/JP2 both bridged right, the 7800's A15/A14 lines drive the ROM's own A15/A14 pins directly, so $8000–$FFFF (32KB, `A15=1`) and $4000–$7FFF (16KB, `A14=1`) each address a distinct region of the 64KB chip. That's 48KB of genuinely unique, addressable ROM content — not a mirrored 32KB.
 
 > **Note:** This board has no address-line bank switching via software — ROM size selection is fixed at assembly time via the two solder jumpers. For software-controlled ROM bank switching (up to 512KB+) and a second cascaded YM2149, see the [32-pin board](Hardware-32pin.md).

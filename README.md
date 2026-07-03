@@ -73,7 +73,7 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 
 ## Technical Highlights
 
-* **Hardware**: Uses **YM2149 PSG** mapped to `$4000-$7FFF`.
+* **Hardware**: Uses **YM2149 PSG** mapped to `$0800`/`$0801` (Pokey800-compatible).
 * **Compression**: Multi-stage **Pattern-Based Delta Masking** for maximum ROM efficiency.
 * **Timing**: Automatic **Pitch Scaling** (1.79MHz vs 2.0MHz) ensures tracks stay in tune.
 * **Diagnostics**: Built-in **Software Triad** visualizer for bare-metal debugging.
