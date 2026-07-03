@@ -17,6 +17,13 @@ The project views the **Atari ST** as a potential **Creation System**.
 
 The **Atari 7800** acts as the **Consumer** of these assets. By bridging the hardware gap, we hope to allow the 7800 to play music from the ST era or new compositions from modern trackers.
 
+### Design Goals
+
+* **In-Production Parts Only**: No POKEY or YM2151 unobtainium, and no expensive FPGAs. Every part on the BOM should be sourceable new today (e.g. the KC89C72 YM2149 clone).
+* **No SMD**: Hand-solderable through-hole components only, so hobbyists without a hot air rework station can build and repair boards.
+* **Low Cost**: Keep the total build cost minimal.
+* **Time-Period Accurate**: Stay faithful to what would have been technically feasible/authentic to the Atari 7800/ST era, rather than leaning on modern shortcuts.
+
 ### Hardware & Development Status
 
 * **Working Prototype**: We have a hand-built cartridge prototype that has been verified to work.
