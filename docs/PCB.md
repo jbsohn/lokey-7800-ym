@@ -30,7 +30,7 @@ This document covers only the shared code-to-PCB pipeline; see the two hardware 
 ### Board Previews:
 
 > [!NOTE]
-> `docs/pcb_front.svg` and `docs/pcb_back.svg` are regenerated from whichever board was routed most recently by `make pcb-28pin` or `make pcb-32pin-max` (both write to the same `pcb/KiCad/index.kicad_pcb`) — they do not currently show both boards side by side.
+> `docs/pcb_front.svg` and `docs/pcb_back.svg` are regenerated from whichever board was routed most recently by `make pcb-28pin` or `make pcb-32pin-max` (both write to the same `pcb/build/KiCad/index.kicad_pcb`) — they do not currently show both boards side by side.
 
 | Front View (Top Copper & Silkscreen) | Back View (Bottom Copper & Silkscreen - Mirrored) |
 | :---: | :---: |
@@ -76,14 +76,14 @@ graph TD
 5. **Freerouting**: Launches the Freerouting CLI to automatically route all signals.
 6. **Import**: Imports the generated Specctra SES route session back into the `.kicad_pcb` board.
 7. **DRC & Zone Refill**: Refills all copper zones and executes `kicad-cli` Design Rule Checking.
-8. **Export Gerbers**: Outputs production-ready plot files to `pcb/gerbers/`.
+8. **Export Gerbers**: Outputs production-ready plot files to `pcb/build/gerbers/`.
 
 ---
 
 ## Requirements & Build Instructions
 
 > [!NOTE]
-> The most recent, production-ready Gerber files are always kept up-to-date directly in the repository under `pcb/gerbers/` and `pcb/gerbers.zip` for quick fabrication orders. You only need to set up the dependencies below if you plan to modify the PCB code or rebuild the layout yourself.
+> Fabrication-ready Gerber files are **not** stored in this repository. A GitHub Actions workflow (`.github/workflows/release.yml`) automatically builds both boards and attaches Gerber archives (`gerbers-28pin.zip`, `gerbers-32pin-max.zip`) to each [GitHub Release](https://github.com/jbsohn/lokey-7800-ym/releases) — grab those if you just want to order the PCB. You only need to set up the dependencies below if you plan to modify the PCB code or rebuild the layout yourself.
 
 ### Requirements
 
@@ -92,7 +92,9 @@ graph TD
    - `kicad-cli` must be available in your system `PATH`.
    - The Python scripting environment (`pcbnew`) must be installed. On macOS, this is typically bundled inside the KiCad application. On Linux, install python3-kicad.
 3. **Freerouting**:
-   - The `freerouting` executable must be installed and either added to your system `PATH` or pointed to using the `FREEROUTING_BIN` environment variable.
+   - Freerouting is a Java application, so a **Java Runtime Environment (JRE 21+)** must be installed and on `PATH`.
+   - The documented way to run it is `java -jar freerouting-X.Y.Z.jar` (see the [official CLI docs](https://github.com/freerouting/freerouting/blob/master/docs/command_line_arguments.md)). Download a release jar and point `FREEROUTING_JAR` at it — this is the preferred method on **every platform, including macOS**.
+   - Alternatively, if you already have a `freerouting` executable/wrapper installed and on `PATH` (e.g. a distro package), it'll be used as a fallback, or you can point `FREEROUTING_BIN` at it directly.
 
 ### Build Instructions
 
@@ -113,4 +115,4 @@ graph TD
    - Runs `route_and_patch.py` to compile the React code, apply design tweaks, auto-route the traces using Freerouting, and run the final Design Rule Check (DRC).
    - Generates that board's schematic diagram (`docs/schematic-28pin.svg` or `docs/schematic-32pin-max.svg`).
    - Exports the front and back board previews to [docs/pcb_front.svg](file:///home/john/Projects/7800-ym2149-lab/docs/pcb_front.svg) and [docs/pcb_back.svg](file:///home/john/Projects/7800-ym2149-lab/docs/pcb_back.svg) — shared filenames, so these always reflect whichever board was built last (see note above).
-   - Populates the production Gerber/Drill files in `pcb/gerbers/` and archives them as `pcb/gerbers.zip`.
+   - Populates the production Gerber/Drill files in `pcb/build/gerbers/` and archives them as `pcb/build/gerbers.zip`.

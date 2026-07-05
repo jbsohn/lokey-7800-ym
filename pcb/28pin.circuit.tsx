@@ -185,6 +185,7 @@ export default () => (
         A0: "net.A0", A1: "net.A1", A2: "net.A2", A3: "net.A3", A4: "net.A4",
         A5: "net.A5", A6: "net.A6", A7: "net.A7", A8: "net.A8", A9: "net.A9",
         A10: "net.A10", A11: "net.A11", A12: "net.A12", A13: "net.A13", A14: "net.A14",
+        A15: "net.A15",
         D0: "net.D0", D1: "net.D1", D2: "net.D2", D3: "net.D3", D4: "net.D4",
         D5: "net.D5", D6: "net.D6", D7: "net.D7",
         RW: "net.RW",
@@ -219,7 +220,7 @@ export default () => (
       />
       <SolderJumper
         name="JP1"
-        pcbX="20mm"
+        pcbX="23mm"
         pcbY="4.5mm"
         pcbRotation={90}
         label="JP1 (VPP)"
@@ -233,7 +234,7 @@ export default () => (
       />
       <SolderJumper
         name="JP2"
-        pcbX="20mm"
+        pcbX="23mm"
         pcbY="-4.5mm"
         pcbRotation={90}
         label="JP2 (A14)"
@@ -248,7 +249,7 @@ export default () => (
       <capacitor
         name="C_ROM"
         capacitance="0.1uF"
-        footprint="axial"
+        footprint="axial_p7.62mm"
         pcbX="20mm"
         pcbY="0mm"
         schX={4}
@@ -268,7 +269,7 @@ export default () => (
           name="U_GAL"
           schX={-2}
           schY={4}
-          pcbRotation={270}
+          pcbRotation={90}
           layer="bottom"
           connections={{
             VCC: "net.VCC",
@@ -292,7 +293,7 @@ export default () => (
         <capacitor
           name="C_GAL"
           capacitance="0.1uF"
-          footprint="axial"
+          footprint="axial_p7.62mm"
           schX={0}
           schY={6}
           pcbX="14.5mm"
@@ -346,7 +347,7 @@ export default () => (
       <capacitor
         name="C_LATCH"
         capacitance="0.1uF"
-        footprint="axial"
+        footprint="axial_p7.62mm"
         schX={8}
         schY={8}
         pcbX="15mm"
@@ -391,7 +392,7 @@ export default () => (
       <capacitor
         name="C_YM"
         capacitance="0.1uF"
-        footprint="axial"
+        footprint="axial_p7.62mm"
         schX={18}
         schY={5}
         pcbX="25mm"
@@ -405,11 +406,12 @@ export default () => (
       <resistor
         name="R_RESET"
         resistance="10k"
-        footprint="axial"
+        footprint="axial_p7.62mm"
         schX={12}
         schY={10}
-        pcbX="6mm"
-        pcbY="-11.5mm"
+        pcbX="-18mm"
+        pcbY="3mm"
+        layer="bottom"
         connections={{
           pin1: "net.VCC",
           pin2: "net.RESET_DELAYED",
@@ -418,12 +420,13 @@ export default () => (
       <capacitor
         name="C_RESET"
         capacitance="10uF"
-        footprint="axial"
+        footprint="axial_p7.62mm"
         polarized
         schX={14}
         schY={7}
-        pcbX="12mm"
-        pcbY="-11.5mm"
+        pcbX="-18mm"
+        pcbY="-3mm"
+        layer="bottom"
         connections={{
           pin1: "net.RESET_DELAYED",
           pin2: "net.GND",
@@ -432,9 +435,9 @@ export default () => (
       <resistor
         name="R_YM_AUDIOA"
         resistance="1k"
-        footprint="axial"
-        pcbX="-6mm"
-        pcbY="-11.5mm"
+        footprint="axial_p7.62mm"
+        pcbX="8mm"
+        pcbY="11mm"
         schX={24}
         schY={5}
         connections={{
@@ -445,9 +448,9 @@ export default () => (
       <resistor
         name="R_YM_AUDIOB"
         resistance="1k"
-        footprint="axial"
-        pcbX="-18mm"
-        pcbY="-11.5mm"
+        footprint="axial_p7.62mm"
+        pcbX="19mm"
+        pcbY="11mm"
         schX={24}
         schY={2}
         connections={{
@@ -458,8 +461,8 @@ export default () => (
       <resistor
         name="R_YM_AUDIOC"
         resistance="1k"
-        footprint="axial"
-        pcbX="-12mm"
+        footprint="axial_p7.62mm"
+        pcbX="16mm"
         pcbY="-11.5mm"
         schX={24}
         schY={-1}
@@ -476,8 +479,8 @@ export default () => (
       <capacitor
         name="C_AMP"
         capacitance="0.1uF"
-        footprint="axial"
-        pcbX="-12mm"
+        footprint="axial_p7.62mm"
+        pcbX="-7mm"
         pcbY="0mm"
         pcbRotation={90}
         schX={32}
@@ -490,12 +493,13 @@ export default () => (
       <resistor
         name="R_FB"
         resistance="1k"
-        footprint="axial"
-        pcbX="-8mm"
+        footprint="axial_p7.62mm"
+        pcbX="0mm"
         pcbY="0mm"
-        pcbRotation={90}
+        pcbRotation={0}
         schX={34}
         schY={6}
+        layer="bottom"
         connections={{
           pin1: "net.SUM_NODE",
           pin2: "net.OPAMP_OUT",
@@ -522,10 +526,10 @@ export default () => (
       <resistor
         name="R_PULL"
         resistance="1k"
-        footprint="axial"
-        pcbX="8mm"
-        pcbY="0mm"
-        pcbRotation={90}
+        footprint="axial_p7.62mm"
+        pcbX="0mm"
+        pcbY="7mm"
+        pcbRotation={0}
         schX={34}
         schY={2}
         connections={{
@@ -536,8 +540,8 @@ export default () => (
       <resistor
         name="R_SERIES"
         resistance="1k"
-        footprint="axial"
-        pcbX="12mm"
+        footprint="axial_p7.62mm"
+        pcbX="8mm"
         pcbY="0mm"
         pcbRotation={90}
         schX={34}
@@ -550,9 +554,9 @@ export default () => (
       <capacitor
         name="C_AUDIO_OUT"
         capacitance="10uF"
-        footprint="axial"
+        footprint="axial_p7.62mm"
         polarized
-        pcbX="16mm"
+        pcbX="12mm"
         pcbY="0mm"
         pcbRotation={90}
         schX={40}

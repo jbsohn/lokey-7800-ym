@@ -29,12 +29,6 @@ yarn-error.log*
 # tscircuit cache
 .tscircuit/
 
-# KiCad files (all intermediate, generated via route_and_patch.py)
-KiCad/
-
-# DRC reports
-*.rpt
-
 # Bun lockfile (using npm)
 bun.lock
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -9,12 +10,15 @@ import pcbnew
 # Change to the script's directory (pcb/)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-PCB_PATH = "./KiCad/index.kicad_pcb"
-DSN_PATH = "./KiCad/index.dsn"
-SES_PATH = "./KiCad/index.ses"
-GERBER_DIR = "./gerbers/"
-PRO_PATH = "./KiCad/index.kicad_pro"
-DRU_PATH = "./KiCad/index.kicad_dru"
+BUILD_DIR = "./build/"
+PCB_PATH = BUILD_DIR + "KiCad/index.kicad_pcb"
+DSN_PATH = BUILD_DIR + "KiCad/index.dsn"
+SES_PATH = BUILD_DIR + "KiCad/index.ses"
+GERBER_DIR = BUILD_DIR + "gerbers/"
+PRO_PATH = BUILD_DIR + "KiCad/index.kicad_pro"
+DRU_PATH = BUILD_DIR + "KiCad/index.kicad_dru"
+DRC_RPT_PATH = BUILD_DIR + "index-drc.rpt"
+GERBER_ZIP_PATH = BUILD_DIR + "gerbers"
 
 ENTRY_FILE = sys.argv[1] if len(sys.argv) > 1 else "index.circuit.tsx"
 
@@ -214,35 +218,70 @@ if os.path.exists(SES_PATH):
     except OSError:
         pass
 
-freerouting_bin = os.getenv("FREEROUTING_BIN", "freerouting")
-if not shutil.which(freerouting_bin) and not os.path.exists(freerouting_bin):
-    mac_app_bin = os.getenv(
-        "FREEROUTING_APP",
-        "/Applications/freerouting.app/Contents/MacOS/freerouting",
-    )
-    if sys.platform == "darwin" and os.path.exists(mac_app_bin):
-        freerouting_bin = mac_app_bin
-    else:
-        print(f"Error: freerouting executable not found in PATH or at {mac_app_bin}")
+# The documented way to run freerouting is `java -jar freerouting-X.Y.Z.jar`
+# (see https://github.com/freerouting/freerouting/blob/master/docs/command_line_arguments.md).
+# Prefer that on every platform (including macOS) if FREEROUTING_JAR points at
+# a jar; otherwise fall back to a `freerouting` executable/wrapper on PATH
+# (e.g. a distro package).
+freerouting_jar = os.getenv("FREEROUTING_JAR")
+if freerouting_jar:
+    if not os.path.exists(freerouting_jar):
+        print(f"Error: FREEROUTING_JAR is set but file not found: {freerouting_jar}")
+        sys.exit(1)
+    freerouting_cmd = ["java", "-jar", freerouting_jar]
+else:
+    freerouting_bin = os.getenv("FREEROUTING_BIN", "freerouting")
+    if not shutil.which(freerouting_bin) and not os.path.exists(freerouting_bin):
+        print(f"Error: freerouting executable not found in PATH ({freerouting_bin}).")
         print(
-            "You can override these paths by setting FREEROUTING_BIN"
-            " or FREEROUTING_APP environment variables."
+            "Set FREEROUTING_JAR to a freerouting-*.jar path (run via `java -jar`),"
+            " or FREEROUTING_BIN to an executable."
         )
         sys.exit(1)
+    freerouting_cmd = [freerouting_bin]
 
-subprocess.run(
-    [
-        freerouting_bin,
+freerouting_proc = subprocess.Popen(
+    freerouting_cmd
+    + [
         "-de",
         DSN_PATH,
         "-do",
         SES_PATH,
         "-mp",
-        "10",
+        "0",
         "--gui.enabled=false",
     ],
-    check=True,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    text=True,
 )
+freerouting_output = []
+for line in freerouting_proc.stdout:
+    print(line, end="")
+    freerouting_output.append(line)
+freerouting_proc.wait()
+freerouting_output = "".join(freerouting_output)
+
+if freerouting_proc.returncode != 0:
+    print(f"Error: freerouting exited with code {freerouting_proc.returncode}.")
+    sys.exit(1)
+
+session_match = re.search(r"session completed:.*", freerouting_output)
+if session_match is None:
+    print(
+        "Error: could not find a freerouting session completion summary in the"
+        " output (see above). Refusing to import/export an unverified board."
+    )
+    sys.exit(1)
+unrouted_match = re.search(r"\((\d+) unrouted\)", session_match.group(0))
+unrouted_count = int(unrouted_match.group(1)) if unrouted_match else 0
+if unrouted_count > 0:
+    print(
+        f"Error: freerouting finished with {unrouted_count} unrouted connection(s)"
+        " (see 'session completed' summary above)."
+        " Refusing to import/export a board with missing copper."
+    )
+    sys.exit(1)
 
 if not os.path.exists(SES_PATH):
     print("Error: freerouting failed to generate session file.")
@@ -259,7 +298,7 @@ board.Save(PCB_PATH)
 
 print("Running DRC...")
 subprocess.run(
-    ["kicad-cli", "pcb", "drc", PCB_PATH],
+    ["kicad-cli", "pcb", "drc", "-o", DRC_RPT_PATH, PCB_PATH],
     check=True,
 )
 
@@ -287,7 +326,7 @@ if os.path.exists(gbrjob_path):
 else:
     print("Warning: gbrjob not found")
 
-print("Zipping Gerber files to gerbers.zip...")
-shutil.make_archive("gerbers", "zip", GERBER_DIR)
+print(f"Zipping Gerber files to {GERBER_ZIP_PATH}.zip...")
+shutil.make_archive(GERBER_ZIP_PATH, "zip", GERBER_DIR)
 
 print("\nSuccess! Fully routed KiCad PCB and Gerbers are updated.")

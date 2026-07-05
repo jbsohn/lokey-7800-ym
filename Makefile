@@ -93,8 +93,8 @@ schematic: schematic-32pin-max
 
 previews:
 	@echo "Exporting PCB SVG previews from KiCad..."
-	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o docs/pcb_front.svg pcb/KiCad/index.kicad_pcb
-	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o docs/pcb_back.svg pcb/KiCad/index.kicad_pcb
+	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o docs/pcb_front.svg pcb/build/KiCad/index.kicad_pcb
+	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o docs/pcb_back.svg pcb/build/KiCad/index.kicad_pcb
 
 # The 'pro' target specifically builds the MADS-only showcase
 pro:
@@ -211,5 +211,4 @@ clean:
 	@rm -rf $(BUILD_DIR)
 	@rm -rf $(BIN_DIR)
 	@rm -f $(BUILD_DIR)/*.wav $(YM_DIR)/*.wav $(VGM_DIR)/*.wav
-	@rm -rf pcb/KiCad/
-	@rm -f pcb/index-drc.rpt
+	@rm -rf pcb/build/
