@@ -68,13 +68,11 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 
 * **[Emulator Support](docs/Emulation.md)** - Using `a7800` and `js7800` for development.
 
-* **[Diagnostic Tools](docs/Tools.md)** - Hardware signal and timing verification.
-
-* **[Music Tools](docs/MusicTools.md)** - Theory and usage for `YmToYmb`, `VgmToYmb`, and `YmbToWav`.
+* **[Toolchain & Diagnostics](docs/Tools.md)** - Register conversion (`YmToYmb`, `VgmToYmb`), audio verification (`YmbToWav`), and hardware signal verification.
 * **[YMB Format](docs/YmbFormat.md)** - Technical specification of the music binary format.
 * **[Musical Credits](docs/Musicians.md)** - Honoring the original composers.
 * **[TODO](docs/TODO.md)** - Known issues and improvements.
-* **[Crazy Future Ideas](docs/FutureIdeas.md)** - Roadmap for hardware/software expansions.
+* **[Future Ideas](docs/FutureIdeas.md)** - Roadmap for hardware/software expansions.
 
 ---
 
@@ -84,12 +82,6 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 * **Compression**: Multi-stage **Pattern-Based Delta Masking** for maximum ROM efficiency.
 * **Timing**: Automatic **Pitch Scaling** (1.79MHz vs 2.0MHz) ensures tracks stay in tune.
 * **Diagnostics**: Built-in **Software Triad** visualizer for bare-metal debugging.
-
-## Future Plans
-
-* Support for complex bank-switching (beyond 32KB).
-* High-speed diagnostic logging via YM I/O ports.
-* **Work in Progress**: Enhancing `A78Gen` to better map advanced header types for modern emulator features.
 
 ## Acknowledgements & Credits
 
