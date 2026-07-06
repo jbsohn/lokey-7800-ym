@@ -130,14 +130,6 @@ with open(DRU_PATH, "w") as f:
   (constraint edge_clearance (min 0mm))
   (condition "A.NetName == 'HALT' || B.NetName == 'HALT' || A.NetName == 'A13' || B.NetName == 'A13' || A.NetName == 'A14' || B.NetName == 'A14' || A.NetName == 'VCC' || B.NetName == 'VCC' || A.NetName == 'GND' || B.NetName == 'GND'")
 )
-
-# The right-shoulder area has no component pads so the GND zone fill produces an
-# isolated island there.  Real GND connectivity is maintained through all through-hole
-# component leads.  Zone-to-zone unconnected is safe to ignore on this board.
-(rule "gnd_zone_fill_artifact"
-  (constraint unconnected (severity ignore))
-  (condition "A.Type == 'Zone' && B.Type == 'Zone'")
-)
 """)
 print("  Wrote kicad_dru custom design rules")
 
@@ -301,6 +293,45 @@ subprocess.run(
     ["kicad-cli", "pcb", "drc", "-o", DRC_RPT_PATH, PCB_PATH],
     check=True,
 )
+
+# Freerouting's own "session completed ... (N unrouted)" self-report is not
+# reliable on its own: it has been observed to claim 0 unrouted while the
+# actually-imported board is missing copper on real signal nets. Cross-check
+# against KiCad's own post-import DRC, which independently recomputes
+# connectivity from the routed geometry. The one expected false positive is
+# the right-shoulder GND zone-fill island (two GND copper zones reported as
+# "unconnected" to each other; real GND connectivity is maintained through
+# component leads) — everything else is a genuine missing-copper defect.
+with open(DRC_RPT_PATH) as f:
+    drc_lines = f.readlines()
+
+real_unconnected = []
+i = 0
+while i < len(drc_lines):
+    if drc_lines[i].strip().startswith("[unconnected_items]"):
+        items = [
+            line.strip()
+            for line in drc_lines[i + 1 : i + 4]
+            if line.strip().startswith("@(")
+        ]
+        if not all("Zone [GND]" in item for item in items):
+            real_unconnected.append(items)
+    i += 1
+
+if real_unconnected:
+    print(
+        f"Error: DRC found {len(real_unconnected)} unconnected item(s) that are"
+        " NOT the known GND zone-fill-island artifact — real missing copper:"
+    )
+    for items in real_unconnected:
+        for item in items:
+            print(f"    {item}")
+    print(
+        "Refusing to export Gerbers for a board with unrouted signals"
+        f" (see full report: {DRC_RPT_PATH})."
+    )
+    sys.exit(1)
+print("  DRC connectivity check passed (no real unconnected items)")
 
 print("Exporting Gerbers and Drill files...")
 os.makedirs(GERBER_DIR, exist_ok=True)
