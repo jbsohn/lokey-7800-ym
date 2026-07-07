@@ -266,6 +266,8 @@ export default () => (
           name="U_GAL"
           schX={-2}
           schY={4}
+          pcbX="0mm"
+          pcbY="0mm"
           pcbRotation={90}
           layer="bottom"
           connections={{
@@ -307,56 +309,6 @@ export default () => (
 
 
 
-    <group
-      name="Latch"
-      pcbX="0mm"
-      pcbY="24mm"
-    >
-      <Latch74HCT373
-        name="U_LATCH"
-        schX={6}
-        schY={4}
-        pcbRotation={270}
-        layer="bottom"
-        connections={{
-          VCC: "net.VCC",
-          GND: "net.GND",
-          OE: "net.GND",
-          LE: "net.YM_LE",
-          D0: "net.D0",
-          D1: "net.D1",
-          D2: "net.D2",
-          D3: "net.D3",
-          D4: "net.D4",
-          D5: "net.D5",
-          D6: "net.D6",
-          D7: "net.D7",
-          Q0: "net.DA0",
-          Q1: "net.DA1",
-          Q2: "net.DA2",
-          Q3: "net.DA3",
-          Q4: "net.DA4",
-          Q5: "net.DA5",
-          Q6: "net.DA6",
-          Q7: "net.DA7",
-        }}
-      />
-      <capacitor
-        name="C_LATCH"
-        capacitance="0.1uF"
-        footprint="axial_p7.62mm"
-        schX={8}
-        schY={8}
-        pcbX="15mm"
-        pcbY="0mm"
-        pcbRotation={270}
-        layer="bottom"
-        connections={{
-          pin1: "net.VCC",
-          pin2: "net.GND"
-        }}
-      />
-    </group>
 
     <group
       name="YM"
@@ -468,10 +420,62 @@ export default () => (
           pin2: "net.SUM_NODE",
         }}
       />
+      <group
+        name="Latch"
+      >
+        <Latch74HCT373
+          name="U_LATCH"
+          schX={6}
+          schY={4}
+          pcbX="0mm"
+          pcbY="0mm"
+          pcbRotation={270}
+          layer="bottom"
+          connections={{
+            VCC: "net.VCC",
+            GND: "net.GND",
+            OE: "net.GND",
+            LE: "net.YM_LE",
+            D0: "net.D0",
+            D1: "net.D1",
+            D2: "net.D2",
+            D3: "net.D3",
+            D4: "net.D4",
+            D5: "net.D5",
+            D6: "net.D6",
+            D7: "net.D7",
+            Q0: "net.DA0",
+            Q1: "net.DA1",
+            Q2: "net.DA2",
+            Q3: "net.DA3",
+            Q4: "net.DA4",
+            Q5: "net.DA5",
+            Q6: "net.DA6",
+            Q7: "net.DA7",
+          }}
+        />
+        <capacitor
+          name="C_LATCH"
+          capacitance="0.1uF"
+          footprint="axial_p7.62mm"
+          schX={8}
+          schY={8}
+          pcbX="15mm"
+          pcbY="0mm"
+          pcbRotation={270}
+          layer="bottom"
+          connections={{
+            pin1: "net.VCC",
+            pin2: "net.GND"
+          }}
+        />
+      </group>
     </group>
 
     <group
       name="Amp"
+      pcbX="-2mm"
+      pcbY="2mm"
     >
       <capacitor
         name="C_AMP"
