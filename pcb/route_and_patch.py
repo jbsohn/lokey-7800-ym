@@ -125,10 +125,10 @@ with open(DRU_PATH, "w") as f:
   (condition "A.Reference == 'J1' || B.Reference == 'J1'")
 )
 
-# HALT, A13, A14, VCC, GND must escape through the narrow connector notch.
+# HALT, PHI2, RW, A13, A14, VCC, GND must escape through the narrow connector notch.
 (rule "connector_notch_escape_clearance"
   (constraint edge_clearance (min 0mm))
-  (condition "A.NetName == 'HALT' || B.NetName == 'HALT' || A.NetName == 'A13' || B.NetName == 'A13' || A.NetName == 'A14' || B.NetName == 'A14' || A.NetName == 'VCC' || B.NetName == 'VCC' || A.NetName == 'GND' || B.NetName == 'GND'")
+  (condition "A.NetName == 'HALT' || B.NetName == 'HALT' || A.NetName == 'PHI2' || B.NetName == 'PHI2' || A.NetName == 'RW' || B.NetName == 'RW' || A.NetName == 'A13' || B.NetName == 'A13' || A.NetName == 'A14' || B.NetName == 'A14' || A.NetName == 'VCC' || B.NetName == 'VCC' || A.NetName == 'GND' || B.NetName == 'GND'")
 )
 """)
 print("  Wrote kicad_dru custom design rules")
@@ -240,6 +240,8 @@ freerouting_proc = subprocess.Popen(
         "-do",
         SES_PATH,
         "-mp",
+        "0",
+        "-oit",
         "0",
         "--gui.enabled=false",
     ],

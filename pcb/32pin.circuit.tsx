@@ -168,6 +168,11 @@ export default () => (
       to=".U_GAL > .HALT"
       thickness="0.15mm"
     />
+    <trace
+      from=".J1 > .PHI2"
+      to=".U_GAL > .PHI2"
+      thickness="0.15mm"
+    />
 
     {/* --- Components --- */}
 

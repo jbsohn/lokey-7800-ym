@@ -9,25 +9,17 @@ import { SolderJumper } from "./SolderJumper";
 export default () => (
   <board
     outline={[
-      { x: "-30mm", y: "40mm" },         // Top-left (±30mm upper body)
-      { x: "30mm", y: "40mm" },          // Top-right
-      { x: "30mm", y: "9.5mm" },         // Right, step in at shoulder top
-      { x: "20.64mm", y: "9.5mm" },      // Right shoulder recess (2.86mm from ±23.5mm, matching cart case)
-      { x: "20.64mm", y: "-0.63mm" },   // Right mid-notch top (rail grip slot)
+      { x: "-32mm", y: "40mm" },
+      { x: "32mm", y: "40mm" },
+      { x: "32mm", y: "-0.63mm" },
       { x: "19.05mm", y: "-0.63mm" },
       { x: "19.05mm", y: "-5.08mm" },
-      { x: "20.64mm", y: "-5.08mm" },   // Right mid-notch bottom
-      { x: "20.64mm", y: "-7mm" },       // Right shoulder bottom
-      { x: "23.5mm", y: "-7mm" },        // Right back to connector width
+      { x: "23.5mm", y: "-5.08mm" },
       ...ATARI_7800_CONNECTOR_OUTLINE,
-      { x: "-23.5mm", y: "-7mm" },       // Left back to connector width
-      { x: "-20.64mm", y: "-7mm" },      // Left shoulder bottom
-      { x: "-20.64mm", y: "-5.08mm" },   // Left mid-notch bottom (rail grip slot)
+      { x: "-23.5mm", y: "-5.08mm" },
       { x: "-19.05mm", y: "-5.08mm" },
       { x: "-19.05mm", y: "-0.63mm" },
-      { x: "-20.64mm", y: "-0.63mm" },   // Left mid-notch top
-      { x: "-20.64mm", y: "9.5mm" },     // Left shoulder top
-      { x: "-30mm", y: "9.5mm" },        // Left step out to upper body
+      { x: "-32mm", y: "-0.63mm" },
     ]}
     routingDisabled={true}
   >
@@ -168,6 +160,11 @@ export default () => (
       to=".U_GAL > .HALT"
       thickness="0.15mm"
     />
+    <trace
+      from=".J1 > .PHI2"
+      to=".U_GAL > .PHI2"
+      thickness="0.15mm"
+    />
 
     {/* --- Components --- */}
 
@@ -296,7 +293,7 @@ export default () => (
           footprint="axial_p7.62mm"
           schX={0}
           schY={6}
-          pcbX="14.5mm"
+          pcbX="-14.5mm"
           pcbY="0mm"
           pcbRotation={270}
           layer="bottom"
@@ -409,7 +406,7 @@ export default () => (
         footprint="axial_p7.62mm"
         schX={12}
         schY={10}
-        pcbX="-18mm"
+        pcbX="-20mm"
         pcbY="3mm"
         layer="bottom"
         connections={{
@@ -424,7 +421,7 @@ export default () => (
         polarized
         schX={14}
         schY={7}
-        pcbX="-18mm"
+        pcbX="-20mm"
         pcbY="-3mm"
         layer="bottom"
         connections={{
@@ -495,11 +492,10 @@ export default () => (
         resistance="1k"
         footprint="axial_p7.62mm"
         pcbX="0mm"
-        pcbY="0mm"
+        pcbY="-7mm"
         pcbRotation={0}
         schX={34}
         schY={6}
-        layer="bottom"
         connections={{
           pin1: "net.SUM_NODE",
           pin2: "net.OPAMP_OUT",
@@ -569,18 +565,11 @@ export default () => (
     </group>
 
     <silkscreentext
-      text="Lokey 7800 YM v0.2"
+      text="Lokey 7800 YM v0.2 - github.com/jbsohn/lokey-7800-ym"
       anchorAlignment="top_left"
       pcbX="-27mm"
-      pcbY="38mm"
+      pcbY="39mm"
       fontSize="1.2mm"
     />
-    <silkscreentext
-      text="github.com/jbsohn/lokey-7800-ym"
-      anchorAlignment="top_left"
-      pcbX="-27mm"
-      pcbY="36mm"
-      fontSize="1.2mm"
-    />
-  </board>
+  </board >
 );
