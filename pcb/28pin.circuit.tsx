@@ -165,6 +165,26 @@ export default () => (
       to=".U_GAL > .PHI2"
       thickness="0.15mm"
     />
+    <trace
+      from=".J1 > .RW"
+      to=".U_GAL > .RW"
+      thickness="0.15mm"
+    />
+    <trace
+      from=".U_LATCH > .D6"
+      to=".U_ROM > .D6"
+      thickness="0.15mm"
+    />
+    <trace
+      from=".U_LATCH > .D7"
+      to=".U_ROM > .D7"
+      thickness="0.15mm"
+    />
+    <trace
+      from=".U_ROM > .A1"
+      to=".J1 > .A1"
+      thickness="0.15mm"
+    />
 
     {/* --- Components --- */}
 
