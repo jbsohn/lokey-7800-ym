@@ -264,6 +264,22 @@ export default () => (
         }}
       />
       <capacitor
+        name="C_BULK"
+        capacitance="10uF"
+        polarized
+        footprint="axial_p7.62mm"
+        pcbX="0mm"
+        pcbY="0mm"
+        layer="bottom"
+        schX={-6}
+        schY={-12}
+        pcbRotation={90}
+        connections={{
+          pin1: "net.VCC",
+          pin2: "net.GND",
+        }}
+      />
+      <capacitor
         name="C_ROM"
         capacitance="0.1uF"
         footprint="axial_p7.62mm"
@@ -291,7 +307,6 @@ export default () => (
         pcbX="0mm"
         pcbY="0mm"
         pcbRotation={270}
-        layer="bottom"
         connections={{
           VCC: "net.VCC",
           GND: "net.GND",
@@ -320,7 +335,6 @@ export default () => (
         pcbX="14.5mm"
         pcbY="0mm"
         pcbRotation={270}
-        layer="bottom"
         connections={{
           pin1: "net.VCC",
           pin2: "net.GND"
@@ -341,7 +355,6 @@ export default () => (
         pcbX="0mm"
         pcbY="0mm"
         pcbRotation={270}
-        layer="bottom"
         connections={{
           VCC: "net.VCC",
           GND: "net.GND",
@@ -374,7 +387,6 @@ export default () => (
         pcbX="15mm"
         pcbY="0mm"
         pcbRotation={270}
-        layer="bottom"
         connections={{
           pin1: "net.VCC",
           pin2: "net.GND"
@@ -384,7 +396,7 @@ export default () => (
 
     <group
       name="YM"
-      pcbX="0mm"
+      pcbX="1mm"
       pcbY="25mm"
     >
       <YM2149
@@ -596,7 +608,7 @@ export default () => (
     <silkscreentext
       text="Lokey 7800 YM v0.2 - 28pin\ngithub.com/jbsohn/lokey-7800-ym"
       anchorAlignment="top_left"
-      pcbX="-30mm"
+      pcbX="-25mm"
       pcbY="39mm"
       fontSize="1.2mm"
     />
