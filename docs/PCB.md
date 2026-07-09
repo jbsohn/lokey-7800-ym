@@ -18,32 +18,19 @@ This document explains the architecture of the Atari 7800 YM2149 sound card cart
 ---
 
 ## PCB Overview
-The board is a **2-layer cartridge PCB** currently in the **experimental prototype phase (not production-ready)**. The project is still in its early stages, and the PCB has not yet been ordered for physical fabrication. While it interfaces the Atari 7800's expansion port to a YM2149 sound chip, address decoding logic, and audio pre-amplifier, mechanical verification and adjustments to fit standard cartridge shells remain a work-in-progress.
+Each board is a **2-layer cartridge PCB** currently in the **experimental prototype phase (not production-ready)**. The project is still in its early stages, and neither board has been ordered for physical fabrication. While they interface the Atari 7800's expansion port to a YM2149 sound chip, address decoding logic, and audio pre-amplifier, mechanical verification and adjustments to fit standard cartridge shells remain a work-in-progress.
 
-### Hardware Stack:
-* **J1 (Atari 7800 Edge Connector)**: Custom edge connector card geometry.
-* **U1 (27C256 ROM)**: Cartridge program storage.
-* **U2 (ATF16V8B GAL)**: Address decoding logic.
-* **U3 (74HCT373 Latch)**: Demultiplexes/latches the multiplexed data/address bus.
-* **U4 (YM2149 Sound Chip)**: Synthesizes 3-channel audio.
-* **U5 (LM358 Op-Amp)**: Active summing amplifier and output buffer.
-* **JP1, JP2 (Solder Jumpers)**: Configure the socket compatibility for 16KB, 32KB, or 64KB ROM sizes.
+There are two board designs, defined as separate tscircuit entry files under `pcb/`:
 
-### Universal ROM Compatibility (Solder Jumpers)
+* **`28pin.circuit.tsx`** — single YM2149, ATF16V8B PLD, solder-jumper ROM size selection. Full wiring/BOM: [Hardware-28pin.md](Hardware-28pin.md).
+* **`32pin-max.circuit.tsx`** — ATF22V10 PLD, native DIP-32 socket with software bank switching, optional cascaded second YM2149. Full wiring/BOM: [Hardware-32pin.md](Hardware-32pin.md).
 
-The board features two 3-pad solder jumpers placed directly next to the ROM socket (`U1`) to configure the board for different capacity 28-pin JEDEC EPROMs:
-
-*   **16KB (27C128)**:
-    *   Bridge **JP1** to **VCC** (Left).
-    *   Bridge **JP2** to **VCC** (Left) — keeps the `~PGM` pin pulled high.
-*   **32KB (27C256)**:
-    *   Bridge **JP1** to **VCC** (Left).
-    *   Bridge **JP2** to **A14** (Right).
-*   **64KB (27C512)**:
-    *   Bridge **JP1** to **A15** (Right) — routes address line A15 to Pin 1.
-    *   Bridge **JP2** to **A14** (Right).
+This document covers only the shared code-to-PCB pipeline; see the two hardware docs above for chip pinouts, jumper/bank-switching configuration, and per-board BOM.
 
 ### Board Previews:
+
+> [!NOTE]
+> `docs/pcb_front.svg` and `docs/pcb_back.svg` are regenerated from whichever board was routed most recently by `make pcb-28pin` or `make pcb-32pin-max` (both write to the same `pcb/build/KiCad/index.kicad_pcb`) — they do not currently show both boards side by side.
 
 | Front View (Top Copper & Silkscreen) | Back View (Bottom Copper & Silkscreen - Mirrored) |
 | :---: | :---: |
@@ -53,20 +40,20 @@ The board features two 3-pad solder jumpers placed directly next to the ROM sock
 
 ## Compilation & Routing Pipeline
 
-Because we maintain a code-first design, the single source of truth is `pcb/index.circuit.tsx`. Generating the final routed KiCad project and manufacturing-ready Gerber/Drill files is fully automated via the `make pcb` task. 
+Because we maintain a code-first design, the single source of truth for each board is its own entry file — `pcb/28pin.circuit.tsx` or `pcb/32pin-max.circuit.tsx`. Generating the final routed KiCad project and manufacturing-ready Gerber/Drill files is automated via `make pcb-28pin` or `make pcb-32pin-max` (`make pcb` is an alias for `make pcb-32pin-max`).
 
-To quickly regenerate the side-by-side SVG visual board previews for documentation (using the currently compiled board design), you can run the standalone command:
+To quickly regenerate the SVG visual board previews for documentation (using the currently compiled board design), you can run the standalone command:
 ```bash
 make previews
 ```
 
 To keep the pipeline robust, we interface directly with the **official KiCad Python API (`pcbnew`) and native `kicad-cli` commands** wherever possible rather than relying on custom text parsers.
 
-The build runner (`pcb/route_and_patch.py`) executes the following sequential steps:
+The build runner (`pcb/route_and_patch.py <entry-file>.circuit.tsx`) executes the following sequential steps:
 
 ```mermaid
 graph TD
-    A[React Code index.circuit.tsx] -->|npx tsci export| B[Unrouted KiCad PCB]
+    A[React Code *.circuit.tsx] -->|npx tsci export| B[Unrouted KiCad PCB]
     B -->|pcb/route_and_patch.py| C[Patched KiCad PCB & Rules]
     C -->|kicad-cli / python pcbnew| D[Specctra DSN Export]
     D -->|Boundary & Clearance Patch| E[Freerouting Session]
@@ -89,14 +76,14 @@ graph TD
 5. **Freerouting**: Launches the Freerouting CLI to automatically route all signals.
 6. **Import**: Imports the generated Specctra SES route session back into the `.kicad_pcb` board.
 7. **DRC & Zone Refill**: Refills all copper zones and executes `kicad-cli` Design Rule Checking.
-8. **Export Gerbers**: Outputs production-ready plot files to `pcb/gerbers/`.
+8. **Export Gerbers**: Outputs production-ready plot files to `pcb/build/gerbers/`.
 
 ---
 
 ## Requirements & Build Instructions
 
 > [!NOTE]
-> The most recent, production-ready Gerber files are always kept up-to-date directly in the repository under `pcb/gerbers/` and `pcb/gerbers.zip` for quick fabrication orders. You only need to set up the dependencies below if you plan to modify the PCB code or rebuild the layout yourself.
+> Fabrication-ready Gerber files are **not** stored in this repository. A GitHub Actions workflow (`.github/workflows/release.yml`) automatically builds both boards and attaches Gerber archives (`gerbers-28pin.zip`, `gerbers-32pin-max.zip`) to each [GitHub Release](https://github.com/jbsohn/lokey-7800-ym/releases) — grab those if you just want to order the PCB. You only need to set up the dependencies below if you plan to modify the PCB code or rebuild the layout yourself.
 
 ### Requirements
 
@@ -105,7 +92,9 @@ graph TD
    - `kicad-cli` must be available in your system `PATH`.
    - The Python scripting environment (`pcbnew`) must be installed. On macOS, this is typically bundled inside the KiCad application. On Linux, install python3-kicad.
 3. **Freerouting**:
-   - The `freerouting` executable must be installed and either added to your system `PATH` or pointed to using the `FREEROUTING_BIN` environment variable.
+   - Freerouting is a Java application, so a **Java Runtime Environment (JRE 21+)** must be installed and on `PATH`.
+   - The documented way to run it is `java -jar freerouting-X.Y.Z.jar` (see the [official CLI docs](https://github.com/freerouting/freerouting/blob/master/docs/command_line_arguments.md)). Download a release jar and point `FREEROUTING_JAR` at it — this is the preferred method on **every platform, including macOS**.
+   - Alternatively, if you already have a `freerouting` executable/wrapper installed and on `PATH` (e.g. a distro package), it'll be used as a fallback, or you can point `FREEROUTING_BIN` at it directly.
 
 ### Build Instructions
 
@@ -117,12 +106,13 @@ graph TD
    ```
 
 2. **Compile and Route the PCB**:
-   From the repository root directory, run:
+   From the repository root directory, run one of:
    ```bash
-   make pcb
+   make pcb-28pin
+   make pcb-32pin-max   # same as `make pcb`
    ```
-   This Makefile target automates the entire pipeline:
+   Each target automates the entire pipeline for that board:
    - Runs `route_and_patch.py` to compile the React code, apply design tweaks, auto-route the traces using Freerouting, and run the final Design Rule Check (DRC).
-   - Generates the schematic diagram in [docs/schematic.svg](file:///home/john/Projects/7800-ym2149-lab/docs/schematic.svg).
-   - Exports the front and back board previews in [docs/pcb_front.svg](file:///home/john/Projects/7800-ym2149-lab/docs/pcb_front.svg) and [docs/pcb_back.svg](file:///home/john/Projects/7800-ym2149-lab/docs/pcb_back.svg).
-   - Populates the production Gerber/Drill files in `pcb/gerbers/` and archives them as `pcb/gerbers.zip`.
+   - Generates that board's schematic diagram (`docs/schematic-28pin.svg` or `docs/schematic-32pin-max.svg`).
+   - Exports the front and back board previews to [docs/pcb_front.svg](file:///home/john/Projects/7800-ym2149-lab/docs/pcb_front.svg) and [docs/pcb_back.svg](file:///home/john/Projects/7800-ym2149-lab/docs/pcb_back.svg) — shared filenames, so these always reflect whichever board was built last (see note above).
+   - Populates the production Gerber/Drill files in `pcb/build/gerbers/` and archives them as `pcb/build/gerbers.zip`.

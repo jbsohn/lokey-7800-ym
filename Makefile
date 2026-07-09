@@ -60,27 +60,57 @@ PRO_A78S       := $(foreach f,$(PRO_BASE),$(BUILD_DIR)/$(f).a78)
 FIXED_ROMS     := $(foreach f,$(FIXED_BASE),$(BUILD_DIR)/$(f).rom)
 
 # --- Core Targets ---
-.PHONY: all help clean logic rom a78 bin wav tools pro pcb schematic previews
+.PHONY: all help clean logic rom a78 bin wav tools pro pcb pcb-28pin pcb-32pin pcb-32pin-max schematic previews
 
 all: tools a78
 
 
-pcb:
-	@echo "Exporting and autorouting KiCad PCB from tscircuit..."
-	@cd pcb && $(KICAD_PYTHON) ./route_and_patch.py
-	@$(MAKE) schematic
+pcb-28pin:
+	@echo "Exporting and autorouting 28-pin PCB from tscircuit..."
+	@cd pcb && $(KICAD_PYTHON) ./route_and_patch.py 28pin.circuit.tsx
+	@$(MAKE) schematic-28pin
 	@$(MAKE) previews
 
+pcb-32pin:
+	@echo "Exporting and autorouting 32-pin PCB from tscircuit..."
+	@cd pcb && $(KICAD_PYTHON) ./route_and_patch.py 32pin.circuit.tsx
+	@$(MAKE) schematic-32pin
+	@$(MAKE) previews
 
-schematic:
-	@echo "Exporting schematic SVG from tscircuit..."
+# EXPERIMENTAL: the everything-but-the-kitchen-sink dual-YM board. Has
+# unresolved routing issues (see PCB_REVIEW.md and pcb/32pin-max.circuit.tsx).
+# Not part of the MVP build path — use `make pcb-32pin` for the active
+# single-YM 32-pin board.
+pcb-32pin-max:
+	@echo "Exporting and autorouting 32-pin-max PCB from tscircuit (EXPERIMENTAL, kitchen-sink WIP)..."
+	@cd pcb && $(KICAD_PYTHON) ./route_and_patch.py 32pin-max.circuit.tsx
+	@$(MAKE) schematic-32pin-max
+	@$(MAKE) previews
+
+pcb: pcb-32pin
+
+schematic-28pin:
+	@echo "Exporting 28-pin schematic SVG..."
 	@mkdir -p $(BUILD_DIR)
-	@cd pcb && npx tsci export -f schematic-svg index.circuit.tsx -o ../docs/schematic.svg
+	@cd pcb && npx tsci export -f schematic-svg 28pin.circuit.tsx -o ../docs/schematic-28pin.svg
+
+schematic-32pin:
+	@echo "Exporting 32-pin schematic SVG..."
+	@mkdir -p $(BUILD_DIR)
+	@cd pcb && npx tsci export -f schematic-svg 32pin.circuit.tsx -o ../docs/schematic-32pin.svg
+
+# EXPERIMENTAL: see pcb-32pin-max above.
+schematic-32pin-max:
+	@echo "Exporting 32-pin-max schematic SVG (EXPERIMENTAL, kitchen-sink WIP)..."
+	@mkdir -p $(BUILD_DIR)
+	@cd pcb && npx tsci export -f schematic-svg 32pin-max.circuit.tsx -o ../docs/schematic-32pin-max.svg
+
+schematic: schematic-32pin
 
 previews:
 	@echo "Exporting PCB SVG previews from KiCad..."
-	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o docs/pcb_front.svg pcb/KiCad/index.kicad_pcb
-	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o docs/pcb_back.svg pcb/KiCad/index.kicad_pcb
+	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o docs/pcb_front.svg pcb/build/KiCad/index.kicad_pcb
+	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o docs/pcb_back.svg pcb/build/KiCad/index.kicad_pcb
 
 # The 'pro' target specifically builds the MADS-only showcase
 pro:
@@ -128,7 +158,10 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "  make tools     - Build the .NET music conversion tools"
-	@echo "  make pcb       - Export KiCad PCB from tscircuit and patch silkscreen text"
+	@echo "  make pcb-28pin     - Build 28-pin board PCB"
+	@echo "  make pcb-32pin     - Build 32-pin board PCB (single YM, MVP target)"
+	@echo "  make pcb-32pin-max - Build 32-pin max board PCB (dual YM, EXPERIMENTAL kitchen-sink WIP)"
+	@echo "  make pcb           - Alias for 'make pcb-32pin'"
 	@echo "  make previews  - Export front/back SVG previews of the current PCB design"
 	@echo "  make logic     - Build the ATF16V8B logic files (.jed)"
 	@echo "  make a78       - Build library of preview ROMs (emulator format)"
@@ -186,13 +219,13 @@ $(BUILD_DIR)/%.rom: $(BUILD_DIR)/%.bin
 
 # --- Utilities ---
 logic: $(BUILD_DIR)
-	@echo "Building ATF16V8B JED files from .pld sources..."
-	@galette gal/rom.pld && galette gal/rom_ym.pld
+	@echo "Building 28-pin and 32-pin board PLD JED files from .pld sources..."
+	@galette gal/rom_28pin.pld && galette gal/rom_ym_28pin.pld
+	@galette gal/rom_32pin.pld && galette gal/rom_ym_32pin.pld
 	@mv gal/*.jed $(BUILD_DIR)/ 2>/dev/null || true
 
 clean:
 	@rm -rf $(BUILD_DIR)
 	@rm -rf $(BIN_DIR)
 	@rm -f $(BUILD_DIR)/*.wav $(YM_DIR)/*.wav $(VGM_DIR)/*.wav
-	@rm -rf pcb/KiCad/
-	@rm -f pcb/index-drc.rpt
+	@rm -rf pcb/build/

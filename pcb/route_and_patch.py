@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -9,17 +10,22 @@ import pcbnew
 # Change to the script's directory (pcb/)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-PCB_PATH = "./KiCad/index.kicad_pcb"
-DSN_PATH = "./KiCad/index.dsn"
-SES_PATH = "./KiCad/index.ses"
-GERBER_DIR = "./gerbers/"
-PRO_PATH = "./KiCad/index.kicad_pro"
-DRU_PATH = "./KiCad/index.kicad_dru"
+BUILD_DIR = "./build/"
+PCB_PATH = BUILD_DIR + "KiCad/index.kicad_pcb"
+DSN_PATH = BUILD_DIR + "KiCad/index.dsn"
+SES_PATH = BUILD_DIR + "KiCad/index.ses"
+GERBER_DIR = BUILD_DIR + "gerbers/"
+PRO_PATH = BUILD_DIR + "KiCad/index.kicad_pro"
+DRU_PATH = BUILD_DIR + "KiCad/index.kicad_dru"
+DRC_RPT_PATH = BUILD_DIR + "index-drc.rpt"
+GERBER_ZIP_PATH = BUILD_DIR + "gerbers"
 
-print("Exporting unrouted board from tscircuit React...")
+ENTRY_FILE = sys.argv[1] if len(sys.argv) > 1 else "index.circuit.tsx"
+
+print(f"Exporting unrouted board from tscircuit React ({ENTRY_FILE})...")
 os.makedirs(os.path.dirname(PCB_PATH), exist_ok=True)
 subprocess.run(
-    ["npx", "tsci", "export", "index.circuit.tsx", "-f", "kicad_pcb", "-o", PCB_PATH],
+    ["npx", "tsci", "export", ENTRY_FILE, "-f", "kicad_pcb", "-o", PCB_PATH],
     check=True,
 )
 
@@ -119,18 +125,10 @@ with open(DRU_PATH, "w") as f:
   (condition "A.Reference == 'J1' || B.Reference == 'J1'")
 )
 
-# HALT, A13, A14, VCC, GND must escape through the narrow connector notch.
+# HALT, PHI2, RW, A13, A14, VCC, GND must escape through the narrow connector notch.
 (rule "connector_notch_escape_clearance"
   (constraint edge_clearance (min 0mm))
-  (condition "A.NetName == 'HALT' || B.NetName == 'HALT' || A.NetName == 'A13' || B.NetName == 'A13' || A.NetName == 'A14' || B.NetName == 'A14' || A.NetName == 'VCC' || B.NetName == 'VCC' || A.NetName == 'GND' || B.NetName == 'GND'")
-)
-
-# The right-shoulder area has no component pads so the GND zone fill produces an
-# isolated island there.  Real GND connectivity is maintained through all through-hole
-# component leads.  Zone-to-zone unconnected is safe to ignore on this board.
-(rule "gnd_zone_fill_artifact"
-  (constraint unconnected (severity ignore))
-  (condition "A.Type == 'Zone' && B.Type == 'Zone'")
+  (condition "A.NetName == 'HALT' || B.NetName == 'HALT' || A.NetName == 'PHI2' || B.NetName == 'PHI2' || A.NetName == 'RW' || B.NetName == 'RW' || A.NetName == 'A13' || B.NetName == 'A13' || A.NetName == 'A14' || B.NetName == 'A14' || A.NetName == 'VCC' || B.NetName == 'VCC' || A.NetName == 'GND' || B.NetName == 'GND'")
 )
 """)
 print("  Wrote kicad_dru custom design rules")
@@ -212,26 +210,72 @@ if os.path.exists(SES_PATH):
     except OSError:
         pass
 
-freerouting_bin = os.getenv("FREEROUTING_BIN", "freerouting")
-if not shutil.which(freerouting_bin) and not os.path.exists(freerouting_bin):
-    mac_app_bin = os.getenv(
-        "FREEROUTING_APP",
-        "/Applications/freerouting.app/Contents/MacOS/freerouting",
-    )
-    if sys.platform == "darwin" and os.path.exists(mac_app_bin):
-        freerouting_bin = mac_app_bin
-    else:
-        print(f"Error: freerouting executable not found in PATH or at {mac_app_bin}")
+# The documented way to run freerouting is `java -jar freerouting-X.Y.Z.jar`
+# (see https://github.com/freerouting/freerouting/blob/master/docs/command_line_arguments.md).
+# Prefer that on every platform (including macOS) if FREEROUTING_JAR points at
+# a jar; otherwise fall back to a `freerouting` executable/wrapper on PATH
+# (e.g. a distro package).
+freerouting_jar = os.getenv("FREEROUTING_JAR")
+if freerouting_jar:
+    if not os.path.exists(freerouting_jar):
+        print(f"Error: FREEROUTING_JAR is set but file not found: {freerouting_jar}")
+        sys.exit(1)
+    freerouting_cmd = ["java", "-jar", freerouting_jar]
+else:
+    freerouting_bin = os.getenv("FREEROUTING_BIN", "freerouting")
+    if not shutil.which(freerouting_bin) and not os.path.exists(freerouting_bin):
+        print(f"Error: freerouting executable not found in PATH ({freerouting_bin}).")
         print(
-            "You can override these paths by setting FREEROUTING_BIN"
-            " or FREEROUTING_APP environment variables."
+            "Set FREEROUTING_JAR to a freerouting-*.jar path (run via `java -jar`),"
+            " or FREEROUTING_BIN to an executable."
         )
         sys.exit(1)
+    freerouting_cmd = [freerouting_bin]
 
-subprocess.run(
-    [freerouting_bin, "-de", DSN_PATH, "-do", SES_PATH, "-mp", "10"],
-    check=True,
+freerouting_proc = subprocess.Popen(
+    freerouting_cmd
+    + [
+        "-de",
+        DSN_PATH,
+        "-do",
+        SES_PATH,
+        "-mp",
+        "0",
+        "-oit",
+        "0",
+        "--gui.enabled=false",
+    ],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.STDOUT,
+    text=True,
 )
+freerouting_output = []
+for line in freerouting_proc.stdout:
+    print(line, end="")
+    freerouting_output.append(line)
+freerouting_proc.wait()
+freerouting_output = "".join(freerouting_output)
+
+if freerouting_proc.returncode != 0:
+    print(f"Error: freerouting exited with code {freerouting_proc.returncode}.")
+    sys.exit(1)
+
+session_match = re.search(r"session completed:.*", freerouting_output)
+if session_match is None:
+    print(
+        "Error: could not find a freerouting session completion summary in the"
+        " output (see above). Refusing to import/export an unverified board."
+    )
+    sys.exit(1)
+unrouted_match = re.search(r"\((\d+) unrouted\)", session_match.group(0))
+unrouted_count = int(unrouted_match.group(1)) if unrouted_match else 0
+if unrouted_count > 0:
+    print(
+        f"Error: freerouting finished with {unrouted_count} unrouted connection(s)"
+        " (see 'session completed' summary above)."
+        " Refusing to import/export a board with missing copper."
+    )
+    sys.exit(1)
 
 if not os.path.exists(SES_PATH):
     print("Error: freerouting failed to generate session file.")
@@ -240,13 +284,56 @@ if not os.path.exists(SES_PATH):
 print("Importing session routing back into KiCad...")
 board = pcbnew.LoadBoard(PCB_PATH)
 pcbnew.ImportSpecctraSES(board, SES_PATH)
+
+print("Refilling zones...")
+filler = pcbnew.ZONE_FILLER(board)
+filler.Fill(board.Zones())
 board.Save(PCB_PATH)
 
-print("Refilling zones and running DRC...")
+print("Running DRC...")
 subprocess.run(
-    ["kicad-cli", "pcb", "drc", "--refill-zones", "--save-board", PCB_PATH],
+    ["kicad-cli", "pcb", "drc", "-o", DRC_RPT_PATH, PCB_PATH],
     check=True,
 )
+
+# Freerouting's own "session completed ... (N unrouted)" self-report is not
+# reliable on its own: it has been observed to claim 0 unrouted while the
+# actually-imported board is missing copper on real signal nets. Cross-check
+# against KiCad's own post-import DRC, which independently recomputes
+# connectivity from the routed geometry. The one expected false positive is
+# the right-shoulder GND zone-fill island (two GND copper zones reported as
+# "unconnected" to each other; real GND connectivity is maintained through
+# component leads) — everything else is a genuine missing-copper defect.
+with open(DRC_RPT_PATH) as f:
+    drc_lines = f.readlines()
+
+real_unconnected = []
+i = 0
+while i < len(drc_lines):
+    if drc_lines[i].strip().startswith("[unconnected_items]"):
+        items = [
+            line.strip()
+            for line in drc_lines[i + 1 : i + 4]
+            if line.strip().startswith("@(")
+        ]
+        if not all("Zone [GND]" in item for item in items):
+            real_unconnected.append(items)
+    i += 1
+
+if real_unconnected:
+    print(
+        f"Error: DRC found {len(real_unconnected)} unconnected item(s) that are"
+        " NOT the known GND zone-fill-island artifact — real missing copper:"
+    )
+    for items in real_unconnected:
+        for item in items:
+            print(f"    {item}")
+    print(
+        "Refusing to export Gerbers for a board with unrouted signals"
+        f" (see full report: {DRC_RPT_PATH})."
+    )
+    sys.exit(1)
+print("  DRC connectivity check passed (no real unconnected items)")
 
 print("Exporting Gerbers and Drill files...")
 os.makedirs(GERBER_DIR, exist_ok=True)
@@ -272,7 +359,7 @@ if os.path.exists(gbrjob_path):
 else:
     print("Warning: gbrjob not found")
 
-print("Zipping Gerber files to gerbers.zip...")
-shutil.make_archive("gerbers", "zip", GERBER_DIR)
+print(f"Zipping Gerber files to {GERBER_ZIP_PATH}.zip...")
+shutil.make_archive(GERBER_ZIP_PATH, "zip", GERBER_DIR)
 
 print("\nSuccess! Fully routed KiCad PCB and Gerbers are updated.")

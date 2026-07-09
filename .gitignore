@@ -16,3 +16,7 @@ bin/
 .testing/
 .DS_Store
 .tscircuit
+pcb/build/
+pcb/node_modules/
+pcb/dist/
+pcb/bun.lock

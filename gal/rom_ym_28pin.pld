@@ -1,13 +1,13 @@
 GAL16V8
 ROM_YM
 
-NC A15 A14 A0 HALT RW PHI2 NC NC GND
-NC NC NC NC YMLE PHI2OUT BC1 BDIR ROMCE VCC
+NC A15 A14 A0 HALT RW PHI2 A13 A12 GND
+A11 NC NC NC YMLE PHI2OUT BC1 BDIR ROMCE VCC
 
 PHI2OUT = PHI2
-BDIR = /A15 * A14 * /RW * HALT * PHI2
-BC1 = /A15 * A14 * /RW * /A0 * HALT * PHI2
-YMLE = /A15 * A14 * /RW * HALT * PHI2
+BDIR = /A15 * /A14 * /A13 * /A12 * A11 * /RW * HALT * PHI2
+BC1 = /A15 * /A14 * /A13 * /A12 * A11 * /RW * /A0 * HALT * PHI2
+YMLE = /A15 * /A14 * /A13 * /A12 * A11 * /RW * HALT * PHI2
 /ROMCE = A15 * RW
        + A14 * RW
 
@@ -17,5 +17,5 @@ Atari 7800 YM2149 Address Decoder.
 ROM enabled for reads at $4000-$FFFF (48KB with 27C512, JP1=R, JP2=R).
   $4000-$7FFF reads  -> ROM (16KB window, A14=1, A15=0)
   $8000-$FFFF reads  -> ROM (32KB window, A15=1)
-  $4000-$4001 writes -> YM2149 (RW=0, ROM_CE not asserted)
+  $0800-$0801 writes -> YM2149 (RW=0, ROM_CE not asserted; A15=A14=A13=A12=0, A11=1)
 Supports 16KB (27C128), 32KB (27C256), and 48KB (27C512) via JP1/JP2.

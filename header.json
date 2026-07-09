@@ -9,6 +9,6 @@
     "slot_passthrough": 0,
     "mapper": 0,
     "mapper_opts": 0,
-    "audio": 16384,
+    "audio": 2048,
     "interrupt": 0
 }

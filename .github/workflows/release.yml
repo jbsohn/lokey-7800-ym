@@ -1,0 +1,74 @@
+name: PCB Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-pcb:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    container:
+      image: ghcr.io/kicad/kicad:9.0
+      options: --user root
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Node.js and Java
+        run: |
+          apt-get update -q
+          apt-get install -y curl wget make
+          curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+          apt-get install -y nodejs
+          npm install -g bun
+          
+          # Install JDK 25 to run Freerouting v2.2.4+
+          wget -q https://corretto.aws/downloads/latest/amazon-corretto-25-x64-linux-jdk.tar.gz -O /tmp/jdk25.tar.gz
+          mkdir -p /usr/local/lib/jvm
+          tar -xzf /tmp/jdk25.tar.gz -C /usr/local/lib/jvm
+          ln -sf /usr/local/lib/jvm/amazon-corretto-25*/bin/java /usr/local/bin/java
+
+      - name: Install Freerouting
+        run: |
+          VERSION="v2.2.4"
+          wget -q "https://github.com/freerouting/freerouting/releases/download/${VERSION}/freerouting-${VERSION#v}.jar" \
+            -O /usr/local/lib/freerouting.jar
+          echo "FREEROUTING_JAR=/usr/local/lib/freerouting.jar" >> "$GITHUB_ENV"
+
+      - name: Install Node dependencies
+        run: cd pcb && npm install
+
+      - name: Build 28pin PCB
+        run: make pcb-28pin
+
+      - name: Collect 28pin gerbers and previews
+        run: |
+          cp pcb/build/gerbers.zip gerbers-28pin.zip
+          cp docs/pcb_front.svg pcb_front-28pin.svg
+          cp docs/pcb_back.svg pcb_back-28pin.svg
+
+      - name: Build 32pin PCB
+        run: make pcb-32pin
+
+      - name: Collect 32pin gerbers and previews
+        run: |
+          cp pcb/build/gerbers.zip gerbers-32pin.zip
+          cp docs/pcb_front.svg pcb_front-32pin.svg
+          cp docs/pcb_back.svg pcb_back-32pin.svg
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            gerbers-28pin.zip
+            gerbers-32pin.zip
+            pcb_front-28pin.svg
+            pcb_back-28pin.svg
+            pcb_front-32pin.svg
+            pcb_back-32pin.svg
+            docs/schematic-28pin.svg
+            docs/schematic-32pin.svg

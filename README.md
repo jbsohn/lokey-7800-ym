@@ -17,6 +17,13 @@ The project views the **Atari ST** as a potential **Creation System**.
 
 The **Atari 7800** acts as the **Consumer** of these assets. By bridging the hardware gap, we hope to allow the 7800 to play music from the ST era or new compositions from modern trackers.
 
+### Design Goals
+
+* **In-Production Parts Only**: No POKEY or YM2151 unobtainium, and no expensive FPGAs. Every part on the BOM should be sourceable new today (e.g. the KC89C72 YM2149 clone).
+* **No SMD**: Hand-solderable through-hole components only, so hobbyists without a hot air rework station can build and repair boards.
+* **Low Cost**: Keep the total build cost minimal.
+* **Time-Period Accurate**: Stay faithful to what would have been technically feasible/authentic to the Atari 7800/ST era, rather than leaning on modern shortcuts.
+
 ### Hardware & Development Status
 
 * **Working Prototype**: We have a hand-built cartridge prototype that has been verified to work.
@@ -53,34 +60,28 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 * **[SDK Samples & Building](docs/Samples.md)** - Compile ROMs and set up the environment.
 
 * **[File Extension Reference](docs/FileExtensions.md)** - Guide to `.ymb`, `.ymi`, `.rom`, and `.a78` files.
-* **[Hardware & Wiring](docs/Hardware.md)** - Pinouts, memory mapping, and logic chips.
+* **[Hardware & Wiring](docs/Hardware.md)** - Shared memory mapping and connector/chip pinouts.
+  * **[28-Pin Board](docs/Hardware-28pin.md)** - Single-YM2149, jumper-configured ROM board.
+  * **[32-Pin Board](docs/Hardware-32pin.md)** - Bank-switched ROM, optional dual-YM2149 board.
 
-* **[PCB Design (tscircuit)](docs/PCB.md)** - Code-to-PCB workflow and **[Schematic](docs/schematic.svg)**.
+* **[PCB Design (tscircuit)](docs/PCB.md)** - Code-to-PCB workflow.
 
 * **[Emulator Support](docs/Emulation.md)** - Using `a7800` and `js7800` for development.
 
-* **[Diagnostic Tools](docs/Tools.md)** - Hardware signal and timing verification.
-
-* **[Music Tools](docs/MusicTools.md)** - Theory and usage for `YmToYmb`, `VgmToYmb`, and `YmbToWav`.
+* **[Toolchain & Diagnostics](docs/Tools.md)** - Register conversion (`YmToYmb`, `VgmToYmb`), audio verification (`YmbToWav`), and hardware signal verification.
 * **[YMB Format](docs/YmbFormat.md)** - Technical specification of the music binary format.
 * **[Musical Credits](docs/Musicians.md)** - Honoring the original composers.
 * **[TODO](docs/TODO.md)** - Known issues and improvements.
-* **[Crazy Future Ideas](docs/FutureIdeas.md)** - Roadmap for hardware/software expansions.
+* **[Future Ideas](docs/FutureIdeas.md)** - Roadmap for hardware/software expansions.
 
 ---
 
 ## Technical Highlights
 
-* **Hardware**: Uses **YM2149 PSG** mapped to `$4000-$7FFF`.
+* **Hardware**: Uses **YM2149 PSG** mapped to `$0800`/`$0801` (Pokey800-compatible).
 * **Compression**: Multi-stage **Pattern-Based Delta Masking** for maximum ROM efficiency.
 * **Timing**: Automatic **Pitch Scaling** (1.79MHz vs 2.0MHz) ensures tracks stay in tune.
 * **Diagnostics**: Built-in **Software Triad** visualizer for bare-metal debugging.
-
-## Future Plans
-
-* Support for complex bank-switching (beyond 32KB).
-* High-speed diagnostic logging via YM I/O ports.
-* **Work in Progress**: Enhancing `A78Gen` to better map advanced header types for modern emulator features.
 
 ## Acknowledgements & Credits
 
@@ -114,6 +115,6 @@ For reflections on the legacy of the Atari ST and how AI is changing the landsca
 This project uses a split license:
 
 * **PCB design** (`pcb/`): Licensed under the **GNU General Public License v2.0 (GPL-2.0)**. See `pcb/LICENSE` for details.
-* **Everything else** (assembly, tools, docs, GAL sources): Licensed under the **MIT License**. See `LICENSE` for details.
+* **Everything else** (assembly, tools, docs, PLD sources): Licensed under the **MIT License**. See `LICENSE` for details.
 
 **Use at your own risk.** The author is not responsible for any damage to your hardware or loss of data.

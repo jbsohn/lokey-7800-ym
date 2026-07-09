@@ -21,8 +21,8 @@
   - `snake_case` for labels, RAM variables, and code (e.g., `play_frame`, `music_ptr`).
 - **Vectors**: All ROMs must include standard Atari 7800 vectors at the end.
 - **Memory Map**:
-  - YM2149 Address Register: `$4000`
-  - YM2149 Data Register: `$4001`
+  - YM2149 Address Register: `$0800`
+  - YM2149 Data Register: `$0801`
   - ROM Start: `$8000` (for 32KB images)
 
 ### C# / .NET
@@ -46,7 +46,7 @@
 - `examples/`: Original DASM assembly samples.
 - `docs/`: Technical reference and deep-dive guides.
 - `tools/`: .NET conversion tools and Sigrok diagnostic scripts.
-- `gal/`: Programmable logic (GAL16V8) sources.
+- `gal/`: Programmable logic (ATF16V8B / ATF22V10 PLD) sources.
 - `pcb/`: tscircuit PCB design files.
 - `ym-samples/`: Original Atari ST music sources.
 - `vgm-samples/`: VGM/VGZ music sources.

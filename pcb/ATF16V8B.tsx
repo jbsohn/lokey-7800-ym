@@ -12,10 +12,10 @@ export const ATF16V8B = (props: ChipProps) => (
       5: "HALT",
       6: "RW",
       7: "PHI2",
-      8: "NC",
-      9: "NC",
+      8: "A13",
+      9: "A12",
       10: "GND",
-      11: "NC",
+      11: "A11",
       12: "NC",
       13: "NC",
       14: "NC",
@@ -30,7 +30,7 @@ export const ATF16V8B = (props: ChipProps) => (
       topSide: { pins: ["VCC"], direction: "left-to-right" },
       bottomSide: { pins: ["GND"], direction: "left-to-right" },
       leftSide: {
-        pins: ["CLK", "A15", "A14", "A0", "HALT", "RW", "PHI2"],
+        pins: ["CLK", "A15", "A14", "A13", "A12", "A11", "A0", "HALT", "RW", "PHI2"],
         direction: "top-to-bottom"
       },
       rightSide: {
