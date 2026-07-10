@@ -2,7 +2,7 @@
 
 ## Features
 
-- [x] ~~**POKEY@$800 mapping** — implement alternative memory mapping at `$0800` (POKEY-compatible) for the YM2149.~~ *(Done: both 28-pin and 32-pin boards now decode the YM2149 at $0800/$0801 instead of $4000/$4001. See `gal/rom_ym_28pin.pld`, `gal/rom_ym_32pin.pld`, and [Hardware.md](Hardware.md#memory-mapping). Follow-up: the `a7800`/`js7800` emulator forks still hardcode $4000-range detection via the `.a78` header's bit-6 flag — see [Emulation.md](Emulation.md) — and need a corresponding update.)*
+- [x] ~~**POKEY@$800 mapping** — implement alternative memory mapping at `$0800` (POKEY-compatible) for the YM2149.~~ *(Done: both 28-pin and 32-pin boards now decode the YM2149 at $0800/$0801 instead of $4000/$4001. See `pld/rom_ym_28pin.pld`, `pld/rom_ym_32pin.pld`, and [Hardware.md](Hardware.md#memory-mapping). Follow-up: the `a7800`/`js7800` emulator forks still hardcode $4000-range detection via the `.a78` header's bit-6 flag — see [Emulation.md](Emulation.md) — and need a corresponding update.)*
 
 ## PCB Design
 

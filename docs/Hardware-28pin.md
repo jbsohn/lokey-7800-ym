@@ -84,7 +84,7 @@ The PLD (`U_GAL` — ATF16V8B) acts as the address decoder (see [Hardware.md](Ha
 
 ### ATF16V8B Pinout (`U_GAL`)
 
-Logic source: `gal/rom_ym_28pin.pld`.
+Logic source: `pld/rom_ym_28pin.pld`.
 
 | Pin | Signal | Source / Destination |
 | :--- | :--- | :--- |

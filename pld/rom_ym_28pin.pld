@@ -8,8 +8,7 @@ PHI2OUT = PHI2
 BDIR = /A15 * /A14 * /A13 * /A12 * A11 * /RW * HALT * PHI2
 BC1 = /A15 * /A14 * /A13 * /A12 * A11 * /RW * /A0 * HALT * PHI2
 YMLE = /A15 * /A14 * /A13 * /A12 * A11 * /RW * HALT * PHI2
-/ROMCE = A15 * RW
-       + A14 * RW
+/ROMCE = A15 * RW + A14 * RW
 
 DESCRIPTION
 

@@ -6,7 +6,7 @@
 - Build only .NET tools: `make tools`
 - Build only logic ROMs and signed binaries: `make rom`
 - Build only emulator-ready `.a78` files: `make a78`
-- Build JEDEC files from `gal/*.pld` sources: `make logic`
+- Build JEDEC files from `pld/*.pld` sources: `make logic`
 - Generate verification WAV files: `make wav`
 - Run specific tool: `dotnet run --project tools/<ToolName>/<ToolName>.csproj -- <args>`
 - Clean all build artifacts: `make clean`
@@ -46,7 +46,7 @@
 - `examples/`: Original DASM assembly samples.
 - `docs/`: Technical reference and deep-dive guides.
 - `tools/`: .NET conversion tools and Sigrok diagnostic scripts.
-- `gal/`: Programmable logic (ATF16V8B / ATF22V10 PLD) sources.
+- `pld/`: Programmable logic (ATF16V8B / ATF22V10 PLD) sources.
 - `pcb/`: tscircuit PCB design files.
 - `ym-samples/`: Original Atari ST music sources.
 - `vgm-samples/`: VGM/VGZ music sources.

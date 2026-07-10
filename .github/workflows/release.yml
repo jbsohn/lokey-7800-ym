@@ -4,7 +4,7 @@ name: PCB Build
 # PCBs from source in a pinned toolchain (KiCad 9, freerouting v2.2.4,
 # galette 0.3.0). Pushing a v* tag additionally publishes the artifacts as a
 # GitHub Release — those release files are the canonical gerbers/JEDs to send
-# to fab and to program GALs from.
+# to fab and to program PLDs from.
 
 on:
   push:

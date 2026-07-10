@@ -30,7 +30,7 @@ This project uses [**galette**](https://github.com/simon-frankau/galette), an op
 make logic
 ```
 
-The source is `gal/rom_ym_32pin.pld`. It differs from the 28-pin PLD in one equation only: `/ROM_CE = A15 * RW` (32KB read window at $8000–$FFFF; no $4000–$7FFF window, no solder jumpers).
+The source is `pld/rom_ym_32pin.pld`. It differs from the 28-pin PLD in one equation only: `/ROM_CE = A15 * RW` (32KB read window at $8000–$FFFF; no $4000–$7FFF window, no solder jumpers).
 
 ## Hardware Wiring
 
