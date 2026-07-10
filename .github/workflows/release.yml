@@ -50,7 +50,7 @@ jobs:
       - name: Install galette
         run: |
           apt-get install -y cargo
-          cargo install galette --version 0.3.0 --root /usr/local
+          cargo install galette --version 0.3.0 --root /usr/local --locked
 
       - name: Install Node dependencies
         run: cd pcb && npm install
