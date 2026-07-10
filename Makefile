@@ -60,7 +60,7 @@ PRO_A78S       := $(foreach f,$(PRO_BASE),$(BUILD_DIR)/$(f).a78)
 FIXED_ROMS     := $(foreach f,$(FIXED_BASE),$(BUILD_DIR)/$(f).rom)
 
 # --- Core Targets ---
-.PHONY: all help clean logic rom a78 bin wav tools pro pcb pcb-28pin pcb-32pin pcb-32pin-max schematic previews
+.PHONY: all help clean logic rom a78 bin wav tools pro pcb pcb-28pin pcb-32pin pcb-32pin-max schematic previews previews-28pin previews-32pin previews-32pin-max
 
 all: tools a78
 
@@ -68,14 +68,10 @@ all: tools a78
 pcb-28pin:
 	@echo "Exporting and autorouting 28-pin PCB from tscircuit..."
 	@cd pcb && $(KICAD_PYTHON) ./route_and_patch.py 28pin.circuit.tsx
-	@$(MAKE) schematic-28pin
-	@$(MAKE) previews
 
 pcb-32pin:
 	@echo "Exporting and autorouting 32-pin PCB from tscircuit..."
 	@cd pcb && $(KICAD_PYTHON) ./route_and_patch.py 32pin.circuit.tsx
-	@$(MAKE) schematic-32pin
-	@$(MAKE) previews
 
 # EXPERIMENTAL: the everything-but-the-kitchen-sink dual-YM board. Has
 # unresolved routing issues (see PCB_REVIEW.md and pcb/32pin-max.circuit.tsx).
@@ -84,8 +80,6 @@ pcb-32pin:
 pcb-32pin-max:
 	@echo "Exporting and autorouting 32-pin-max PCB from tscircuit (EXPERIMENTAL, kitchen-sink WIP)..."
 	@cd pcb && $(KICAD_PYTHON) ./route_and_patch.py 32pin-max.circuit.tsx
-	@$(MAKE) schematic-32pin-max
-	@$(MAKE) previews
 
 pcb: pcb-32pin
 
@@ -107,10 +101,22 @@ schematic-32pin-max:
 
 schematic: schematic-32pin
 
-previews:
-	@echo "Exporting PCB SVG previews from KiCad..."
-	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o docs/pcb_front.svg pcb/build/KiCad/index.kicad_pcb
-	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o docs/pcb_back.svg pcb/build/KiCad/index.kicad_pcb
+previews-28pin:
+	@echo "Exporting 28-pin PCB SVG previews from KiCad..."
+	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o docs/pcb_front_28pin.svg pcb/build/KiCad/index.kicad_pcb
+	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o docs/pcb_back_28pin.svg pcb/build/KiCad/index.kicad_pcb
+
+previews-32pin:
+	@echo "Exporting 32-pin PCB SVG previews from KiCad..."
+	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o docs/pcb_front_32pin.svg pcb/build/KiCad/index.kicad_pcb
+	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o docs/pcb_back_32pin.svg pcb/build/KiCad/index.kicad_pcb
+
+previews-32pin-max:
+	@echo "Exporting 32-pin max PCB SVG previews from KiCad..."
+	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o docs/pcb_front_32pin_max.svg pcb/build/KiCad/index.kicad_pcb
+	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o docs/pcb_back_32pin_max.svg pcb/build/KiCad/index.kicad_pcb
+
+previews: previews-32pin
 
 # The 'pro' target specifically builds the MADS-only showcase
 pro:

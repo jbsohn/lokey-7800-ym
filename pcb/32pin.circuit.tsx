@@ -1,6 +1,6 @@
 import Atari7800EdgeConnector, { ATARI_7800_CONNECTOR_OUTLINE } from "./Atari7800EdgeConnector";
 import { ROM_27Cxxx } from "./ROM_27Cxxx";
-import { ATF22V10 } from "./ATF22V10";
+import { ATF16V8B } from "./ATF16V8B";
 import { Latch74HCT373 } from "./74HCT373";
 import { YM2149 } from "./YM2149";
 import { LM358 } from "./LM358";
@@ -34,14 +34,12 @@ export default () => (
     <net name="OPAMP_OUT_AC" />
     <net name="RESET_DELAYED" />
     <net name="AMP_UNUSED_FB" />
-    <net name="ROM_A15" />   {/* socket pad 3:  A15 ← GAL ROM_A15 (IOA0) */}
-    <net name="ROM_A16" />   {/* socket pad 2:  A16 ← GAL ROM_A16 (IOA1) */}
-    <net name="ROM_A17" />   {/* socket pad 30: A17 ← GAL ROM_A17 (IOA2) */}
-    <net name="ROM_A18" />   {/* socket pad 31: A18 ← GAL ROM_A18 (IOA3) */}
-    <net name="YM_IOA0" />   {/* YM1 pin 21 (IOA0) → ROM A15 bank bit */}
-    <net name="YM_IOA1" />   {/* YM1 pin 20 (IOA1) → ROM A16 bank bit */}
-    <net name="YM_IOA2" />   {/* YM1 pin 19 (IOA2) → ROM A17 bank bit */}
-    <net name="YM_IOA3" />   {/* YM1 pin 18 (IOA3) → ROM A18 bank bit */}
+    {/* Bank selection: YM IOA port wired directly to ROM bank address
+        pins, 10k pull-ups -> power-on bank 15 (top bank holds vectors) */}
+    <net name="YM_IOA0" />   {/* YM1 pin 21 (IOA0) → ROM pad 3  (A15) */}
+    <net name="YM_IOA1" />   {/* YM1 pin 20 (IOA1) → ROM pad 2  (A16) */}
+    <net name="YM_IOA2" />   {/* YM1 pin 19 (IOA2) → ROM pad 30 (A17) */}
+    <net name="YM_IOA3" />   {/* YM1 pin 18 (IOA3) → ROM pad 31 (A18) */}
 
     {/* Ground Plane & Basic Net Configuration */}
     <copperpour
@@ -197,7 +195,7 @@ export default () => (
       pcbX="0mm"
       pcbY="-5mm"
     >
-      <ATF22V10
+      <ATF16V8B
         name="U_GAL"
         schX={-5}
         schY={0}
@@ -205,28 +203,20 @@ export default () => (
         connections={{
           VCC: "net.VCC",
           GND: "net.GND",
-          HALT: "net.HALT",
           A15: "net.A15",
           A14: "net.A14",
           A13: "net.A13",
           A12: "net.A12",
           A11: "net.A11",
           A0: "net.A0",
+          HALT: "net.HALT",
           RW: "net.RW",
           PHI2: "net.PHI2",
-          IOA0: "net.YM_IOA0",
-          IOA1: "net.YM_IOA1",
-          IOA2: "net.YM_IOA2",
-          IOA3: "net.YM_IOA3",
           ROM_CE: "net.ROM_CE",
           BDIR: "net.BDIR",
           BC1: "net.BC1",
           PHI2OUT: "net.PHI2OUT",
           YM_LE: "net.YM_LE",
-          ROM_A15: "net.ROM_A15",
-          ROM_A16: "net.ROM_A16",
-          ROM_A17: "net.ROM_A17",
-          ROM_A18: "net.ROM_A18",
         }}
       />
       <capacitor
@@ -235,7 +225,7 @@ export default () => (
         footprint="axial_p7.62mm"
         schX={-3}
         schY={4}
-        pcbX="17mm"
+        pcbX="14.5mm"
         pcbY="0mm"
         pcbRotation={270}
         connections={{
@@ -264,10 +254,10 @@ export default () => (
           A0: "net.A0", A1: "net.A1", A2: "net.A2", A3: "net.A3", A4: "net.A4",
           A5: "net.A5", A6: "net.A6", A7: "net.A7", A8: "net.A8", A9: "net.A9",
           A10: "net.A10", A11: "net.A11", A12: "net.A12", A13: "net.A13", A14: "net.A14",
-          A15: "net.ROM_A15",    // pin 3:  bank bit 0, driven by PLD from YM_IOA0
-          A16: "net.ROM_A16",    // pin 2:  bank bit 1, driven by PLD from YM_IOA1
-          A17: "net.ROM_A17",    // pin 30: bank bit 2, driven by PLD from YM_IOA2 (256K+)
-          A18: "net.ROM_A18",    // pin 31: bank bit 3, driven by PLD from YM_IOA3 (512K)
+          A15: "net.YM_IOA0",    // pin 3:  bank bit 0, driven by YM IOA0
+          A16: "net.YM_IOA1",    // pin 2:  bank bit 1, driven by YM IOA1
+          A17: "net.YM_IOA2",    // pin 30: bank bit 2, driven by YM IOA2 (256K+)
+          A18: "net.YM_IOA3",    // pin 31: bank bit 3, driven by YM IOA3 (512K)
           D0: "net.D0", D1: "net.D1", D2: "net.D2", D3: "net.D3", D4: "net.D4",
           D5: "net.D5", D6: "net.D6", D7: "net.D7",
         }}
@@ -300,6 +290,67 @@ export default () => (
         connections={{
           pin1: "net.VCC",
           pin2: "net.GND",
+        }}
+      />
+      {/* Bank pull-ups: power-on bank = 15 while YM IOA is Hi-Z (input mode) */}
+      <resistor
+        name="R_BANK0"
+        resistance="10k"
+        footprint="axial_p7.62mm"
+        pcbX="7mm"
+        pcbY="0mm"
+        pcbRotation={90}
+        layer="bottom"
+        schX={7}
+        schY={-2}
+        connections={{
+          pin1: "net.VCC",
+          pin2: "net.YM_IOA0",
+        }}
+      />
+      <resistor
+        name="R_BANK1"
+        resistance="10k"
+        footprint="axial_p7.62mm"
+        pcbX="11mm"
+        pcbY="0mm"
+        pcbRotation={90}
+        layer="bottom"
+        schX={7}
+        schY={-4}
+        connections={{
+          pin1: "net.VCC",
+          pin2: "net.YM_IOA1",
+        }}
+      />
+      <resistor
+        name="R_BANK2"
+        resistance="10k"
+        footprint="axial_p7.62mm"
+        pcbX="15mm"
+        pcbY="0mm"
+        pcbRotation={90}
+        layer="bottom"
+        schX={7}
+        schY={-6}
+        connections={{
+          pin1: "net.VCC",
+          pin2: "net.YM_IOA2",
+        }}
+      />
+      <resistor
+        name="R_BANK3"
+        resistance="10k"
+        footprint="axial_p7.62mm"
+        pcbX="19mm"
+        pcbY="0mm"
+        pcbRotation={90}
+        layer="bottom"
+        schX={7}
+        schY={-8}
+        connections={{
+          pin1: "net.VCC",
+          pin2: "net.YM_IOA3",
         }}
       />
     </group>
@@ -377,6 +428,10 @@ export default () => (
           RESET: "net.RESET_DELAYED",
           A8: "net.VCC",
           A9: "net.GND",
+          IOA0: "net.YM_IOA0",
+          IOA1: "net.YM_IOA1",
+          IOA2: "net.YM_IOA2",
+          IOA3: "net.YM_IOA3",
           ANALOG_A: "net.ANALOG_A",
           ANALOG_B: "net.ANALOG_B",
           ANALOG_C: "net.ANALOG_C",

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-The **Lokey 7800 YM** project is an experiment in providing a low-cost (~$2 USD) bridge between the Atari 7800 and the Atari ST. By using the YM2149 PSG (or modern clones like the **KC89C72**), we aim to bring three-channel sound to the 7800 with Atari ST asset compatibility. Original YM2149 chips are also often available as used or New-Old-Stock (NOS) parts.
+The Atari 7800 community's favorite audio upgrades have a supply problem: POKEY clones run **~$10-$40 each — when they're in stock** — and the YM2151 has been out of production for decades, commanding collector prices used. The **Lokey 7800 YM** takes a different route: the **YM2149 PSG** — the Atari ST's sound chip — is still manufactured today as the **KC89C72** clone for **about $2**. One in-production chip brings three-channel sound to the 7800, and with it a direct bridge to four decades of Atari ST music and a tracker ecosystem that is still alive and composing. Original YM2149 chips are also plentiful as used or New-Old-Stock (NOS) parts.
 
 ### What's in a Name?
 
@@ -28,6 +28,7 @@ The **Atari 7800** acts as the **Consumer** of these assets. By bridging the har
 
 * **Working Prototype**: We have a hand-built cartridge prototype that has been verified to work.
 * **PCB Effort**: We are working on a PCB design using a code-to-PCB workflow (**tscircuit**).
+* **Reproducible Hardware Builds**: GitHub Actions rebuilds the PLD logic and both PCBs from source on every push, with a pinned toolchain. The gerbers and `.jed` files attached to [GitHub Releases](https://github.com/jbsohn/lokey-7800-ym/releases) are the canonical artifacts — what you send to the fab and program into GALs.
 * **Conversion Tools**: The project includes experimental C# tools to convert Atari ST **YM** and multi-platform **VGM** files into an optimized format for the 7800. These are used for early testing to minimize data size for limited cartridge space.
 * **SDK Progress**: We are working toward a set of tools and drivers to help others add YM music to their 7800 projects.
 * **Custom Emulation**: For testing without hardware, we use forks of **a7800** and **js7800** that implement this specific memory mapping. *If this project gains momentum, we hope these changes might eventually be useful to the official upstream projects.*
@@ -62,7 +63,7 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 * **[File Extension Reference](docs/FileExtensions.md)** - Guide to `.ymb`, `.ymi`, `.rom`, and `.a78` files.
 * **[Hardware & Wiring](docs/Hardware.md)** - Shared memory mapping and connector/chip pinouts.
   * **[28-Pin Board](docs/Hardware-28pin.md)** - Single-YM2149, jumper-configured ROM board.
-  * **[32-Pin Board](docs/Hardware-32pin.md)** - Bank-switched ROM, optional dual-YM2149 board.
+  * **[32-Pin Board](docs/Hardware-32pin.md)** - Bank-switched ROM board (YM-IOA banking, 128KB-512KB) (Experimental Pre-Alpha v0.2 - Untested).
 
 * **[PCB Design (tscircuit)](docs/PCB.md)** - Code-to-PCB workflow.
 

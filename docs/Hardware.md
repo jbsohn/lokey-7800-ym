@@ -7,7 +7,7 @@ This document contains the technical hardware specifications, memory mapping, an
 This project has two board designs, each with its own dedicated hardware doc for PLD/ROM wiring, jumpers, and BOM:
 
 * **[28-Pin Board](Hardware-28pin.md)** (`pcb/28pin.circuit.tsx`) — single YM2149, ATF16V8B PLD, solder-jumper ROM size selection (16/32/64KB).
-* **[32-Pin Board](Hardware-32pin.md)** (`pcb/32pin-max.circuit.tsx`) — ATF22V10 PLD, native DIP-32 socket with software bank switching (128KB–512KB), optional cascaded second YM2149.
+* **[32-Pin Board](Hardware-32pin.md)** (`pcb/32pin.circuit.tsx`) — single YM2149, ATF16V8B PLD, native DIP-32 socket with software bank switching via the YM IOA port (128KB–512KB).
 
 Everything below this section — the memory map and connector/chip pinout references — applies to both boards.
 
