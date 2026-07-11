@@ -67,8 +67,9 @@ jobs:
       - name: Collect 28pin gerbers and previews
         run: |
           cp pcb/build/gerbers.zip gerbers-28pin.zip
-          cp docs/pcb_front_28pin.svg pcb_front_28pin.svg
-          cp docs/pcb_back_28pin.svg pcb_back_28pin.svg
+          cp pcb/build/previews/pcb_front_28pin.svg pcb_front_28pin.svg
+          cp pcb/build/previews/pcb_back_28pin.svg pcb_back_28pin.svg
+          cp pcb/build/previews/pcb_3d_28pin.png pcb_3d_28pin.png
 
       - name: Build 32pin PCB
         run: |
@@ -79,8 +80,9 @@ jobs:
       - name: Collect 32pin gerbers and previews
         run: |
           cp pcb/build/gerbers.zip gerbers-32pin.zip
-          cp docs/pcb_front_32pin.svg pcb_front_32pin.svg
-          cp docs/pcb_back_32pin.svg pcb_back_32pin.svg
+          cp pcb/build/previews/pcb_front_32pin.svg pcb_front_32pin.svg
+          cp pcb/build/previews/pcb_back_32pin.svg pcb_back_32pin.svg
+          cp pcb/build/previews/pcb_3d_32pin.png pcb_3d_32pin.png
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
@@ -91,8 +93,10 @@ jobs:
             gerbers-32pin.zip
             pcb_front_28pin.svg
             pcb_back_28pin.svg
+            pcb_3d_28pin.png
             pcb_front_32pin.svg
             pcb_back_32pin.svg
+            pcb_3d_32pin.png
             docs/schematic-28pin.svg
             docs/schematic-32pin.svg
             build/*.jed
@@ -107,8 +111,10 @@ jobs:
             gerbers-32pin.zip
             pcb_front_28pin.svg
             pcb_back_28pin.svg
+            pcb_3d_28pin.png
             pcb_front_32pin.svg
             pcb_back_32pin.svg
+            pcb_3d_32pin.png
             docs/schematic-28pin.svg
             docs/schematic-32pin.svg
             build/*.jed

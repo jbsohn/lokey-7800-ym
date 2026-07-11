@@ -89,13 +89,19 @@ schematic: schematic-32pin
 
 previews-28pin:
 	@echo "Exporting 28-pin PCB SVG previews from KiCad..."
-	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o docs/pcb_front_28pin.svg pcb/build/KiCad/index.kicad_pcb
-	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o docs/pcb_back_28pin.svg pcb/build/KiCad/index.kicad_pcb
+	@mkdir -p pcb/build/previews
+	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o pcb/build/previews/pcb_front_28pin.svg pcb/build/KiCad/index.kicad_pcb
+	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o pcb/build/previews/pcb_back_28pin.svg pcb/build/KiCad/index.kicad_pcb
+	@echo "Rendering 28-pin PCB 3D preview from KiCad..."
+	@kicad-cli pcb render --quality high --floor --rotate -45,0,45 --width 1600 --height 1200 --background opaque -o pcb/build/previews/pcb_3d_28pin.png pcb/build/KiCad/index.kicad_pcb
 
 previews-32pin:
 	@echo "Exporting 32-pin PCB SVG previews from KiCad..."
-	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o docs/pcb_front_32pin.svg pcb/build/KiCad/index.kicad_pcb
-	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o docs/pcb_back_32pin.svg pcb/build/KiCad/index.kicad_pcb
+	@mkdir -p pcb/build/previews
+	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o pcb/build/previews/pcb_front_32pin.svg pcb/build/KiCad/index.kicad_pcb
+	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o pcb/build/previews/pcb_back_32pin.svg pcb/build/KiCad/index.kicad_pcb
+	@echo "Rendering 32-pin PCB 3D preview from KiCad..."
+	@kicad-cli pcb render --quality high --floor --rotate -45,0,45 --width 1600 --height 1200 --background opaque -o pcb/build/previews/pcb_3d_32pin.png pcb/build/KiCad/index.kicad_pcb
 
 previews: previews-32pin
 
