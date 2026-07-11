@@ -30,11 +30,12 @@ This document covers only the shared code-to-PCB pipeline; see the two hardware 
 ### Board Previews:
 
 > [!NOTE]
-> `docs/pcb_front.svg` and `docs/pcb_back.svg` are regenerated from whichever board was routed most recently by `make pcb-28pin` or `make pcb-32pin` (both write to the same `pcb/build/KiCad/index.kicad_pcb`) — they do not currently show both boards side by side.
+> These previews link to the [latest GitHub Release](https://github.com/jbsohn/lokey-7800-ym/releases/latest) build artifacts rather than files checked into this repo, so they always reflect the most recently tagged `v*` release (not necessarily the current `main` branch).
 
-| Front View (Top Copper & Silkscreen) | Back View (Bottom Copper & Silkscreen - Mirrored) |
-| :---: | :---: |
-| ![PCB Front Preview](pcb_front.svg) | ![PCB Back Preview](pcb_back.svg) |
+| Board | Front View (Top Copper & Silkscreen) | Back View (Bottom Copper & Silkscreen - Mirrored) |
+| :--- | :---: | :---: |
+| **28-pin** | ![28-pin PCB Front](https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_front_28pin.svg) | ![28-pin PCB Back](https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_back_28pin.svg) |
+| **32-pin** | ![32-pin PCB Front](https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_front_32pin.svg) | ![32-pin PCB Back](https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_back_32pin.svg) |
 
 ---
 
@@ -113,6 +114,6 @@ graph TD
    ```
    Each target automates the entire pipeline for that board:
    - Runs `route_and_patch.py` to compile the React code, apply design tweaks, auto-route the traces using Freerouting, and run the final Design Rule Check (DRC).
-   - Generates that board's schematic diagram (`docs/schematic-28pin.svg` or `docs/schematic-32pin.svg`).
-   - Exports the front and back board previews to [docs/pcb_front.svg](file:///home/john/Projects/7800-ym2149-lab/docs/pcb_front.svg) and [docs/pcb_back.svg](file:///home/john/Projects/7800-ym2149-lab/docs/pcb_back.svg) — shared filenames, so these always reflect whichever board was built last (see note above).
    - Populates the production Gerber/Drill files in `pcb/build/gerbers/` and archives them as `pcb/build/gerbers.zip`.
+
+   Run `make schematic-28pin` / `make schematic-32pin` to generate that board's schematic diagram (`docs/schematic-28pin.svg` / `docs/schematic-32pin.svg`), and `make previews` to export front/back board previews to `docs/pcb_front.svg` / `docs/pcb_back.svg` (shared filenames — these reflect whichever board was routed last; see note above).
