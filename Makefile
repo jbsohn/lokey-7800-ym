@@ -60,7 +60,7 @@ PRO_A78S       := $(foreach f,$(PRO_BASE),$(BUILD_DIR)/$(f).a78)
 FIXED_ROMS     := $(foreach f,$(FIXED_BASE),$(BUILD_DIR)/$(f).rom)
 
 # --- Core Targets ---
-.PHONY: all help clean logic rom a78 bin wav tools pro pcb pcb-28pin pcb-32pin pcb-32pin-max schematic previews previews-28pin previews-32pin previews-32pin-max
+.PHONY: all help clean logic rom a78 bin wav tools pro pcb pcb-28pin pcb-32pin schematic previews previews-28pin previews-32pin
 
 all: tools a78
 
@@ -72,14 +72,6 @@ pcb-28pin:
 pcb-32pin:
 	@echo "Exporting and autorouting 32-pin PCB from tscircuit..."
 	@cd pcb && $(KICAD_PYTHON) ./route_and_patch.py 32pin.circuit.tsx
-
-# EXPERIMENTAL: the everything-but-the-kitchen-sink dual-YM board. Has
-# unresolved routing issues (see PCB_REVIEW.md and pcb/32pin-max.circuit.tsx).
-# Not part of the MVP build path — use `make pcb-32pin` for the active
-# single-YM 32-pin board.
-pcb-32pin-max:
-	@echo "Exporting and autorouting 32-pin-max PCB from tscircuit (EXPERIMENTAL, kitchen-sink WIP)..."
-	@cd pcb && $(KICAD_PYTHON) ./route_and_patch.py 32pin-max.circuit.tsx
 
 pcb: pcb-32pin
 
@@ -93,12 +85,6 @@ schematic-32pin:
 	@mkdir -p $(BUILD_DIR)
 	@cd pcb && npx tsci export -f schematic-svg 32pin.circuit.tsx -o ../docs/schematic-32pin.svg
 
-# EXPERIMENTAL: see pcb-32pin-max above.
-schematic-32pin-max:
-	@echo "Exporting 32-pin-max schematic SVG (EXPERIMENTAL, kitchen-sink WIP)..."
-	@mkdir -p $(BUILD_DIR)
-	@cd pcb && npx tsci export -f schematic-svg 32pin-max.circuit.tsx -o ../docs/schematic-32pin-max.svg
-
 schematic: schematic-32pin
 
 previews-28pin:
@@ -110,11 +96,6 @@ previews-32pin:
 	@echo "Exporting 32-pin PCB SVG previews from KiCad..."
 	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o docs/pcb_front_32pin.svg pcb/build/KiCad/index.kicad_pcb
 	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o docs/pcb_back_32pin.svg pcb/build/KiCad/index.kicad_pcb
-
-previews-32pin-max:
-	@echo "Exporting 32-pin max PCB SVG previews from KiCad..."
-	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o docs/pcb_front_32pin_max.svg pcb/build/KiCad/index.kicad_pcb
-	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o docs/pcb_back_32pin_max.svg pcb/build/KiCad/index.kicad_pcb
 
 previews: previews-32pin
 
@@ -166,7 +147,6 @@ help:
 	@echo "  make tools     - Build the .NET music conversion tools"
 	@echo "  make pcb-28pin     - Build 28-pin board PCB"
 	@echo "  make pcb-32pin     - Build 32-pin board PCB (single YM, MVP target)"
-	@echo "  make pcb-32pin-max - Build 32-pin max board PCB (dual YM, EXPERIMENTAL kitchen-sink WIP)"
 	@echo "  make pcb           - Alias for 'make pcb-32pin'"
 	@echo "  make previews  - Export front/back SVG previews of the current PCB design"
 	@echo "  make logic     - Build the ATF16V8B logic files (.jed)"

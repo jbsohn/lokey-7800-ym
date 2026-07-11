@@ -5,9 +5,6 @@
 
 This document covers the **32-pin ROM board** (`pcb/32pin.circuit.tsx`): a single-YM2149, bank-switched EPROM design with a native DIP-32 socket (128KB–512KB). For the shared memory map and pinout references common to all board variants, see [Hardware.md](Hardware.md). For the smaller, jumper-configured board, see [Hardware-28pin.md](Hardware-28pin.md).
 
-> [!CAUTION]
-> The dual-YM design (`pcb/32pin-max.circuit.tsx`) is not ready, should not be used, and may never be finished or supported.
-
 ## BOM Cost Estimation (Per Unit)
 
 | Component | Part | Estimated Cost | Notes |

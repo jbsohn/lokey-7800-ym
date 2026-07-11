@@ -23,14 +23,14 @@ Each board is a **2-layer cartridge PCB** currently in the **experimental protot
 There are two board designs, defined as separate tscircuit entry files under `pcb/`:
 
 * **`28pin.circuit.tsx`** — single YM2149, ATF16V8B PLD, solder-jumper ROM size selection. Full wiring/BOM: [Hardware-28pin.md](Hardware-28pin.md).
-* **`32pin-max.circuit.tsx`** — ATF22V10 PLD, native DIP-32 socket with software bank switching, optional cascaded second YM2149. Full wiring/BOM: [Hardware-32pin.md](Hardware-32pin.md).
+* **`32pin.circuit.tsx`** — single YM2149, ATF16V8B PLD, native DIP-32 socket with software bank switching via the YM IOA port. Full wiring/BOM: [Hardware-32pin.md](Hardware-32pin.md).
 
 This document covers only the shared code-to-PCB pipeline; see the two hardware docs above for chip pinouts, jumper/bank-switching configuration, and per-board BOM.
 
 ### Board Previews:
 
 > [!NOTE]
-> `docs/pcb_front.svg` and `docs/pcb_back.svg` are regenerated from whichever board was routed most recently by `make pcb-28pin` or `make pcb-32pin-max` (both write to the same `pcb/build/KiCad/index.kicad_pcb`) — they do not currently show both boards side by side.
+> `docs/pcb_front.svg` and `docs/pcb_back.svg` are regenerated from whichever board was routed most recently by `make pcb-28pin` or `make pcb-32pin` (both write to the same `pcb/build/KiCad/index.kicad_pcb`) — they do not currently show both boards side by side.
 
 | Front View (Top Copper & Silkscreen) | Back View (Bottom Copper & Silkscreen - Mirrored) |
 | :---: | :---: |
@@ -40,7 +40,7 @@ This document covers only the shared code-to-PCB pipeline; see the two hardware 
 
 ## Compilation & Routing Pipeline
 
-Because we maintain a code-first design, the single source of truth for each board is its own entry file — `pcb/28pin.circuit.tsx` or `pcb/32pin-max.circuit.tsx`. Generating the final routed KiCad project and manufacturing-ready Gerber/Drill files is automated via `make pcb-28pin` or `make pcb-32pin-max` (`make pcb` is an alias for `make pcb-32pin-max`).
+Because we maintain a code-first design, the single source of truth for each board is its own entry file — `pcb/28pin.circuit.tsx` or `pcb/32pin.circuit.tsx`. Generating the final routed KiCad project and manufacturing-ready Gerber/Drill files is automated via `make pcb-28pin` or `make pcb-32pin` (`make pcb` is an alias for `make pcb-32pin`).
 
 To quickly regenerate the SVG visual board previews for documentation (using the currently compiled board design), you can run the standalone command:
 ```bash
@@ -83,7 +83,7 @@ graph TD
 ## Requirements & Build Instructions
 
 > [!NOTE]
-> Fabrication-ready Gerber files are **not** stored in this repository. A GitHub Actions workflow (`.github/workflows/release.yml`) automatically builds both boards and attaches Gerber archives (`gerbers-28pin.zip`, `gerbers-32pin-max.zip`) to each [GitHub Release](https://github.com/jbsohn/lokey-7800-ym/releases) — grab those if you just want to order the PCB. You only need to set up the dependencies below if you plan to modify the PCB code or rebuild the layout yourself.
+> Fabrication-ready Gerber files are **not** stored in this repository. A GitHub Actions workflow (`.github/workflows/release.yml`) automatically builds both boards and attaches Gerber archives (`gerbers-28pin.zip`, `gerbers-32pin.zip`) to each [GitHub Release](https://github.com/jbsohn/lokey-7800-ym/releases) — grab those if you just want to order the PCB. You only need to set up the dependencies below if you plan to modify the PCB code or rebuild the layout yourself.
 
 ### Requirements
 
@@ -109,10 +109,10 @@ graph TD
    From the repository root directory, run one of:
    ```bash
    make pcb-28pin
-   make pcb-32pin-max   # same as `make pcb`
+   make pcb-32pin   # same as `make pcb`
    ```
    Each target automates the entire pipeline for that board:
    - Runs `route_and_patch.py` to compile the React code, apply design tweaks, auto-route the traces using Freerouting, and run the final Design Rule Check (DRC).
-   - Generates that board's schematic diagram (`docs/schematic-28pin.svg` or `docs/schematic-32pin-max.svg`).
+   - Generates that board's schematic diagram (`docs/schematic-28pin.svg` or `docs/schematic-32pin.svg`).
    - Exports the front and back board previews to [docs/pcb_front.svg](file:///home/john/Projects/7800-ym2149-lab/docs/pcb_front.svg) and [docs/pcb_back.svg](file:///home/john/Projects/7800-ym2149-lab/docs/pcb_back.svg) — shared filenames, so these always reflect whichever board was built last (see note above).
    - Populates the production Gerber/Drill files in `pcb/build/gerbers/` and archives them as `pcb/build/gerbers.zip`.
