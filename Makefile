@@ -155,7 +155,7 @@ help:
 	@echo "  make pcb-32pin     - Build 32-pin board PCB (single YM, MVP target)"
 	@echo "  make pcb           - Alias for 'make pcb-32pin'"
 	@echo "  make previews  - Export front/back SVG previews of the current PCB design"
-	@echo "  make logic     - Build the ATF16V8B logic files (.jed)"
+	@echo "  make logic     - Build the PLD logic files (.jed)"
 	@echo "  make a78       - Build library of preview ROMs (emulator format)"
 	@echo "  make pro       - Build the MADS 'Pro' showcase demo"
 	@echo "  make rom       - Build and sign raw ROMs for hardware (.rom)"

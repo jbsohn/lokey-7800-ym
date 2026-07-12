@@ -63,7 +63,7 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 * **[File Extension Reference](docs/FileExtensions.md)** - Guide to `.ymb`, `.ymi`, `.rom`, and `.a78` files.
 * **[Hardware & Wiring](docs/Hardware.md)** - Shared memory mapping and connector/chip pinouts.
   * **[28-Pin Board](docs/Hardware-28pin.md)** - Single-YM2149, jumper-configured ROM board.
-  * **[32-Pin Board](docs/Hardware-32pin.md)** - Bank-switched ROM board (YM-IOA banking, 128KB-512KB) (Experimental Pre-Alpha v0.2 - Untested).
+  * **[32-Pin Board](docs/Hardware-32pin.md)** - Bank-switched ROM board (fixed 32KB code + 16KB YM-IOA banked data window, 128KB-256KB) (Experimental Pre-Alpha v0.3 - Untested).
 
 * **[PCB Design (tscircuit)](docs/PCB.md)** - Code-to-PCB workflow.
 
@@ -87,7 +87,7 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 ## Acknowledgements & Credits
 
 * **Karri Kaksonen (karrika)**: For the excellent [Otaku-flash](https://github.com/karrika/Otaku-flash) project. We have integrated the **Stable Alpha** Atari 7800 cartridge footprints, symbols, and professional design rules from this MIT-licensed repository.
-* **Simon Frankau ([galette](https://github.com/simon-frankau/galette))**: For the open-source **galette** logic assembler. It provides a modern, cross-platform toolchain for compiling ATF16V8B logic, saving us from the legacy Windows tools.
+* **Simon Frankau ([galette](https://github.com/simon-frankau/galette))**: For the open-source **galette** logic assembler. It provides a modern, cross-platform toolchain for compiling ATF16V8B/ATF22V10 logic, saving us from the legacy Windows tools.
 * **Dan Boris (AtariHQ)**: For the indispensable [7800 Cartridge Technical Specifications](https://atarihq.com/danb/7800cart/a7800cart.shtml) and reference diagrams that made this hardware mapping possible.
 * **Olivier PONCET (aym-js)**: For the high-fidelity [aym-js](https://github.com/ponceto/aym-js) YM2149 emulator core. Our `BinToWav` tool uses a literal C# port of this logic to ensure high-accuracy verification of music assets.
 
