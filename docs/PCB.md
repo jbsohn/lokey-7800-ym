@@ -32,10 +32,17 @@ This document covers only the shared code-to-PCB pipeline; see the two hardware 
 > [!NOTE]
 > These previews link to the [latest GitHub Release](https://github.com/jbsohn/lokey-7800-ym/releases/latest) build artifacts rather than files checked into this repo, so they always reflect the most recently tagged `v*` release (not necessarily the current `main` branch).
 
-| Board | Front View (Top Copper & Silkscreen) | Back View (Bottom Copper & Silkscreen - Mirrored) | 3D Render (Isometric) |
-| :--- | :---: | :---: | :---: |
-| **28-pin** | ![28-pin PCB Front](../build/pcb_front_28pin.png) | ![28-pin PCB Back](../build/pcb_back_28pin.png) | ![28-pin PCB 3D](../build/pcb_3d_28pin.png) |
-| **32-pin** | ![32-pin PCB Front](../build/pcb_front_32pin.png) | ![32-pin PCB Back](../build/pcb_back_32pin.png) | ![32-pin PCB 3D](../build/pcb_3d_32pin.png) |
+#### 28-Pin Board Previews
+
+| Front View (Top Copper) | Back View (Bottom Copper) | 3D Render (Isometric) |
+| :---: | :---: | :---: |
+| <img src="https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_front_28pin.png" width="200" alt="28-pin Front" /> | <img src="https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_back_28pin.png" width="200" alt="28-pin Back" /> | <img src="https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_3d_28pin.png" width="400" alt="28-pin 3D" /> |
+
+#### 32-Pin Board Previews
+
+| Front View (Top Copper) | Back View (Bottom Copper) | 3D Render (Isometric) |
+| :---: | :---: | :---: |
+| <img src="https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_front_32pin.png" width="200" alt="32-pin Front" /> | <img src="https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_back_32pin.png" width="200" alt="32-pin Back" /> | <img src="https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_3d_32pin.png" width="400" alt="32-pin 3D" /> |
 
 > [!NOTE]
 > The 3D renders show bare copper/silkscreen/drill geometry without component bodies — the `tscircuit`-generated footprints don't currently have 3D models (STEP/WRL) assigned, so chips, connectors, and passives don't appear as solid parts yet.
