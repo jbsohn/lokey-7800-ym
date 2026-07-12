@@ -1,30 +1,38 @@
-GAL16V8
+GAL22V10
 ROM_YM
 
-NC A15 A14 A0 HALT RW PHI2 A13 A12 GND
-A11 NC NC NC YMLE PHI2OUT BC1 BDIR ROMCE VCC
+PHI2 A15 A14 A13 A12 A11 A0 RW HALT IOA0 IOA1 GND
+IOA2 IOA3 ROMA14 ROMA15 ROMA16 ROMA17 ROMCE BC1 BDIR PHI2OUT YMLE VCC
 
 PHI2OUT = PHI2
 BDIR = /A15 * /A14 * /A13 * /A12 * A11 * /RW * HALT * PHI2
 BC1 = /A15 * /A14 * /A13 * /A12 * A11 * /RW * /A0 * HALT * PHI2
 YMLE = /A15 * /A14 * /A13 * /A12 * A11 * /RW * HALT * PHI2
-/ROMCE = A15 * RW
+/ROMCE = A15 * RW + /A15 * A14 * RW
+ROMA14 = A15 * A14 + /A15 * IOA0
+ROMA15 = A15 + IOA1
+ROMA16 = A15 + IOA2
+ROMA17 = A15 + IOA3
 
 DESCRIPTION
 
-Atari 7800 YM2149 Address Decoder (32-pin board, ATF16V8B).
+Atari 7800 YM2149 decoder + bank mapper (32-pin board, ATF22V10).
 YM mapped to $0800/$0801 (A15=0, A14=0, A13=0, A12=0, A11=1).
   $0800 (A0=0): address register  BDIR=1, BC1=1, YMLE=1
   $0801 (A0=1): data register     BDIR=1, BC1=0, YMLE=1
-ROM enabled for reads at $8000-$FFFF (RW gating prevents bus
+
+SuperGame-style fixed + banked ROM layout:
+  $8000-$FFFF fixed 32KB  -> top of chip (ROMA17:A15 forced high,
+                             ROMA14 = console A14)
+  $4000-$7FFF banked 16KB -> bank N = YM IOA[3:0] (ROMA17:A14)
+ROM enabled for reads across $4000-$FFFF (RW gating prevents bus
 contention on writes; ROM OE is hardwired low on the board).
 
-ROM bank selection is NOT handled by the GAL: YM1 IOA0-IOA3
-(pins 21/20/19/18) wire directly to ROM A15-A18 with 10k
-pull-ups to VCC. Write YM reg 7 bit 6 = 1 (IOA output), then
-reg 14 = bank number. 16 x 32KB banks:
-  AT27C010 128KB: IOA[1:0], 4 banks
-  AT27C020 256KB: IOA[2:0], 8 banks
-  AT27C040 512KB: IOA[3:0], 16 banks
-Power-on: IOA is in input mode (Hi-Z), pull-ups select the
-last bank -> boot code and vectors live in the top bank.
+YM IOA0-IOA3 are PLD inputs with 10k pull-ups. Write YM reg 7
+bit 6 = 1 (IOA output), then reg 14 = 16KB bank number:
+  AT27C010 128KB: banks 0-5 free (6,7 = fixed region)
+  AT27C020 256KB: banks 0-13 free (14,15 = fixed region)
+  AT27C040 512KB: pin 31/A18 tied VCC, top half only, as 27C020
+Power-on: IOA is Hi-Z, pull-ups select bank 15 (a mirror of the
+fixed region). Vectors/boot code live in the fixed bank, so no
+code duplication across banks is needed.
