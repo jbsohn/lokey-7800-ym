@@ -21,6 +21,7 @@ DRC_RPT_PATH = BUILD_DIR + "index-drc.rpt"
 GERBER_ZIP_PATH = BUILD_DIR + "gerbers"
 
 ENTRY_FILE = sys.argv[1] if len(sys.argv) > 1 else "index.circuit.tsx"
+BOARD = os.path.basename(ENTRY_FILE).split(".")[0]
 
 print(f"Exporting unrouted board from tscircuit React ({ENTRY_FILE})...")
 os.makedirs(os.path.dirname(PCB_PATH), exist_ok=True)
@@ -361,5 +362,12 @@ else:
 
 print(f"Zipping Gerber files to {GERBER_ZIP_PATH}.zip...")
 shutil.make_archive(GERBER_ZIP_PATH, "zip", GERBER_DIR)
+
+# Board-specific copies so downstream targets (previews, CI artifacts) can
+# never grab outputs from whichever board happened to build last.
+print(f"Copying board-specific outputs for {BOARD}...")
+shutil.copy(PCB_PATH, BUILD_DIR + f"index-{BOARD}.kicad_pcb")
+shutil.copy(DRC_RPT_PATH, BUILD_DIR + f"index-{BOARD}-drc.rpt")
+shutil.copy(GERBER_ZIP_PATH + ".zip", BUILD_DIR + f"gerbers-{BOARD}.zip")
 
 print("\nSuccess! Fully routed KiCad PCB and Gerbers are updated.")
