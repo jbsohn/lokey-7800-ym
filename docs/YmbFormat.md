@@ -1,5 +1,8 @@
 # Atari 7800 YM2149 YMB Music Format
 
+> [!WARNING]
+> **Work in Progress**: The `.ymb` format was developed as an experimental proof of concept to quickly test YM and VGM register stream playback on physical cartridges. As such, **the format is subject to change**. Future revisions will align with the planned C++ codebase rewrite to support concurrent music and sound effects playback.
+
 This document specifies the custom binary format used to store compressed YM2149 music assets for the Atari 7800. This format is designed for efficiency in a limited ROM, while aiming for low CPU overhead on the 6502.
 
 ## 1. Header Structure
