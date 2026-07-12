@@ -67,9 +67,9 @@ jobs:
       - name: Collect 28pin gerbers and previews
         run: |
           cp pcb/build/gerbers.zip gerbers-28pin.zip
-          cp docs/pcb_front_28pin.png pcb_front_28pin.png
-          cp docs/pcb_back_28pin.png pcb_back_28pin.png
-          cp docs/pcb_3d_28pin.png pcb_3d_28pin.png
+          cp build/pcb_front_28pin.png pcb_front_28pin.png
+          cp build/pcb_back_28pin.png pcb_back_28pin.png
+          cp build/pcb_3d_28pin.png pcb_3d_28pin.png
 
       - name: Build 32pin PCB
         run: |
@@ -80,9 +80,9 @@ jobs:
       - name: Collect 32pin gerbers and previews
         run: |
           cp pcb/build/gerbers.zip gerbers-32pin.zip
-          cp docs/pcb_front_32pin.png pcb_front_32pin.png
-          cp docs/pcb_back_32pin.png pcb_back_32pin.png
-          cp docs/pcb_3d_32pin.png pcb_3d_32pin.png
+          cp build/pcb_front_32pin.png pcb_front_32pin.png
+          cp build/pcb_back_32pin.png pcb_back_32pin.png
+          cp build/pcb_3d_32pin.png pcb_3d_32pin.png
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
