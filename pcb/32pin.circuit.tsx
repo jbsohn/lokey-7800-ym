@@ -8,17 +8,25 @@ import { LM358 } from "./LM358";
 export default () => (
   <board
     outline={[
-      { x: "-32mm", y: "40mm" },
-      { x: "32mm", y: "40mm" },
-      { x: "32mm", y: "-0.63mm" },
+      { x: "-30mm", y: "40mm" },         // Top-left (±30mm upper body)
+      { x: "30mm", y: "40mm" },          // Top-right
+      { x: "30mm", y: "9.5mm" },         // Right, step in at shoulder top
+      { x: "20.64mm", y: "9.5mm" },      // Right shoulder recess (2.86mm from ±23.5mm, matching cart case)
+      { x: "20.64mm", y: "-0.63mm" },   // Right mid-notch top (rail grip slot)
       { x: "19.05mm", y: "-0.63mm" },
       { x: "19.05mm", y: "-5.08mm" },
-      { x: "23.5mm", y: "-5.08mm" },
+      { x: "20.64mm", y: "-5.08mm" },   // Right mid-notch bottom
+      { x: "20.64mm", y: "-7mm" },       // Right shoulder bottom
+      { x: "23.5mm", y: "-7mm" },        // Right back to connector width
       ...ATARI_7800_CONNECTOR_OUTLINE,
-      { x: "-23.5mm", y: "-5.08mm" },
+      { x: "-23.5mm", y: "-7mm" },       // Left back to connector width
+      { x: "-20.64mm", y: "-7mm" },      // Left shoulder bottom
+      { x: "-20.64mm", y: "-5.08mm" },   // Left mid-notch bottom (rail grip slot)
       { x: "-19.05mm", y: "-5.08mm" },
       { x: "-19.05mm", y: "-0.63mm" },
-      { x: "-32mm", y: "-0.63mm" },
+      { x: "-20.64mm", y: "-0.63mm" },   // Left mid-notch top
+      { x: "-20.64mm", y: "9.5mm" },     // Left shoulder top
+      { x: "-30mm", y: "9.5mm" },        // Left step out to upper body
     ]}
     routingDisabled={true}
   >
@@ -193,7 +201,7 @@ export default () => (
     <group
       name="GAL"
       pcbX="0mm"
-      pcbY="-5mm"
+      pcbY="-4mm"
     >
       <ATF16V8B
         name="U_GAL"
@@ -238,7 +246,7 @@ export default () => (
     <group
       name="Rom"
       pcbX="-1mm"
-      pcbY="-21mm"
+      pcbY="-20mm"
     >
       <ROM_27Cxxx
         name="U_ROM"
@@ -357,7 +365,7 @@ export default () => (
     <group
       name="Latch"
       pcbX="0mm"
-      pcbY="7mm"
+      pcbY="8mm"
     >
       <Latch74HCT373
         name="U_LATCH"
@@ -484,8 +492,8 @@ export default () => (
         name="R_YM_AUDIOA"
         resistance="1k"
         footprint="axial_p7.62mm"
-        pcbX="8mm"
-        pcbY="11mm"
+        pcbX="8.5mm"
+        pcbY="10.5mm"
         schX={24}
         schY={5}
         connections={{
@@ -498,7 +506,7 @@ export default () => (
         resistance="1k"
         footprint="axial_p7.62mm"
         pcbX="19mm"
-        pcbY="11mm"
+        pcbY="10.5mm"
         schX={24}
         schY={2}
         connections={{
@@ -510,8 +518,8 @@ export default () => (
         name="R_YM_AUDIOC"
         resistance="1k"
         footprint="axial_p7.62mm"
-        pcbX="16mm"
-        pcbY="-11.5mm"
+        pcbX="-2mm"
+        pcbY="10.5mm"
         schX={24}
         schY={-1}
         connections={{
@@ -578,8 +586,8 @@ export default () => (
           name="R_PULL"
           resistance="1k"
           footprint="axial_p7.62mm"
-          pcbX="-12mm"
-          pcbY="-11.5mm"
+          pcbX="-12.5mm"
+          pcbY="10.5mm"
           schX={34}
           schY={2}
           connections={{
@@ -592,7 +600,7 @@ export default () => (
           resistance="1k"
           footprint="axial_p7.62mm"
           pcbX="-23mm"
-          pcbY="-11.5mm"
+          pcbY="10.5mm"
           schX={34}
           schY={0}
           connections={{
@@ -620,7 +628,7 @@ export default () => (
     </group>
 
     <silkscreentext
-      text="Lokey 7800 YM v0.2 - 32pin\ngithub.com/jbsohn/lokey-7800-ym"
+      text="Lokey 7800 YM v0.2 - 32pin github.com/jbsohn/lokey-7800-ym"
       anchorAlignment="top_left"
       pcbX="-25mm"
       pcbY="39mm"
