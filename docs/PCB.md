@@ -34,8 +34,8 @@ This document covers only the shared code-to-PCB pipeline; see the two hardware 
 
 | Board | Front View (Top Copper & Silkscreen) | Back View (Bottom Copper & Silkscreen - Mirrored) | 3D Render (Isometric) |
 | :--- | :---: | :---: | :---: |
-| **28-pin** | ![28-pin PCB Front](https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_front_28pin.svg) | ![28-pin PCB Back](https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_back_28pin.svg) | ![28-pin PCB 3D](https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_3d_28pin.png) |
-| **32-pin** | ![32-pin PCB Front](https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_front_32pin.svg) | ![32-pin PCB Back](https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_back_32pin.svg) | ![32-pin PCB 3D](https://github.com/jbsohn/lokey-7800-ym/releases/latest/download/pcb_3d_32pin.png) |
+| **28-pin** | ![28-pin PCB Front](../build/pcb_front_28pin.png) | ![28-pin PCB Back](../build/pcb_back_28pin.png) | ![28-pin PCB 3D](../build/pcb_3d_28pin.png) |
+| **32-pin** | ![32-pin PCB Front](../build/pcb_front_32pin.png) | ![32-pin PCB Back](../build/pcb_back_32pin.png) | ![32-pin PCB 3D](../build/pcb_3d_32pin.png) |
 
 > [!NOTE]
 > The 3D renders show bare copper/silkscreen/drill geometry without component bodies — the `tscircuit`-generated footprints don't currently have 3D models (STEP/WRL) assigned, so chips, connectors, and passives don't appear as solid parts yet.
@@ -119,4 +119,4 @@ graph TD
    - Runs `route_and_patch.py` to compile the React code, apply design tweaks, auto-route the traces using Freerouting, and run the final Design Rule Check (DRC).
    - Populates the production Gerber/Drill files in `pcb/build/gerbers/` and archives them as `pcb/build/gerbers.zip`.
 
-   Run `make schematic-28pin` / `make schematic-32pin` to generate that board's schematic diagram, and `make previews-28pin` / `make previews-32pin` to export that board's front/back SVGs plus an isometric 3D render to `pcb/build/previews/` (`pcb_front_<board>.svg` / `pcb_back_<board>.svg` / `pcb_3d_<board>.png` — gitignored build output, not checked into the repo). `make previews` is an alias for `make previews-32pin` only.
+   Run `make schematic-28pin` / `make schematic-32pin` to generate that board's schematic diagram, and `make previews-28pin` / `make previews-32pin` to export that board's front/back PNGs plus an isometric 3D render to `build/` (`pcb_front_<board>.png` / `pcb_back_<board>.png` / `pcb_3d_<board>.png` — gitignored build output, not checked into the repo). `make previews` is an alias for `make previews-32pin` only.

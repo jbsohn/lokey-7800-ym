@@ -29,7 +29,7 @@ jobs:
       - name: Install Node.js and Java
         run: |
           apt-get update -q
-          apt-get install -y curl wget make
+          apt-get install -y curl wget make librsvg2-bin
           curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
           apt-get install -y nodejs
           npm install -g bun
@@ -67,9 +67,9 @@ jobs:
       - name: Collect 28pin gerbers and previews
         run: |
           cp pcb/build/gerbers.zip gerbers-28pin.zip
-          cp pcb/build/previews/pcb_front_28pin.svg pcb_front_28pin.svg
-          cp pcb/build/previews/pcb_back_28pin.svg pcb_back_28pin.svg
-          cp pcb/build/previews/pcb_3d_28pin.png pcb_3d_28pin.png
+          cp docs/pcb_front_28pin.png pcb_front_28pin.png
+          cp docs/pcb_back_28pin.png pcb_back_28pin.png
+          cp docs/pcb_3d_28pin.png pcb_3d_28pin.png
 
       - name: Build 32pin PCB
         run: |
@@ -80,9 +80,9 @@ jobs:
       - name: Collect 32pin gerbers and previews
         run: |
           cp pcb/build/gerbers.zip gerbers-32pin.zip
-          cp pcb/build/previews/pcb_front_32pin.svg pcb_front_32pin.svg
-          cp pcb/build/previews/pcb_back_32pin.svg pcb_back_32pin.svg
-          cp pcb/build/previews/pcb_3d_32pin.png pcb_3d_32pin.png
+          cp docs/pcb_front_32pin.png pcb_front_32pin.png
+          cp docs/pcb_back_32pin.png pcb_back_32pin.png
+          cp docs/pcb_3d_32pin.png pcb_3d_32pin.png
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
@@ -91,14 +91,14 @@ jobs:
           path: |
             gerbers-28pin.zip
             gerbers-32pin.zip
-            pcb_front_28pin.svg
-            pcb_back_28pin.svg
+            pcb_front_28pin.png
+            pcb_back_28pin.png
             pcb_3d_28pin.png
-            pcb_front_32pin.svg
-            pcb_back_32pin.svg
+            pcb_front_32pin.png
+            pcb_back_32pin.png
             pcb_3d_32pin.png
-            docs/schematic-28pin.svg
-            docs/schematic-32pin.svg
+            build/schematic-28pin.png
+            build/schematic-32pin.png
             build/*.jed
 
       - name: Create GitHub Release
@@ -109,12 +109,12 @@ jobs:
           files: |
             gerbers-28pin.zip
             gerbers-32pin.zip
-            pcb_front_28pin.svg
-            pcb_back_28pin.svg
+            pcb_front_28pin.png
+            pcb_back_28pin.png
             pcb_3d_28pin.png
-            pcb_front_32pin.svg
-            pcb_back_32pin.svg
+            pcb_front_32pin.png
+            pcb_back_32pin.png
             pcb_3d_32pin.png
-            docs/schematic-28pin.svg
-            docs/schematic-32pin.svg
+            build/schematic-28pin.png
+            build/schematic-32pin.png
             build/*.jed

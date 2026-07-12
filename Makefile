@@ -78,30 +78,52 @@ pcb: pcb-32pin
 schematic-28pin:
 	@echo "Exporting 28-pin schematic SVG..."
 	@mkdir -p $(BUILD_DIR)
-	@cd pcb && npx tsci export -f schematic-svg 28pin.circuit.tsx -o ../docs/schematic-28pin.svg
+	@cd pcb && npx tsci export -f schematic-svg 28pin.circuit.tsx -o ../$(BUILD_DIR)/schematic-28pin.svg
+	@if command -v rsvg-convert >/dev/null 2>&1; then \
+		echo "Converting schematic SVG to PNG..."; \
+		rsvg-convert -w 2048 $(BUILD_DIR)/schematic-28pin.svg -o $(BUILD_DIR)/schematic-28pin.png; \
+	else \
+		echo "Warning: 'rsvg-convert' not found. Skipping PNG schematic generation (only SVG created)."; \
+	fi
 
 schematic-32pin:
 	@echo "Exporting 32-pin schematic SVG..."
 	@mkdir -p $(BUILD_DIR)
-	@cd pcb && npx tsci export -f schematic-svg 32pin.circuit.tsx -o ../docs/schematic-32pin.svg
+	@cd pcb && npx tsci export -f schematic-svg 32pin.circuit.tsx -o ../$(BUILD_DIR)/schematic-32pin.svg
+	@if command -v rsvg-convert >/dev/null 2>&1; then \
+		echo "Converting schematic SVG to PNG..."; \
+		rsvg-convert -w 2048 $(BUILD_DIR)/schematic-32pin.svg -o $(BUILD_DIR)/schematic-32pin.png; \
+	else \
+		echo "Warning: 'rsvg-convert' not found. Skipping PNG schematic generation (only SVG created)."; \
+	fi
 
 schematic: schematic-32pin
 
 previews-28pin:
 	@echo "Exporting 28-pin PCB SVG previews from KiCad..."
-	@mkdir -p pcb/build/previews
-	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o pcb/build/previews/pcb_front_28pin.svg pcb/build/KiCad/index.kicad_pcb
-	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o pcb/build/previews/pcb_back_28pin.svg pcb/build/KiCad/index.kicad_pcb
+	@mkdir -p $(BUILD_DIR)
+	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o $(BUILD_DIR)/pcb_front_28pin.svg pcb/build/KiCad/index.kicad_pcb
+	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o $(BUILD_DIR)/pcb_back_28pin.svg pcb/build/KiCad/index.kicad_pcb
+	@if command -v rsvg-convert >/dev/null 2>&1; then \
+		echo "Converting PCB SVGs to PNG..."; \
+		rsvg-convert -w 2048 $(BUILD_DIR)/pcb_front_28pin.svg -o $(BUILD_DIR)/pcb_front_28pin.png; \
+		rsvg-convert -w 2048 $(BUILD_DIR)/pcb_back_28pin.svg -o $(BUILD_DIR)/pcb_back_28pin.png; \
+	fi
 	@echo "Rendering 28-pin PCB 3D preview from KiCad..."
-	@kicad-cli pcb render --quality high --floor --rotate -45,0,45 --width 1600 --height 1200 --background opaque -o pcb/build/previews/pcb_3d_28pin.png pcb/build/KiCad/index.kicad_pcb
+	@kicad-cli pcb render --quality high --floor --rotate -45,0,45 --width 1600 --height 1200 --background opaque -o $(BUILD_DIR)/pcb_3d_28pin.png pcb/build/KiCad/index.kicad_pcb
 
 previews-32pin:
 	@echo "Exporting 32-pin PCB SVG previews from KiCad..."
-	@mkdir -p pcb/build/previews
-	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o pcb/build/previews/pcb_front_32pin.svg pcb/build/KiCad/index.kicad_pcb
-	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o pcb/build/previews/pcb_back_32pin.svg pcb/build/KiCad/index.kicad_pcb
+	@mkdir -p $(BUILD_DIR)
+	@kicad-cli pcb export svg --mode-single --layers F.Cu,F.Silkscreen,F.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board -o $(BUILD_DIR)/pcb_front_32pin.svg pcb/build/KiCad/index.kicad_pcb
+	@kicad-cli pcb export svg --mode-single --layers B.Cu,B.Silkscreen,B.Mask,Edge.Cuts --exclude-drawing-sheet --fit-page-to-board --mirror -o $(BUILD_DIR)/pcb_back_32pin.svg pcb/build/KiCad/index.kicad_pcb
+	@if command -v rsvg-convert >/dev/null 2>&1; then \
+		echo "Converting PCB SVGs to PNG..."; \
+		rsvg-convert -w 2048 $(BUILD_DIR)/pcb_front_32pin.svg -o $(BUILD_DIR)/pcb_front_32pin.png; \
+		rsvg-convert -w 2048 $(BUILD_DIR)/pcb_back_32pin.svg -o $(BUILD_DIR)/pcb_back_32pin.png; \
+	fi
 	@echo "Rendering 32-pin PCB 3D preview from KiCad..."
-	@kicad-cli pcb render --quality high --floor --rotate -45,0,45 --width 1600 --height 1200 --background opaque -o pcb/build/previews/pcb_3d_32pin.png pcb/build/KiCad/index.kicad_pcb
+	@kicad-cli pcb render --quality high --floor --rotate -45,0,45 --width 1600 --height 1200 --background opaque -o $(BUILD_DIR)/pcb_3d_32pin.png pcb/build/KiCad/index.kicad_pcb
 
 previews: previews-32pin
 
