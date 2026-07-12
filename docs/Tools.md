@@ -4,6 +4,8 @@ This document describes the compilation, conversion, verification, and diagnosti
 
 > [!IMPORTANT]
 > These C# tools are **experimental** and primarily intended for **early testing** of the YM2149 on Atari 7800 cartridges.
+> 
+> The C# implementation was a temporary hack to quickly parse and verify Atari ST captures. In future development, these tools will be rewritten in C++ and optimized for a driver architecture that supports simultaneous sound effects and music playback.
 
 > [!NOTE]
 > The current toolchain and the `.ymb` music format were developed as a proof of concept to quickly get YM music playing on physical cartridges, and are subject to change in future revisions.

@@ -28,8 +28,8 @@ The **Atari 7800** acts as the **Consumer** of these assets. By bridging the har
 
 * **Working Prototype**: We have a hand-built cartridge prototype that has been verified to work.
 * **PCB Effort**: We are working on a PCB design using a code-to-PCB workflow (**tscircuit**).
-* **Reproducible Hardware Builds**: GitHub Actions rebuilds the PLD logic and both PCBs from source on every push, with a pinned toolchain. The gerbers and `.jed` files attached to [GitHub Releases](https://github.com/jbsohn/lokey-7800-ym/releases) are the canonical artifacts — what you send to the fab and program into PLDs.
-* **Conversion Tools**: The project includes experimental C# tools to convert Atari ST **YM** and multi-platform **VGM** files into an optimized format for the 7800. These are used for early testing to minimize data size for limited cartridge space.
+* **Reproducible Hardware Builds**: GitHub Actions rebuilds the PLD logic and both PCBs from source on every push. You can also build locally using the preconfigured **Docker Dev Container** (currently supported for building and routing PCBs).
+* **Conversion Tools**: The project includes experimental tools to convert music files. The current C# implementation was a temporary hack to parse ST captures; this will be rewritten in C++ and optimized to support simultaneous music and sound effects playback.
 * **SDK Progress**: We are working toward a set of tools and drivers to help others add YM music to their 7800 projects.
 * **Custom Emulation**: For testing without hardware, we use forks of **a7800** and **js7800** that implement this specific memory mapping. *If this project gains momentum, we hope these changes might eventually be useful to the official upstream projects.*
 

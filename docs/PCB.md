@@ -91,6 +91,15 @@ graph TD
 
 ### Requirements
 
+#### Docker Dev Container (Optional)
+
+An optional, preconfigured Dev Container is provided in the `.devcontainer/` folder. Opening the project in this container sets up a gold-standard environment that mirrors the GitHub Actions runner, pre-installing Node.js, Bun, Java, Cargo, KiCad 9.0, freerouting, `dasm`, and the `.NET SDK`.
+
+> [!IMPORTANT]
+> At this stage of the project, the Dev Container is only fully configured and supported for **building and routing the PCB, schematics, and PLD logic**.
+
+#### Manual Setup Requirements
+
 1. **Node.js (v18+) & npm/bun**: Required to run the `tscircuit` React-to-PCB compiler.
 2. **KiCad (v7.0 or v8.0+)**:
    - `kicad-cli` must be available in your system `PATH`.

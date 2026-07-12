@@ -220,7 +220,7 @@ if freerouting_jar:
     if not os.path.exists(freerouting_jar):
         print(f"Error: FREEROUTING_JAR is set but file not found: {freerouting_jar}")
         sys.exit(1)
-    freerouting_cmd = ["java", "-jar", freerouting_jar]
+    freerouting_cmd = ["java", "-Djava.awt.headless=true", "-jar", freerouting_jar]
 else:
     freerouting_bin = os.getenv("FREEROUTING_BIN", "freerouting")
     if not shutil.which(freerouting_bin) and not os.path.exists(freerouting_bin):
