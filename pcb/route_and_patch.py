@@ -351,11 +351,11 @@ gbrjob_path = os.path.join(GERBER_DIR, "index-job.gbrjob")
 if os.path.exists(gbrjob_path):
     with open(gbrjob_path) as f:
         gbrjob = json.load(f)
-    gbrjob["GeneralSpecs"]["Finish"] = "HAL"
+    gbrjob["GeneralSpecs"]["Finish"] = "ENIG"
     gbrjob["GeneralSpecs"]["ProjectId"]["Revision"] = "Rev1"
     with open(gbrjob_path, "w") as f:
         json.dump(gbrjob, f, indent=2)
-    print("  Set Finish: HAL, Revision: Rev1")
+    print("  Set Finish: ENIG, Revision: Rev1")
 else:
     print("Warning: gbrjob not found")
 
