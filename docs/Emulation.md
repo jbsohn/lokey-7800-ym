@@ -9,7 +9,7 @@ The project uses a **v4 A78 Header** (an extension of the standard 128-byte head
 - **Header Version**: `4` (Offset 0)
 - **Audio Location**: `$0800` written into Offset 66–67 (`A78Gen`'s `audio` field) — the real YM2149 address register location.
 - **Cart Type Flag**: Bit 2 of the Cart Type low byte (Offset 54) is force-set as a redundant "YM2149 present" flag for older emulator support.
-- **Mapper**: `0` (Linear/No Bankswitching, Offset 64).
+- **Mapper** (Offset 64): `0` = Linear (fixed 32KB, no bankswitching). `1` = 32-pin board's YM-IOA bank scheme — fixed 32KB at `$8000-$FFFF` plus a 16KB window at `$4000-$7FFF` bank-selected via the YM2149's IOA port (see [Hardware-32pin.md](Hardware-32pin.md)). `A78Gen` sets this from the `mapper` field in its config JSON; for mapper 1 the input binary must be the full 128KB or 256KB ROM image, not just the fixed bank.
 
 > **Emulator fork compatibility note**: As of the move to the $0800/$0801 "Pokey800" mapping (see [Hardware.md](Hardware.md#memory-mapping)), Offset 66 is `$08` rather than `$40`. The `a7800`/`js7800` forks below historically detected YM2149 presence by checking **bit 6** of Offset 66 (`%01000000`), which only happened to work because $4000's high byte is `0x40`. That bit-6 check no longer matches and needs a corresponding update in those forks — until then, rely on the Cart Type bit 2 flag (Offset 54) for detection, or patch the forks to read the full 16-bit Offset 66–67 value as the actual mapped address instead of a fixed bit flag.
 
@@ -35,3 +35,4 @@ A browser-based emulator that allows for zero-setup testing and sharing.
 - **Key Enhancements**:
   - **WebAudio Integration**: Bridges the 6502 register writes to the browser's audio engine for real-time playback.
   - **Rapid Iteration**: Open sourceyour `.a78` builds directly into the browser.
+  - **32-Pin Bank Switching**: Emulates the Mapper 1 YM-IOA bank scheme (`CARTRIDGE_TYPE_YM_BANKED` in `Cartridge.js`) — the `$4000-$7FFF` window follows the YM2149's IO Port A whenever register 7 has it configured as an output, including the 128KB chip's bank-number aliasing (no A17 pin) and the power-on pull-up float to the fixed-region mirror.

@@ -59,8 +59,14 @@ FIXED_A78S     := $(foreach f,$(FIXED_BASE),$(BUILD_DIR)/$(f).a78)
 PRO_A78S       := $(foreach f,$(PRO_BASE),$(BUILD_DIR)/$(f).a78)
 FIXED_ROMS     := $(foreach f,$(FIXED_BASE),$(BUILD_DIR)/$(f).rom)
 
+# Banked demo (32-pin board, mapper:1) -- packaged with its own
+# <name>_header.json, not the shared header.json (which is mapper:0 and
+# would silently truncate a banked image to a fixed 32KB one).
+BANKED_A78S    := $(BUILD_DIR)/bank.a78
+BANKED_ROMS    := $(BUILD_DIR)/bank.rom
+
 # --- Core Targets ---
-.PHONY: all help clean logic rom a78 bin wav tools pro pcb pcb-28pin pcb-32pin schematic previews previews-28pin previews-32pin
+.PHONY: all help clean logic rom a78 bin wav tools pro pcb pcb-28pin pcb-32pin schematic previews previews-28pin previews-32pin bank
 
 all: tools a78
 
@@ -155,13 +161,15 @@ $(A78GEN): tools/A78Gen/*.cs tools/Core/*.cs
 	@mkdir -p $(BIN_DIR)
 	@dotnet publish tools/A78Gen/A78Gen.csproj -o $(BIN_DIR) --configuration Release --verbosity quiet
 
-rom: $(BUILD_DIR) $(MUSIC_ROMS) $(FIXED_ROMS)
+rom: $(BUILD_DIR) $(MUSIC_ROMS) $(FIXED_ROMS) $(BANKED_ROMS)
 	@for f in $(BUILD_DIR)/*.rom; do \
 		echo "Signing $$f"; \
 		$(SIGN) -w "$$f" && $(SIGN) -t "$$f" || true; \
 	done
 
-a78: $(BUILD_DIR) $(MUSIC_A78S) $(FIXED_A78S)
+a78: $(BUILD_DIR) $(MUSIC_A78S) $(FIXED_A78S) $(BANKED_A78S)
+
+bank: $(BUILD_DIR) $(BANKED_A78S) $(BANKED_ROMS)
 
 bin: $(BUILD_DIR) $(ALL_MUSIC_DATA)
 
@@ -173,12 +181,13 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "  make tools     - Build the .NET music conversion tools"
-	@echo "  make pcb-28pin     - Build 28-pin board PCB"
-	@echo "  make pcb-32pin     - Build 32-pin board PCB (single YM, MVP target)"
-	@echo "  make pcb           - Alias for 'make pcb-32pin'"
+	@echo "  make pcb-28pin - Build 28-pin board PCB"
+	@echo "  make pcb-32pin - Build 32-pin board PCB (single YM, MVP target)"
+	@echo "  make pcb       - Alias for 'make pcb-32pin'"
 	@echo "  make previews  - Export front/back SVG previews of the current PCB design"
 	@echo "  make logic     - Build the PLD logic files (.jed)"
 	@echo "  make a78       - Build library of preview ROMs (emulator format)"
+	@echo "  make bank 		- Build the 32-pin bank-select chromatic scale demo (.a78 + .rom)"
 	@echo "  make pro       - Build the MADS 'Pro' showcase demo"
 	@echo "  make rom       - Build and sign raw ROMs for hardware (.rom)"
 	@echo "  make wav       - Generate verification .wav files for all tracks"
@@ -206,6 +215,10 @@ $(BUILD_DIR)/%.ymb $(BUILD_DIR)/%.ymi: $(VGM_DIR)/%.vgz $(VGM2BIN) | $(BUILD_DIR
 $(BUILD_DIR)/%.a78: $(BUILD_DIR)/%.bin header.json $(A78GEN)
 	@echo "  Packaging ROM [$(ASSEMBLER)]: $@"
 	@$(A78GEN) $< header.json -o $@
+
+$(BUILD_DIR)/bank.a78: $(BUILD_DIR)/bank.bin $(SRC_DIR)/bank.json $(A78GEN)
+	@echo "  Packaging banked ROM [$(ASSEMBLER)]: $@"
+	@$(A78GEN) $< $(SRC_DIR)/bank.json -o $@
 
 # Music Player (Uses universal source)
 $(BUILD_DIR)/%.bin: $(SRC_DIR)/player.asm $(BUILD_DIR)/%.ymb $(BUILD_DIR)/%.ymi | $(BUILD_DIR)

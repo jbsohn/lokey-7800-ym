@@ -115,9 +115,9 @@ The board carries a native 32-pin DIP-32 (600mil) socket compatible with the AT2
 
 | YM Pin | Signal  | Connection                 |
 | :----- | :------ | :------------------------- |
-| 22     | CLOCK   | PHI2OUT (PLD Pin 16)       |
-| 27     | BDIR    | PLD Pin 18                 |
-| 29     | BC1     | PLD Pin 17                 |
+| 22     | CLOCK   | PHI2OUT (PLD Pin 22)       |
+| 27     | BDIR    | PLD Pin 21                 |
+| 29     | BC1     | PLD Pin 20                 |
 | 28     | BC2     | VCC                        |
 | 25     | A8      | VCC                        |
 | 24     | !A9     | GND                        |
@@ -139,7 +139,7 @@ The YM's IOA port holds the current bank number. Software writes YM **register 1
 ### 5. Fixed + Banked Memory Layout
 
 > [!NOTE]
-> This bank switching scheme (version 0.3) is currently experimental pre-alpha and has not yet been tested on physical hardware.
+> This bank switching scheme is currently experimental pre-alpha and has not yet been tested on physical hardware.
 
 SuperGame-style split, decoded entirely in the ATF22V10:
 
@@ -164,6 +164,9 @@ Supported configurations (16KB banks; the top two banks are the fixed 32KB regio
 | AT27C010 | 128KB                 | 6 × 16KB (banks 0–5; IOA3 ignored) |
 | AT27C020 | 256KB                 | 14 × 16KB (banks 0–13)             |
 | AT27C040 | 512KB (top half used) | 14 × 16KB (banks 0–13)             |
+
+> [!IMPORTANT]
+> **Known limitation of this revision:** 14 usable banks (256KB) is a hard limit, not a soft one — to be addressed in a later revision.
 
 **Power-on behaviour:** at reset the YM's IOA port is in input mode (Hi-Z), so the pull-ups select bank 15 and the data window shows a mirror of $C000–$FFFF — harmless. The reset vectors and boot code live in the **fixed** bank, which is always mapped, so **no code or vector duplication across banks is required**. Bank switching only ever moves the $4000–$7FFF data window.
 

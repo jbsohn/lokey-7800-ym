@@ -73,4 +73,9 @@ Advanced timing diagnostics used to detect mid-cycle address bus noise or "shatt
 ### `tools/A78Gen/Program.cs`
 Generates a 128-byte A78 header and packages a raw binary for emulator use.
 *   **Status**: **Work in Progress**.
-*   **Planned Improvements**: Advanced mapping for varied cartridge header types and bank-switching configurations.
+*   **Mapper**: set `"mapper": 1` in the config JSON to package the 32-pin board's YM-IOA bank scheme (see [Emulation.md](Emulation.md#a78-header--emulator-detection)) — the input binary must then be the full 128KB or 256KB ROM image, not just the fixed 32KB bank. `"mapper": 0` (default) keeps the original fixed-32KB-only behavior.
+*   **Usage**:
+    ```bash
+    dotnet run --project tools/A78Gen/A78Gen.csproj -- <input.bin> <config.json> -o <output.a78>
+    ```
+*   **Planned Improvements**: Mapping for other cartridge header types (SuperGame, Activision, etc.) beyond the fixed-32KB and YM-IOA-banked cases.

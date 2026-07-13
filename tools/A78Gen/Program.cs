@@ -4,6 +4,17 @@ using System.Text.Json.Serialization;
 
 namespace A78Gen;
 
+/// Header offset-64 "Mapper" values. See docs/Hardware-32pin.md and
+/// docs/Emulation.md for the corresponding emulator-side detection.
+public static class Mapper
+{
+    public const byte Linear = 0;
+    /// 32-pin board: fixed 32K @ $8000-$FFFF + 16K @ $4000-$7FFF banked
+    /// via the YM2149 IOA port. Input binary must be the full 128K or 256K
+    /// ROM image (not just the fixed bank).
+    public const byte YmBanked = 1;
+}
+
 public class A78Config
 {
     [JsonPropertyName("version")] public byte Version { get; set; } = 4;
@@ -61,10 +72,33 @@ internal class Program
         var config = JsonSerializer.Deserialize(json, SourceGenerationContext.Default.A78Config) ?? new A78Config();
 
         byte[] rawData = File.ReadAllBytes(inputPath);
-        byte[] romData = new byte[32768];
-        Array.Fill(romData, (byte)0xFF);
-        int copyLength = Math.Min(32768, rawData.Length);
-        Array.Copy(rawData, rawData.Length - copyLength, romData, 32768 - copyLength, copyLength);
+        byte[] romData;
+
+        if (config.Mapper == Mapper.YmBanked)
+        {
+            // Fixed 32K + YM-IOA-banked 16K: ship the whole image untouched.
+            // The board only wires up a 128K (AT27C010) or 256K
+            // (AT27C020, or AT27C040 used as top-half-only) chip.
+            if (rawData.Length != 128 * 1024 && rawData.Length != 256 * 1024)
+            {
+                Console.Error.WriteLine(
+                    $"Error: mapper 1 (YM-IOA banked) requires a 128KB or 256KB input binary, got {rawData.Length} bytes.");
+                Environment.Exit(1);
+            }
+            romData = rawData;
+        }
+        else
+        {
+            if (rawData.Length > 32768)
+            {
+                Console.WriteLine(
+                    $"Warning: input is {rawData.Length} bytes but mapper is 0 (linear/fixed 32K) -- only the top 32KB will be kept. Set \"mapper\": 1 in the config to build a banked image instead.");
+            }
+            romData = new byte[32768];
+            Array.Fill(romData, (byte)0xFF);
+            int copyLength = Math.Min(32768, rawData.Length);
+            Array.Copy(rawData, rawData.Length - copyLength, romData, 32768 - copyLength, copyLength);
+        }
 
         string romPath = Path.ChangeExtension(outputPath, ".rom");
         File.WriteAllBytes(romPath, romData);
@@ -76,7 +110,10 @@ internal class Program
         byte[] titleBytes = Encoding.ASCII.GetBytes(config.Title.PadRight(32));
         Array.Copy(titleBytes, 0, header, 17, 32);
         
-        header[49] = 0; header[50] = 0; header[51] = 0x80; header[52] = 0x00;
+        header[49] = (byte)(romData.Length >> 24);
+        header[50] = (byte)(romData.Length >> 16);
+        header[51] = (byte)(romData.Length >> 8);
+        header[52] = (byte)(romData.Length & 0xFF);
         
         header[53] = (byte)(config.CartType >> 8);
         // Force YM bit (bit 2) in low byte of Cart Type for older emulator support
@@ -104,7 +141,7 @@ internal class Program
 
         using var fs = new FileStream(outputPath, FileMode.Create);
         fs.Write(header, 0, 128);
-        fs.Write(romData, 0, 32768);
+        fs.Write(romData, 0, romData.Length);
 
         Console.WriteLine($"Generated {outputPath} and {romPath}");
     }
