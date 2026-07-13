@@ -1,7 +1,8 @@
 # 32-Pin Board — Theory of Operation & Assembly Guide
 
-> [!WARNING]
-> **Experimental Pre-Alpha (v0.2):** The fixed+banked YM-IOA bank selection design has not been tested on physical hardware yet and is considered experimental pre-alpha. Use at your own risk.
+**Experimental Pre-Alpha (v0.2):** The fixed+banked YM-IOA bank selection design has not been tested on physical hardware yet and is considered experimental pre-alpha. Use at your own risk. 
+
+**Status:** v0.2 has been sent to the manufacturer; a prototype PCB is pending and this design is not yet hardware-verified.
 
 This document covers the **32-pin ROM board** (`pcb/32pin.circuit.tsx`): a single-YM2149, bank-switched EPROM design with a native DIP-32 socket. The memory layout is SuperGame-style: a **fixed 32KB code bank at $8000–$FFFF** and a **switched 16KB data window at $4000–$7FFF**, with the bank number held in the YM2149's IOA port and decoded by the ATF22V10 PLD. For the shared memory map and pinout references common to all board variants, see [Hardware.md](Hardware.md). For the smaller, jumper-configured board, see [Hardware-28pin.md](Hardware-28pin.md).
 
