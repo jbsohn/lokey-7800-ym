@@ -106,19 +106,18 @@ internal class Program
         byte[] header = new byte[128];
         header[0] = config.Version;
         Encoding.ASCII.GetBytes("ATARI7800").CopyTo(header, 1);
-        
+
         byte[] titleBytes = Encoding.ASCII.GetBytes(config.Title.PadRight(32));
         Array.Copy(titleBytes, 0, header, 17, 32);
-        
+
         header[49] = (byte)(romData.Length >> 24);
         header[50] = (byte)(romData.Length >> 16);
         header[51] = (byte)(romData.Length >> 8);
         header[52] = (byte)(romData.Length & 0xFF);
-        
+
         header[53] = (byte)(config.CartType >> 8);
-        // Force YM bit (bit 2) in low byte of Cart Type for older emulator support
-        header[54] = (byte)((config.CartType & 0xFF) | 0x04); 
-        
+        header[54] = (byte)(config.CartType & 0xFF);
+
         header[55] = config.Controller1;
         header[56] = config.Controller2;
         header[57] = config.TvType;
@@ -132,12 +131,6 @@ internal class Program
         header[69] = (byte)(config.Interrupt & 0xFF);
 
         Encoding.ASCII.GetBytes("ACTUAL CART DATA STARTS HERE").CopyTo(header, 100);
-
-        // --- CHECKSUM CALCULATION ---
-        // Some emulators require the 128-byte header to be checksummed
-        long sum = 0;
-        for (int i = 0; i < 127; i++) sum += header[i];
-        header[127] = (byte)(sum & 0xFF);
 
         using var fs = new FileStream(outputPath, FileMode.Create);
         fs.Write(header, 0, 128);

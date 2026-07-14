@@ -162,10 +162,6 @@ $(A78GEN): tools/A78Gen/*.cs tools/Core/*.cs
 	@dotnet publish tools/A78Gen/A78Gen.csproj -o $(BIN_DIR) --configuration Release --verbosity quiet
 
 rom: $(BUILD_DIR) $(MUSIC_ROMS) $(FIXED_ROMS) $(BANKED_ROMS)
-	@for f in $(BUILD_DIR)/*.rom; do \
-		echo "Signing $$f"; \
-		$(SIGN) -w "$$f" && $(SIGN) -t "$$f" || true; \
-	done
 
 a78: $(BUILD_DIR) $(MUSIC_A78S) $(FIXED_A78S) $(BANKED_A78S)
 
@@ -212,11 +208,11 @@ $(BUILD_DIR)/%.ymb $(BUILD_DIR)/%.ymi: $(VGM_DIR)/%.vgz $(VGM2BIN) | $(BUILD_DIR
 
 # --- Assembly Rules ---
 
-$(BUILD_DIR)/%.a78: $(BUILD_DIR)/%.bin header.json $(A78GEN)
+$(BUILD_DIR)/%.a78: $(BUILD_DIR)/%.rom header.json $(A78GEN)
 	@echo "  Packaging ROM [$(ASSEMBLER)]: $@"
 	@$(A78GEN) $< header.json -o $@
 
-$(BUILD_DIR)/bank.a78: $(BUILD_DIR)/bank.bin $(SRC_DIR)/bank.json $(A78GEN)
+$(BUILD_DIR)/bank.a78: $(BUILD_DIR)/bank.rom $(SRC_DIR)/bank.json $(A78GEN)
 	@echo "  Packaging banked ROM [$(ASSEMBLER)]: $@"
 	@$(A78GEN) $< $(SRC_DIR)/bank.json -o $@
 
@@ -240,9 +236,9 @@ $(BUILD_DIR)/%.bin: $(SRC_DIR)/%.asm | $(BUILD_DIR)
 	@echo "  Assembling Demo ROM [$(ASSEMBLER)]: $*"
 	@$(ASM_CMD) $< $(ASM_FLAGS) $(ASM_OUT)$@
 
-# Legacy Hardware format
 $(BUILD_DIR)/%.rom: $(BUILD_DIR)/%.bin
 	@cp $< $@
+	@$(SIGN) -w "$@" >/dev/null && $(SIGN) -t "$@" || true
 
 # --- Utilities ---
 logic: $(BUILD_DIR)

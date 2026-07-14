@@ -91,7 +91,7 @@ This video shows a physical Atari 7800 playing a full 92-second capture of the "
 - **Karri Kaksonen (karrika)**: For the excellent [Otaku-flash](https://github.com/karrika/Otaku-flash) project. We have integrated the **Stable Alpha** Atari 7800 cartridge footprints, symbols, and professional design rules from this MIT-licensed repository.
 - **Simon Frankau ([galette](https://github.com/simon-frankau/galette))**: For the open-source **galette** logic assembler. It provides a modern, cross-platform toolchain for compiling ATF16V8B/ATF22V10 logic, saving us from the legacy Windows tools.
 - **Dan Boris (AtariHQ)**: For the indispensable [7800 Cartridge Technical Specifications](https://atarihq.com/danb/7800cart/a7800cart.shtml) and reference diagrams that made this hardware mapping possible.
-- **Olivier PONCET (aym-js)**: For the high-fidelity [aym-js](https://github.com/ponceto/aym-js) YM2149 emulator core. Our `BinToWav` tool uses a literal C# port of this logic to ensure high-accuracy verification of music assets.
+- **Olivier PONCET (aym-js)**: For the excellent, high-fidelity [aym-js](https://github.com/ponceto/aym-js) YM2149/AY-3-8910 emulator core. Its tone/noise/envelope generator model and DAC tables underpin `tools/Core/AymEmulator.cs` (a literal C# port), which powers `YmbToWav`'s audio verification and has since been ported a second time into Go to give the `test7800` emulator fork native YM2149 support. A small, focused piece of GPL-licensed JavaScript that ended up doing a lot of work across this project — thank you!
 
 - **Arnaud Carré (Leonard/OXG)**: For the excellent [StSound](https://github.com/arnaud-carre/StSound) project. The melodic assets used for hardware testing were sourced via this project's research.
 
@@ -115,9 +115,13 @@ For reflections on the legacy of the Atari ST and how AI is changing the landsca
 
 ## License
 
-This project uses a split license:
+Short version:
 
-- **PCB design** (`pcb/`): Licensed under the **GNU General Public License v2.0 (GPL-2.0)**. See `pcb/LICENSE` for details.
-- **Everything else** (assembly, tools, docs, PLD sources): Licensed under the **MIT License**. See `LICENSE` for details.
+- **Your homebrew is yours, no strings attached.** Anything that runs *on* the 7800 — the 6502 assembly in `examples/` and `include/`, and any ROM you build with this SDK for your own cartridge — is **MIT licensed**. Copy it, modify it, sell your game, whatever. The only condition is keeping the copyright/license notice around in copies of the source — there's no obligation to share your own game's source, and no restriction on commercial use.
+- **The tools that build it are GPL.** Everything else in this repo — the `.NET` tools in `tools/`, the PCB design in `pcb/`, the PLD logic in `pld/`, and this documentation — is licensed under the **GNU General Public License v2.0**, specifically v2 only, not "or later." This only matters if you redistribute a modified version of *the tools themselves* (or the PCB/PLD designs): then you must release your changes' source too. **Using the tools to build your own game does not put your game under GPL** — GPL covers the tools, not what they produce.
+
+Why the split: `tools/Core/AymEmulator.cs` is a C# port of Olivier Poncet's GPL-licensed **aym-js** (see Acknowledgements above), so that part of the project needs to stay GPL-compatible. The 6502 code you actually ship on a cartridge doesn't touch any of that, so it's kept as permissive as possible instead. GPL-2.0 is the preferred license here (rather than v3) — it's the less restrictive of the two (no anti-tivoization/DRM clause, no explicit patent-retaliation terms), and aym-js's own "version 2, or at your option any later version" grant lets us make that choice.
+
+Full legal text: `LICENSE` at the repo root (GPL) and in `examples/`/`include/` (MIT).
 
 **Use at your own risk.** The author is not responsible for any damage to your hardware or loss of data.
