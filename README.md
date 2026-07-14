@@ -115,13 +115,12 @@ For reflections on the legacy of the Atari ST and how AI is changing the landsca
 
 ## License
 
-Short version:
+This repository is dual-licensed:
 
-- **Your homebrew is yours, no strings attached.** Anything that runs *on* the 7800 — the 6502 assembly in `examples/` and `include/`, and any ROM you build with this SDK for your own cartridge — is **MIT licensed**. Copy it, modify it, sell your game, whatever. The only condition is keeping the copyright/license notice around in copies of the source — there's no obligation to share your own game's source, and no restriction on commercial use.
-- **The tools that build it are GPL.** Everything else in this repo — the `.NET` tools in `tools/`, the PCB design in `pcb/`, the PLD logic in `pld/`, and this documentation — is licensed under the **GNU General Public License v2.0**, specifically v2 only, not "or later." This only matters if you redistribute a modified version of *the tools themselves* (or the PCB/PLD designs): then you must release your changes' source too. **Using the tools to build your own game does not put your game under GPL** — GPL covers the tools, not what they produce.
+- **MIT License**: Applies to the 6502 target code ([examples/](file:///home/john/Projects/7800-ym2149-lab/examples) and [include/](file:///home/john/Projects/7800-ym2149-lab/include)). You can use, modify, and distribute this code in your homebrew games without any requirement to open-source your game. See [examples/LICENSE](file:///home/john/Projects/7800-ym2149-lab/examples/LICENSE) and [include/LICENSE](file:///home/john/Projects/7800-ym2149-lab/include/LICENSE).
+- **GPL-2.0**: Applies to the host tools ([tools/](file:///home/john/Projects/7800-ym2149-lab/tools)), hardware layouts ([pcb/](file:///home/john/Projects/7800-ym2149-lab/pcb)), PLD logic ([pld/](file:///home/john/Projects/7800-ym2149-lab/pld)), and documentation. Modifying and redistributing these requires sharing your changes. Using these tools to build your ROM does not make your game GPL. See [LICENSE](file:///home/john/Projects/7800-ym2149-lab/LICENSE).
 
-Why the split: `tools/Core/AymEmulator.cs` is a C# port of Olivier Poncet's GPL-licensed **aym-js** (see Acknowledgements above), so that part of the project needs to stay GPL-compatible. The 6502 code you actually ship on a cartridge doesn't touch any of that, so it's kept as permissive as possible instead. GPL-2.0 is the preferred license here (rather than v3) — it's the less restrictive of the two (no anti-tivoization/DRM clause, no explicit patent-retaliation terms), and aym-js's own "version 2, or at your option any later version" grant lets us make that choice.
+### Why the split?
+The emulation core ([AymEmulator.cs](file:///home/john/Projects/7800-ym2149-lab/tools/Core/AymEmulator.cs)) is a C# port of Olivier Poncet's GPL-licensed **aym-js**, requiring GPL compatibility. Since the 6502 code shipped on the cartridge does not link or interact with the host emulator code, it remains under the permissive MIT license.
 
-Full legal text: `LICENSE` at the repo root (GPL) and in `examples/`/`include/` (MIT).
-
-**Use at your own risk.** The author is not responsible for any damage to your hardware or loss of data.
+**Disclaimer:** Use at your own risk. The author is not responsible for hardware damage or data loss.
