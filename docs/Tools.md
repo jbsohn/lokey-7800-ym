@@ -21,7 +21,7 @@ Converts Atari ST **YM** files (register dumps from legacy ST trackers).
 *   **Formats**: YM2, YM3, YM4, YM5, and YM6.
 *   **Usage**: 
     ```bash
-    dotnet run --project tools/YmToYmb/YmToYmb.csproj -- <input.ym> [options]
+    dotnet run --project tools-cs/YmToYmb/YmToYmb.csproj -- <input.ym> [options]
     ```
 
 ### `VgmToYmb` (Modern Trackers)
@@ -29,7 +29,7 @@ Converts **VGM/VGZ** command streams. This is the preferred route for new compos
 *   **Trackers**: [Furnace Tracker](https://tildearrow.org/furnace) or [Arkos Tracker](https://www.julien-nevo.com/arkostracker/).
 *   **Usage**: 
     ```bash
-    dotnet run --project tools/VgmToYmb/VgmToYmb.csproj -- <input.vgm> [options]
+    dotnet run --project tools-cs/VgmToYmb/VgmToYmb.csproj -- <input.vgm> [options]
     ```
 
 ### `YmbToWav` (Audio Verification)
@@ -37,7 +37,7 @@ Renders `.ymb` music data back into standard `.wav` audio to verify conversion a
 *   **Accuracy**: Aims to reproduce the YM2149's logarithmic volume curve and hardware envelopes.
 *   **Usage**: 
     ```bash
-    dotnet run --project tools/YmbToWav/YmbToWav.csproj -- build/song.ymb [output.wav]
+    dotnet run --project tools-cs/YmbToWav/YmbToWav.csproj -- build/song.ymb [output.wav]
     ```
 
 ---
@@ -56,12 +56,12 @@ For the complete technical layout of the generated output, see the **[YMB Format
 
 These scripts help validate physical signals coming off the Atari 7800 cartridge edge connector before they reach the ROM or YM2149.
 
-### `tools/Scripts/ValidateCartSignals.cs`
+### `tools-cs/Scripts/ValidateCartSignals.cs`
 Validates physical signals coming off the edge connector.
 *   **Requirements**: `sigrok-cli` and a logic analyzer (e.g., `fx2lafw`).
 *   **Target Signals**: Analyzes `PHI2`, `R/W`, `HALT`, and `A15` for stable transitions.
 
-### `tools/Scripts/ValidateLogicSignals.cs` & `tools/Scripts/ValidateLatchEnable.cs`
+### `tools-cs/Scripts/ValidateLogicSignals.cs` & `tools-cs/Scripts/ValidateLatchEnable.cs`
 Advanced timing diagnostics used to detect mid-cycle address bus noise or "shattered" pulses.
 *   **Timing Check**: Ensures `YM_LE`, `BDIR`, and `BC1` only trigger when the `PHI2` clock is stable.
 *   **BC1 Monitor**: Confirms the logic equations correctly identify register selection (A0=0) vs. data writes.
@@ -70,12 +70,12 @@ Advanced timing diagnostics used to detect mid-cycle address bus noise or "shatt
 
 ## 4. ROM Packaging Tools
 
-### `tools/A78Gen/Program.cs`
+### `tools-cs/A78Gen/Program.cs`
 Generates a 128-byte A78 header and packages a raw binary for emulator use.
 *   **Status**: **Work in Progress**.
 *   **Mapper**: set `"mapper": 1` in the config JSON to package the 32-pin board's YM-IOA bank scheme (see [Emulation.md](Emulation.md#a78-header--emulator-detection)) — the input binary must then be the full 128KB or 256KB ROM image, not just the fixed 32KB bank. `"mapper": 0` (default) keeps the original fixed-32KB-only behavior.
 *   **Usage**:
     ```bash
-    dotnet run --project tools/A78Gen/A78Gen.csproj -- <input.bin> <config.json> -o <output.a78>
+    dotnet run --project tools-cs/A78Gen/A78Gen.csproj -- <input.bin> <config.json> -o <output.a78>
     ```
 *   **Planned Improvements**: Mapping for other cartridge header types (SuperGame, Activision, etc.) beyond the fixed-32KB and YM-IOA-banked cases.

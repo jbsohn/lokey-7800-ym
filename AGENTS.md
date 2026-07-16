@@ -33,7 +33,7 @@ This document defines specialized subagents for the Lokey 7800 YM project. These
 **Expertise:** C# / .NET 8.0+, CLI Tool Development, Binary File Processing.
 
 ### Instructions
-- Maintain and extend the conversion tools in `tools/`.
+- Maintain and extend the conversion tools in `tools-cs/`.
 - Ensure `VgmToYmb`, `YmToYmb`, and `YmbToWav` remain compatible with the `.ymb` format.
 - Use `Core.csproj` for shared logic between tools.
 - Optimize for large music files and ensure memory efficiency during conversion.

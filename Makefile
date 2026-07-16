@@ -141,25 +141,25 @@ pro:
 
 tools: $(YM2BIN) $(VGM2BIN) $(WAVTOOL) $(A78GEN)
 
-$(YM2BIN): tools/YmToYmb/*.cs tools/Core/*.cs
+$(YM2BIN): tools-cs/YmToYmb/*.cs tools-cs/Core/*.cs
 	@echo "  Building YmToYmb..."
 	@mkdir -p $(BIN_DIR)
-	@dotnet publish tools/YmToYmb/YmToYmb.csproj -o $(BIN_DIR) --configuration Release --verbosity quiet
+	@dotnet publish tools-cs/YmToYmb/YmToYmb.csproj -o $(BIN_DIR) --configuration Release --verbosity quiet
 
-$(VGM2BIN): tools/VgmToYmb/*.cs tools/Core/*.cs
+$(VGM2BIN): tools-cs/VgmToYmb/*.cs tools-cs/Core/*.cs
 	@echo "  Building VgmToYmb..."
 	@mkdir -p $(BIN_DIR)
-	@dotnet publish tools/VgmToYmb/VgmToYmb.csproj -o $(BIN_DIR) --configuration Release --verbosity quiet
+	@dotnet publish tools-cs/VgmToYmb/VgmToYmb.csproj -o $(BIN_DIR) --configuration Release --verbosity quiet
 
-$(WAVTOOL): tools/YmbToWav/*.cs tools/Core/*.cs
+$(WAVTOOL): tools-cs/YmbToWav/*.cs tools-cs/Core/*.cs
 	@echo "  Building YmbToWav..."
 	@mkdir -p $(BIN_DIR)
-	@dotnet publish tools/YmbToWav/YmbToWav.csproj -o $(BIN_DIR) --configuration Release --verbosity quiet
+	@dotnet publish tools-cs/YmbToWav/YmbToWav.csproj -o $(BIN_DIR) --configuration Release --verbosity quiet
 
-$(A78GEN): tools/A78Gen/*.cs tools/Core/*.cs
+$(A78GEN): tools-cs/A78Gen/*.cs tools-cs/Core/*.cs
 	@echo "  Building A78Gen..."
 	@mkdir -p $(BIN_DIR)
-	@dotnet publish tools/A78Gen/A78Gen.csproj -o $(BIN_DIR) --configuration Release --verbosity quiet
+	@dotnet publish tools-cs/A78Gen/A78Gen.csproj -o $(BIN_DIR) --configuration Release --verbosity quiet
 
 rom: $(BUILD_DIR) $(MUSIC_ROMS) $(FIXED_ROMS) $(BANKED_ROMS)
 

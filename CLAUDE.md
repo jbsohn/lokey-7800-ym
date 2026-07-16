@@ -8,7 +8,7 @@
 - Build only emulator-ready `.a78` files: `make a78`
 - Build JEDEC files from `pld/*.pld` sources: `make logic`
 - Generate verification WAV files: `make wav`
-- Run specific tool: `dotnet run --project tools/<ToolName>/<ToolName>.csproj -- <args>`
+- Run specific tool: `dotnet run --project tools-cs/<ToolName>/<ToolName>.csproj -- <args>`
 - Clean all build artifacts: `make clean`
 
 ## Code Style & Standards
@@ -29,7 +29,7 @@
 
 - **Version**: .NET 10.0+
 - **Style**: Standard C# conventions (PascalCase for classes/methods, camelCase for local variables).
-- **Architecture**: Core logic resides in `tools/Core/`, utilized by CLI wrappers.
+- **Architecture**: Core logic resides in `tools-cs/Core/`, utilized by CLI wrappers.
 - **Performance**: Use `ReadOnlySpan<byte>` for binary parsing where possible.
 - **Testing**: Use `ymbtowav` to verify that bitmask compression is lossless.
 
@@ -45,7 +45,7 @@
 - `ca65/`: 6502 assembly sample code and reference player (ca65).
 - `examples/`: Original DASM assembly samples.
 - `docs/`: Technical reference and deep-dive guides.
-- `tools/`: .NET conversion tools and Sigrok diagnostic scripts.
+- `tools-cs/`: .NET conversion tools and Sigrok diagnostic scripts.
 - `pld/`: Programmable logic (ATF16V8B / ATF22V10 PLD) sources.
 - `pcb/`: tscircuit PCB design files.
 - `ym-samples/`: Original Atari ST music sources.
