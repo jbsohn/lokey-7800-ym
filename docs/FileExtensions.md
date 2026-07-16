@@ -8,6 +8,7 @@ This document describes the various file extensions and build artifacts used in 
 | :--- | :--- | :--- |
 | `.ym` / `.YM` | YM Sample | Original Atari ST / Amstrad CPC music files (YM2149 register dumps). |
 | `.vgm` / `.vgz` | VGM Sample | Video Game Music files containing AY-3-8910 command streams. |
+| `.yms` | YM Sound | Hand-authored sound effect source files (written in JSON/YAML format). |
 | `.asm` | 6502 Assembly | Source code for the music player, logic ROMs, and hardware drivers. |
 | `.pld` | CUPL Logic | Source code for the PLD address decoder, compiled with `galette` (see `pld/`; ATF16V8B on the [28-pin board](Hardware-28pin.md), ATF22V10 on the [32-pin board](Hardware-32pin.md)). |
 
@@ -16,6 +17,7 @@ This document describes the various file extensions and build artifacts used in 
 | Extension | Name | Description |
 | :--- | :--- | :--- |
 | **`.ymb`** | **YM Binary** | Custom compressed music data. Uses delta-masking and pattern deduplication. Replaced generic `.bin`. |
+| **`.ysb`** | **YM Sound Binary** | Compiled, delta-masked single-channel sound effect data. |
 | **`.ymi`** | **YM Info** | Sidecar metadata file for DASM. Contains timing constants (`PLAYER_HZ`, `YM_DELAY`) and data offsets. Replaced `.yminc`. |
 | `.wav` | Verification Audio | 44.1kHz PCM audio rendered from the `.ymb` data to verify conversion accuracy. |
 

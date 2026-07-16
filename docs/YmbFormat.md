@@ -1,7 +1,7 @@
 # Atari 7800 YM2149 YMB Music Format
 
 > [!WARNING]
-> **Work in Progress**: The `.ymb` format was developed as an experimental proof of concept to quickly test YM and VGM register stream playback on physical cartridges. As such, **the format is subject to change**. Future revisions will align with the planned C++ codebase rewrite to support concurrent music and sound effects playback.
+> **Work in Progress**: The `.ymb` format was developed as an experimental proof of concept to quickly test YM and VGM register stream playback on physical cartridges. As such, **the format is subject to change**. Future revisions will align with the planned Rust codebase rewrite to support concurrent music and sound effects playback.
 
 This document specifies the custom binary format used to store compressed YM2149 music assets for the Atari 7800. This format is designed for efficiency in a limited ROM, while aiming for low CPU overhead on the 6502.
 
@@ -36,7 +36,11 @@ The final and largest block is the raw **Pattern Data**.
 
 * **Compression**: Data is stored using **Bitmask Deltas**.
 * **Frame Structure**: Each audio frame consists of:
-    1. **Mask (2 bytes)**: A 16-bit little-endian value. Bits 0–13 represent YM2149 registers 0–13.
+    1. **Mask (2 bytes)**: A 16-bit little-endian value. 
+        * Bits 0–13 represent YM2149 registers 0–13. A `1` indicates the register is updated this frame; `0` indicates it retains its previous value.
+        * Bits 14 and 15 are currently unused/reserved. In future Rust toolchain revisions, they are planned to be used for control flow:
+            * **Bit 14**: Loop / End-of-Song marker.
+            * **Bit 15**: Sync trigger (flashing effects, spawning beat-synced objects).
     2. **Payload (Variable)**: Only the register values corresponding to the `1` bits in the mask are stored, in sequential order.
 
 ### Example Frame
@@ -46,11 +50,15 @@ If only Register 0 (Tone A Low) and Register 8 (Volume A) changed:
 * **Data**: `[Reg0 Value][Reg8 Value]`
 * **Total Size**: 4 bytes (instead of 14).
 
+---
+
 ## 5. Architectural Advantages
 
-### O(1) Seeking
+### O(1) Seeking & Pattern Independence
 
 By using fixed-size patterns and an offset table, the 6502 player can instantly calculate the memory address of any part of the song without parsing linear data.
+
+Furthermore, **the first frame of every pattern block is always fully compressed using a `0x3FFF` mask** (writing all 14 registers). This ensures that patterns are completely independent. The player can safely jump to the start of any pattern sequence index (for looping or skipping) without needing to carry over register state from preceding patterns.
 
 ### Zero Arithmetic
 
