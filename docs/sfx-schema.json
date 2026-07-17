@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "YmSound YAML Specification",
+  "type": "object",
+  "required": ["name", "sourceClock", "sourceHz", "priority", "frames"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique identifier for compiler-generated assembly constants."
+    },
+    "sourceClock": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Original sound chip clock frequency in Hz (e.g. 2000000 for Atari ST)."
+    },
+    "sourceHz": {
+      "type": "integer",
+      "enum": [50, 60],
+      "description": "Original playback tick rate in Hz."
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255,
+      "description": "Sound effect priority (0 = lowest, 255 = highest)."
+    },
+    "preferredChannels": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["A", "B", "C"]
+      },
+      "description": "Preferred YM2149 channels to play this sound effect on."
+    },
+    "loopStart": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Zero-indexed frame to loop back to. Null or omitted for one-shot."
+    },
+    "frames": {
+      "type": "array",
+      "description": "List of audio frames.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "toneEnable": {
+            "type": "boolean",
+            "description": "Enables/disables the tone generator for this channel."
+          },
+          "noiseEnable": {
+            "type": "boolean",
+            "description": "Enables/disables the noise generator for this channel."
+          },
+          "tone": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4095,
+            "description": "12-bit tone period divider."
+          },
+          "noise": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 31,
+            "description": "5-bit noise period divider."
+          },
+          "volume": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 15,
+            "description": "4-bit volume amplitude."
+          },
+          "duration": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Duration of this frame in ticks (default is 1)."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
